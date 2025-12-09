@@ -1,0 +1,63 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teams</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f2f2f2;
+    }
+    h1 {
+      color: #007acc;
+    }
+    ul {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 5px;
+      max-width: 400px;
+    }
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ddd;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Users from Wroughton</h1>
+  <ul id="user-list">
+    <li>Loading users...</li>
+  </ul>
+
+  <script>
+    // Fetch user data from the backend API
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('user-list');
+        list.innerHTML = ''; // Clear loading message
+
+        if (data.length === 0) {
+          list.innerHTML = '<li>No users found.</li>';
+          return;
+        }
+
+        data.forEach(user => {
+          const li = document.createElement('li');
+          li.textContent = `${user.name} (ID: ${user.id})`;
+          list.appendChild(li);
+        });
+      })
+      .catch(err => {
+        console.error('Error fetching users:', err);
+        document.getElementById('user-list').innerHTML = '<li>Failed to load users.</li>';
+      });
+  </script>
+</body>
+</html>
+
