@@ -1,22 +1,26 @@
-// client/src/AddFixture.jsx
 import { useEffect, useState } from 'react';
+import './AddFixture.css';
 
-export default function AddFixture({ onFixtureAdded }) {
+export default function AddFixture({ onFixturesUpdated }) {
   const [teams, setTeams] = useState([]);
-  const [home, setHome] = useState('');
-  const [away, setAway] = useState('');
+  const [homeTeam, setHomeTeam] = useState('');
+  const [awayTeam, setAwayTeam] = useState('');
 
   useEffect(() => {
-    fetch('/api/users')
+    fetch('/api/teams')
       .then(res => res.json())
-      .then(setTeams)
-      .catch(err => console.error('❌ Load teams error:', err));
+      .then(data => setTeams(data))
+      .catch(err => {
+        console.error('❌ Load teams error:', err);
+        alert('Failed to load teams');
+      });
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleAddFixture = (e) => {
     e.preventDefault();
-    if (home === away || !home || !away) {
-      alert('Choose two different teams');
+
+    if (homeTeam === awayTeam) {
+      alert('A team cannot play against itself.');
       return;
     }
 
@@ -24,33 +28,49 @@ export default function AddFixture({ onFixtureAdded }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        home_team_id: +home,
-        away_team_id: +away
-      }),
+        home_team_id: parseInt(homeTeam),
+        away_team_id: parseInt(awayTeam)
+      })
     })
-      .then(res => res.json())
       .then(() => {
-        alert('Fixture created!');
-        if (onFixtureAdded) onFixtureAdded();
+        setHomeTeam('');
+        setAwayTeam('');
+        console.log("✅ Fixture added")
+        if (typeof onFixturesUpdated === 'function') {
+          onFixturesUpdated(); // Trigger reload in parent
+        }
       })
       .catch(err => {
-        console.error('❌ Fixture error:', err);
-        alert('Error creating fixture');
+        console.error('❌ Add fixture error:', err);
+        alert('Failed to add fixture');
       });
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '2rem' }}>
+    <div className="add-fixture-form">
       <h3>Add Fixture</h3>
-      <select value={home} onChange={e => setHome(e.target.value)}>
-        <option value="">Home team</option>
-        {teams.map(t => <option key={t.id} value={t.id}>{t.team}</option>)}
-      </select>
-      <select value={away} onChange={e => setAway(e.target.value)}>
-        <option value="">Away team</option>
-        {teams.map(t => <option key={t.id} value={t.id}>{t.team}</option>)}
-      </select>
-      <button type="submit">Add Fixture</button>
-    </form>
+      <form onSubmit={handleAddFixture}>
+        <select value={homeTeam} onChange={(e) => setHomeTeam(e.target.value)} required>
+          <option value="">Select Home Team</option>
+          {teams.map(team => (
+            <option key={team.id} value={team.id}>
+              {team.team}
+            </option>
+          ))}
+        </select>
+
+        <select value={awayTeam} onChange={(e) => setAwayTeam(e.target.value)} required>
+          <option value="">Select Away Team</option>
+          {teams.map(team => (
+            <option key={team.id} value={team.id}>
+              {team.team}
+            </option>
+          ))}
+        </select>
+
+        <button type="submit">Add Fixture</button>
+      </form>
+    </div>
   );
 }
+

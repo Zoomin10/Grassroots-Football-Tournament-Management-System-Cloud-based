@@ -78,7 +78,7 @@ app.post('/api/matches', async (req, res) => {
 });
 
 app.post('/api/matches/:id/result', async (req, res) => {
-  const { id } = req.params;
+  const { matchid } = req.params;
   const { home_score, away_score } = req.body;
 
   try {
@@ -88,7 +88,7 @@ app.post('/api/matches/:id/result', async (req, res) => {
            away_score = $2,
            played = true
        WHERE id = $3`,
-      [home_score, away_score, id]
+      [home_score, away_score, matchid]
     );
     res.sendStatus(200);
   } catch (err) {
@@ -123,49 +123,39 @@ app.get('/api/league', async (req, res) => {
   try {
     const result = await db.query(`
       SELECT 
-        t.team AS team,
-        COUNT(*) FILTER (WHERE m.played) AS played,
-        COUNT(*) FILTER (
-          WHERE m.played AND 
-          ((m.home_team_id = t.id AND m.home_score > m.away_score) OR 
-           (m.away_team_id = t.id AND m.away_score > m.home_score))
-        ) AS wins,
-        COUNT(*) FILTER (
-          WHERE m.played AND m.home_score = m.away_score
-        ) AS draws,
-        COUNT(*) FILTER (
-          WHERE m.played AND 
-          ((m.home_team_id = t.id AND m.home_score < m.away_score) OR 
-           (m.away_team_id = t.id AND m.away_score < m.home_score))
-        ) AS losses,
-        SUM(
-          CASE
-            WHEN m.home_team_id = t.id THEN m.home_score - m.away_score
-            WHEN m.away_team_id = t.id THEN m.away_score - m.home_score
-            ELSE 0
-          END
-        ) AS goal_difference,
-        SUM(
-          CASE
-            WHEN m.home_team_id = t.id AND m.home_score > m.away_score THEN 3
-            WHEN m.away_team_id = t.id AND m.away_score > m.home_score THEN 3
-            WHEN m.home_score = m.away_score THEN 1
-            ELSE 0
-          END
-        ) AS points
+        t.id,
+        t.team,
+        COALESCE(SUM(CASE 
+          WHEN m.played AND t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
+          WHEN m.played AND t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
+          WHEN m.played AND (t.id = m.home_team_id OR t.id = m.away_team_id) AND m.home_score = m.away_score THEN 1
+          ELSE 0 END), 0) AS points,
+        COUNT(CASE WHEN m.played AND (t.id = m.home_team_id OR t.id = m.away_team_id) THEN 1 END) AS played,
+        COALESCE(SUM(CASE 
+          WHEN t.id = m.home_team_id THEN m.home_score
+          WHEN t.id = m.away_team_id THEN m.away_score
+          ELSE 0 END), 0) AS goals_for,
+        COALESCE(SUM(CASE 
+          WHEN t.id = m.home_team_id THEN m.away_score
+          WHEN t.id = m.away_team_id THEN m.home_score
+          ELSE 0 END), 0) AS goals_against,
+        COALESCE(SUM(CASE 
+          WHEN t.id = m.home_team_id THEN m.home_score - m.away_score
+          WHEN t.id = m.away_team_id THEN m.away_score - m.home_score
+          ELSE 0 END), 0) AS goal_difference
       FROM teams t
       LEFT JOIN matches m ON t.id = m.home_team_id OR t.id = m.away_team_id
-      WHERE m.played = true
-      GROUP BY t.team
-      ORDER BY points DESC, goal_difference DESC
+      GROUP BY t.id, t.team
+      ORDER BY points DESC, goal_difference DESC, goals_for DESC
     `);
-
+    
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ League SQL error:', err);
+    console.error('❌ League query error:', err);
     res.status(500).json({ error: 'Failed to fetch league table' });
   }
 });
+
 
 
 

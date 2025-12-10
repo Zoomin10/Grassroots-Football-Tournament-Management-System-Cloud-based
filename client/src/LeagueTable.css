@@ -11,12 +11,27 @@
   border-collapse: collapse;
 }
 
+ 
 .league-table th,
 .league-table td {
-  padding: 0.5rem;
-  text-align: center;
-  border-bottom: 1px solid #eee;
+  padding: 10px;
 }
+
+.league-table td:first-child {
+  text-align: left;
+  padding-left: 16px;
+}
+
+.league-table th:first-child {
+  text-align: left;
+  padding-left: 16px;
+}
+
+.league-table td:not(:first-child),
+.league-table th:not(:first-child) {
+  text-align: center;
+}
+
 
 .league-table th {
   background-color: #f7f7f7;

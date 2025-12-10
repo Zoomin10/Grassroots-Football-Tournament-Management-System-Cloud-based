@@ -11,6 +11,8 @@ function App() {
   const [fixtures, setFixtures] = useState([]);
   const [league, setLeague] = useState([]);
   const [reloadKey, setReloadKey] = useState(0);
+  const [fixturesKey, setFixturesKey] = useState(0);
+
 
   // Load data from backend
   useEffect(() => {
@@ -72,6 +74,11 @@ function App() {
     }
   };
 
+  const refreshFixtures = () => {
+    console.log("🔄 Refreshing fixtures..."); 
+  setFixturesKey(prev => prev + 1); // Forces Fixtures component to reload
+};
+
   const handleAddFixture = async (homeTeam, awayTeam) => {
     try {
       const res = await fetch('/api/matches', {
@@ -113,19 +120,22 @@ function App() {
          
           <TeamList teams={teams} onDelete={reloadAll} />
            <AddTeam onAdd={reloadData} />
-          <AddFixture teams={teams} onAdd={handleAddFixture} />
+           <AddFixture onFixturesUpdated={refreshFixtures} />
+         
         </div>
 
         <div className="right-panel">
-          <LeagueTable data={league} />
-          
-          
-          <Fixtures
-            fixtures={fixtures}
+        <LeagueTable league={league} />
+        <Fixtures
+            key={fixturesKey}
+    f       ixturesKey={fixturesKey}
+            onResultsUpdated={updateLeague}
             onDelete={handleDeleteFixture}
-            onUpdateResult={updateLeague}
-          />
-        </div>
+          
+  />
+  
+</div>
+
       </div>
     </div>
   );

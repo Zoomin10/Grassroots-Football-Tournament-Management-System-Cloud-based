@@ -34,12 +34,10 @@ function TeamList({ teams, onDelete }) {
             className="team-logo"
           />
           <span className="team-name">{team.team}</span>
-          <button
-            className="team-delete"
-            onClick={() => handleDelete(team.team)}
-          >
-            ❌
-          </button>
+          <button className="delete-btn" onClick={() => handleDelete(team.id)}>
+  🗑️
+</button>
+
         </div>
       ))}
     </div>

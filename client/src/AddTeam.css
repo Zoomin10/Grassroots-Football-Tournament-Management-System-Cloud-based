@@ -1,8 +1,9 @@
 .add-team-form {
-  background: #fff;
-  padding: 1rem;
+  background: #f8f9fa;
+  padding: 16px;
   margin-bottom: 1.5rem;
   border: 1px solid #ddd;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
 }
 

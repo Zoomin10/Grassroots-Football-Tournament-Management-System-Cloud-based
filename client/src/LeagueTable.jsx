@@ -1,7 +1,6 @@
-import React from 'react';
 import './LeagueTable.css';
 
-function LeagueTable({ data }) {
+export default function LeagueTable({ league = [] }) {
   return (
     <div className="league-table">
       <h2>League Table</h2>
@@ -9,30 +8,26 @@ function LeagueTable({ data }) {
         <thead>
           <tr>
             <th>Team</th>
-            <th>P</th>
-            <th>W</th>
-            <th>D</th>
-            <th>L</th>
+            <th>Points</th>
             <th>GD</th>
-            <th>Pts</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((team, idx) => (
-            <tr key={`team-${team.team || idx}`}>
-              <td>{team.team}</td>
-              <td>{team.played}</td>
-              <td>{team.wins}</td>
-              <td>{team.draws}</td>
-              <td>{team.losses}</td>
-              <td>{team.goal_difference}</td>
-              <td>{team.points}</td>
+          {league.length > 0 ? (
+            league.map((team, index) => (
+              <tr key={team.name || index}>
+                <td>{team.team}</td>
+                <td>{team.points}</td>
+                <td>{team.goal_difference}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3">No data available</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
   );
 }
-
-export default LeagueTable;
