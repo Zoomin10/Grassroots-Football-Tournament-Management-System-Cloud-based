@@ -1,5 +1,6 @@
 .league-table {
-  margin-top: 1.5rem;
+  margin-top: 1px;
+  margin-bottom: 30px;
   background-color: #fff;
   padding: 1rem;
   border-radius: 8px;
@@ -34,19 +35,6 @@
 
 
 .league-table th {
-  
-  background-color: #386bcf;
+  background-color: #445ff7;
   font-weight: bold;
-}
-.team-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-}
-
-.team-logo {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
 }

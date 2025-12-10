@@ -1,6 +1,7 @@
 .add-team-form {
   background: #f8f9fa;
   padding: 16px;
+  margin-top: 30px;
   margin-bottom: 1.5rem;
   border: 1px solid #ddd;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
@@ -9,7 +10,7 @@
 
 .add-team-form input {
   display: block;
-  width: 100%;
+  width: 97%;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
   font-size: 1rem;

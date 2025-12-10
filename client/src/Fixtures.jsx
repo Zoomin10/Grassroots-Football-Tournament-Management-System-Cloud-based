@@ -41,7 +41,7 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
 
   return (
     <div className="fixtures-container">
-      <h2>Fixtures</h2>
+      <h2>Results / Fixtures</h2>
       <ul className="fixture-list">
         {localFixtures.map(fx => (
           <li key={fx.id} className="fixture-card">

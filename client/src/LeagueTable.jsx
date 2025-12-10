@@ -1,14 +1,10 @@
 import './LeagueTable.css';
 
 export default function LeagueTable({ league = [] }) {
-  const getLogo = (teamName) => {
-    const cleanName = teamName.toLowerCase().replace(/\s/g, '');
-    return `/logos/${cleanName}.png`; // expects logos in public/logos/
-  };
-
   return (
     <div className="league-table">
       <h2>🏆 League Table</h2>
+
       <table>
         <thead>
           <tr>
@@ -20,16 +16,8 @@ export default function LeagueTable({ league = [] }) {
         <tbody>
           {league.length > 0 ? (
             league.map((team, index) => (
-              <tr key={team.team || index}>
-                <td className="team-name-cell">
-                  <img
-                    src={getLogo(team.team)}
-                    onError={(e) => (e.target.src = '/logos/default.png')}
-                    alt="logo"
-                    className="team-logo"
-                  />
-                  {team.team}
-                </td>
+              <tr key={team.name || index}>
+                <td>{team.team}</td>
                 <td>{team.points}</td>
                 <td>{team.goal_difference}</td>
               </tr>
