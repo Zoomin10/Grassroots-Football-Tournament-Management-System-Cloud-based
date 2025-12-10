@@ -34,6 +34,19 @@
 
 
 .league-table th {
-  background-color: #f7f7f7;
+  
+  background-color: #386bcf;
   font-weight: bold;
+}
+.team-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.team-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }

@@ -33,6 +33,7 @@ body {
   gap: 20px;
   margin-bottom: 40px;
   flex-wrap: wrap;
+   color: #3710e0;
 }
 
 .header img {
