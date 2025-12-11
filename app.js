@@ -78,7 +78,7 @@ app.post('/api/matches', async (req, res) => {
 });
 
 app.post('/api/matches/:id/result', async (req, res) => {
-  const { matchid } = req.params;
+  const id  = req.params.id;
   const { home_score, away_score } = req.body;
 
   try {
@@ -88,7 +88,7 @@ app.post('/api/matches/:id/result', async (req, res) => {
            away_score = $2,
            played = true
        WHERE id = $3`,
-      [home_score, away_score, matchid]
+      [home_score, away_score, id]
     );
     res.sendStatus(200);
   } catch (err) {

@@ -80,7 +80,9 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
               <button
                 className="delete-btn"
                 onClick={() => {
+                  if (typeof onDelete === 'function') {
                   onDelete(fx.id);
+                  }                
                   loadFixtures();
                 }}
               >
