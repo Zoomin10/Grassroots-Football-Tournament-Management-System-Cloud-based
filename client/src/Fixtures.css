@@ -1,6 +1,7 @@
 .fixtures-container {
   display: flex;
   flex-direction: column;
+   max-width: 480px;
   gap: 1rem;
 }
 .fixture-card {
@@ -54,6 +55,10 @@
 }
 .fixture-card {
   border: 2px solid rgb(105, 115, 255) !important;
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+  font-size: 14px;
 }
 .fixture-list {
   display: flex;
@@ -97,7 +102,7 @@
 }
 
 .fixture-score-form button {
-  padding: 4px 8px;
+  padding: 6px;
   font-size: 14px;
   cursor: pointer;
 }
@@ -128,11 +133,19 @@
 .fixture-team.home {
   flex: 1;
   text-align: right;
+   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fixture-team.away {
   flex: 1;
   text-align: left;
+   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .vs {

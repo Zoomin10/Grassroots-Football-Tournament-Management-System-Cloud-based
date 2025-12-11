@@ -1,6 +1,8 @@
 .league-table {
   margin-top: 1px;
   margin-bottom: 30px;
+  width: 100%;
+  max-width: 500px;
   font-size: 18px;
   background-color: #fff;
   padding-top: 1rem;
