@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./server
+    depends_on:
+      - postgres
+    environment:
+      PGUSER: myuser
+      PGPASSWORD: mypass
+      PGDATABASE: mydb
+      PGHOST: postgres
+      PGPORT: 5432
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./client
+    depends_on:
+      - backend
+    ports:
+      - "5173:4173"
+
+volumes:
+  pgdata:
