@@ -8,7 +8,7 @@ function AddTeam({ onAdd }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/users', {
+      const res = await fetch('/api/teams', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ team, age }),

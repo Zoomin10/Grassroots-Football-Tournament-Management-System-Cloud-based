@@ -46,7 +46,7 @@ function App() {
 
   const fetchTeams = async () => {
     try {
-      const res = await fetch('/api/users');
+      const res = await fetch('/api/teams');
       const data = await res.json();
       setTeams(data);
     } catch (err) {
