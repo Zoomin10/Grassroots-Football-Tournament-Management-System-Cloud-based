@@ -80,6 +80,7 @@
 .fixture-score-centered {
   text-align: center;
   font-weight: bold;
+  color: red;
 }
 
 .fixture-score-form {
@@ -115,4 +116,28 @@
 }
 .vs-text {
   margin: 0 0.5rem;
+}
+.fixture-teams-balanced {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.fixture-team.home {
+  flex: 1;
+  text-align: right;
+}
+
+.fixture-team.away {
+  flex: 1;
+  text-align: left;
+}
+
+.vs {
+  font-weight: bold;
+  color: #333;
+  min-width: 30px;
+  text-align: center;
 }

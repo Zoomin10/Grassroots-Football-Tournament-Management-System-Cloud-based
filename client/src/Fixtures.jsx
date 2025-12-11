@@ -48,11 +48,12 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
             <div className="fixture-content">
 
               {/* Team vs Team Line */}
-              <div className="fixture-line fixture-teams-centered">
-                {fx.home_team}
-                <span className="vs-text">vs</span>
-                {fx.away_team}
-              </div>
+             <div className="fixture-line fixture-teams-balanced">
+                <span className="fixture-team home">{fx.home_team}</span>
+                <span className="vs">vs</span>
+  <             span className="fixture-team away">{fx.away_team}</span>
+            </div>
+
 
               {/* Score or Submit Form */}
               {fx.played ? (

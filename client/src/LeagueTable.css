@@ -1,10 +1,12 @@
 .league-table {
   margin-top: 1px;
   margin-bottom: 30px;
+  font-size: 18px;
   background-color: #fff;
-  padding: 0rem;
+  padding-top: 1rem;
   border-radius: 8px;
   border: 1px solid #ddd;
+  text-align: center;
 }
 
 .league-table table {
