@@ -9,7 +9,7 @@ function TeamList({ teams, onDelete }) {
 
   const handleDelete = async (teamName) => {
     try {
-      const res = await fetch(`/api/users/${encodeURIComponent(teamName)}`, {
+      const res = await fetch(`/api/teams/${encodeURIComponent(teamName)}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete team');
