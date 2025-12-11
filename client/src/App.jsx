@@ -134,10 +134,26 @@ function App() {
           
   />
   
-</div>
+        </div>
 
       </div>
+      <footer className="sponsor-footer">
+  <h4>Proudly sponsored by :</h4>
+  <div className="sponsor-logos">
+    <img src="/sponsors/iew.png" alt="iew" />
+    <img src="/sponsors/southby.png" alt="southby" />
+    <img src="/sponsors/ajwaste.png" alt="ajwaste" />
+    <img src="/sponsors/oceanescape.png" alt="oceanescape" />
+    
+    <img src="/sponsors/headstart.png" alt="headstart" />
+    <img src="/sponsors/holloway.png" alt="holloway" />
+     <img src="/sponsors/mjd.png" alt="mjd" />
+  </div>
+</footer>
+
     </div>
+ 
+
   );
 }
 

@@ -20,6 +20,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  padding-bottom: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -164,4 +165,35 @@ button:hover {
 
 .league-table tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+.sponsor-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;                /* Full width */
+  background-color: #f6f6f6;  /* Light background */
+  padding: 10px 0;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  z-index: 999;               /* Ensure it sits above other content */
+}
+
+.sponsor-footer h4 {
+  margin: 0 0 6px 0;
+
+  font-size: 14px;
+  color: #333;
+}
+
+.sponsor-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.sponsor-logos img {
+  height: 80px;
+  object-fit: contain;
 }
