@@ -2,7 +2,7 @@
   margin-top: 1px;
   margin-bottom: 30px;
   background-color: #fff;
-  padding: 1rem;
+  padding: 0rem;
   border-radius: 8px;
   border: 1px solid #ddd;
 }
@@ -35,6 +35,6 @@
 
 
 .league-table th {
-  background-color: #445ff7;
+  background-color: #007bff;
   font-weight: bold;
 }

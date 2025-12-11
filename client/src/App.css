@@ -60,7 +60,7 @@ body {
 
 /* Left & Right Panels */
 .left-panel {
-  flex: 2;
+  flex: 1;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -189,11 +189,19 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 80px;
+  gap: 120px;
   flex-wrap: wrap;
 }
 
 .sponsor-logos img {
   height: 80px;
   object-fit: contain;
+}
+.sponsor-footer h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2b3e5e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }

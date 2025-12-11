@@ -138,7 +138,7 @@ function App() {
 
       </div>
       <footer className="sponsor-footer">
-  <h4>Proudly sponsored by :</h4>
+  <h4>This WYFC tournament is proudly sponsored by :</h4>
   <div className="sponsor-logos">
     <img src="/sponsors/iew.png" alt="iew" />
     <img src="/sponsors/southby.png" alt="southby" />

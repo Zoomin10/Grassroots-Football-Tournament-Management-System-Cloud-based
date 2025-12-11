@@ -3,7 +3,7 @@ import './LeagueTable.css';
 export default function LeagueTable({ league = [] }) {
   return (
     <div className="league-table">
-      <h2>🏆 League Table</h2>
+      <h2>🏆 League Table 🏆</h2>
 
       <table>
         <thead>

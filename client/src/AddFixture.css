@@ -9,14 +9,20 @@
 }
 
 .add-fixture-form h3 {
+  font-size: 18px;
+  color: #2b3e5e;
+  font-weight: 600;
   margin-top: 0;
   margin-bottom: 12px;
-  font-size: 1.2rem;
-  color: #333;
+
+  
   text-align: left;
 }
-
+ 
 .add-fixture-form form {
+  font-size: 18px;
+  color: #2b3e5e;
+  font-weight: 600;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -35,6 +41,7 @@
   color: white;
   border: none;
   cursor: pointer;
+   width: fit-content;
   transition: background-color 0.2s ease;
 }
 
