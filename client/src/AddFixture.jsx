@@ -23,7 +23,7 @@ export default function AddFixture({ leagueId, onFixturesUpdated }) {
       alert('A team cannot play against itself.');
       return;
     }
-console.log('Adding fixture for league:', leagueId);
+// console.log('Adding fixture for league:', leagueId);
 
     fetch('/api/matches', {
       method: 'POST',
@@ -47,14 +47,19 @@ console.log('Adding fixture for league:', leagueId);
         alert('Failed to add fixture');
       });
   };
+const leagueTeams = teams.filter(t => t.league_id === leagueId);
 
   return (
     <div className="add-fixture-form">
+      <p className="fixture-league-note">
+  Creating fixture for <strong>{leagueId === 1 ? 'League A' : 'League B'}</strong>
+</p>
+
       <h3>Add Fixture</h3>
       <form onSubmit={handleAddFixture}>
         <select value={homeTeam} onChange={(e) => setHomeTeam(e.target.value)} required>
           <option value="">Select Home Team</option>
-          {teams.map(team => (
+          {leagueTeams.map(team => (
             <option key={team.id} value={team.id}>
               {team.team}
             </option>
@@ -63,12 +68,18 @@ console.log('Adding fixture for league:', leagueId);
 
         <select value={awayTeam} onChange={(e) => setAwayTeam(e.target.value)} required>
           <option value="">Select Away Team</option>
-          {teams.map(team => (
+          {leagueTeams.map(team => (
             <option key={team.id} value={team.id}>
               {team.team}
             </option>
           ))}
         </select>
+{leagueTeams.length < 2 && (
+  <p className="error-text">
+    Not enough teams in this league to create a fixture
+  </p>
+)}
+
 
         <button type="submit">Add Fixture</button>
       </form>

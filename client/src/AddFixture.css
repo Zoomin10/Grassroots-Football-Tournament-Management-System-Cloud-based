@@ -48,3 +48,8 @@
 .add-fixture-form button:hover {
   background-color: #0056b3;
 }
+.fixture-league-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}

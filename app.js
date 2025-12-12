@@ -105,7 +105,37 @@ app.get('/api/matches', async (req, res) => {
 app.post('/api/matches', async (req, res) => {
   const { home_team_id, away_team_id, leagueId } = req.body;
 
+  if (!home_team_id || !away_team_id || !leagueId) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
   try {
+    // 🔒 VALIDATION STEP (this is the key part)
+    const teamsResult = await pool.query(
+      `
+      SELECT id, league_id
+      FROM teams
+      WHERE id IN ($1, $2)
+      `,
+      [home_team_id, away_team_id]
+    );
+
+    if (teamsResult.rows.length !== 2) {
+      return res.status(400).json({ error: 'Invalid teams selected' });
+    }
+
+    const [home, away] = teamsResult.rows;
+
+    if (
+      home.league_id !== away.league_id ||
+      home.league_id !== leagueId
+    ) {
+      return res
+        .status(400)
+        .json({ error: 'Teams must belong to the selected league' });
+    }
+
+    // ✅ INSERT ONLY AFTER VALIDATION PASSES
     await pool.query(
       `
       INSERT INTO matches (home_team_id, away_team_id, league_id, round)
@@ -116,8 +146,8 @@ app.post('/api/matches', async (req, res) => {
 
     res.sendStatus(201);
   } catch (err) {
-    console.error('❌ Create fixture error:', err);
-    res.status(500).json({ error: 'Failed to create fixture' });
+    console.error('❌ Add fixture error:', err);
+    res.status(500).json({ error: 'Failed to add fixture' });
   }
 });
 

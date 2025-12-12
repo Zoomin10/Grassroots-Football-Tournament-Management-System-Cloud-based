@@ -18,28 +18,32 @@ function App() {
   const reloadAll = () => setReloadKey(prev => prev + 1);
 
   const reloadData = () => {
-    fetch(`/api/matches?leagueId=${leagueId}`)
-      .then(res => res.json())
-      .then(setTeams)
-      .catch(err => console.error('❌ Fetch teams error:', err));
+  // ✅ Fetch TEAMS
+  fetch(`/api/teams?leagueId=${leagueId}`)
+    .then(res => res.json())
+    .then(setTeams)
+    .catch(err => console.error('❌ Fetch teams error:', err));
 
-    fetch(`/api/league?leagueId=${leagueId}`)
-      .then(res => res.json())
-      .then(data => {
-        const formatted = data.map(t => ({
-          ...t,
-          games_played: t.played,
-          goal_difference: t.goals_for - t.goals_against
-        }));
-        setLeague(formatted);
-      })
-      .catch(err => console.error('❌ Fetch league error:', err));
+  // ✅ Fetch LEAGUE TABLE
+  fetch(`/api/league?leagueId=${leagueId}`)
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map(t => ({
+        ...t,
+        games_played: t.played,
+        goal_difference: t.goals_for - t.goals_against
+      }));
+      setLeague(formatted);
+    })
+    .catch(err => console.error('❌ Fetch league error:', err));
 
-      fetch(`/api/matches?leagueId=${leagueId}`)
-      .then(res => res.json())
-      .then(setFixtures)
-      .catch(err => console.error('❌ Fetch fixtures error:', err));
-  };
+  // ✅ Fetch FIXTURES
+  fetch(`/api/matches?leagueId=${leagueId}`)
+    .then(res => res.json())
+    .then(setFixtures)
+    .catch(err => console.error('❌ Fetch fixtures error:', err));
+};
+
 
   useEffect(() => {
     reloadData();
@@ -67,6 +71,27 @@ function App() {
         <h1>Summer Tournament</h1>
       </header>
 
+            <div className="league-selector">
+              <span className="league-label">League:</span>
+
+              <button
+                className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
+                onClick={() => setLeagueId(1)}
+              >
+                League A
+              </button>
+
+              <button
+                className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
+                onClick={() => setLeagueId(2)}
+              >
+                League B
+              </button>
+            </div>
+<h3 className="active-league-title">
+  {leagueId === 1 ? 'League A' : 'League B'}
+</h3>
+
           <div style={{ margin: '1rem 0' }}>
             <label style={{ fontWeight: 'bold' }}>
               League:&nbsp;
@@ -88,7 +113,7 @@ function App() {
           <TeamList teams={teams} onDelete={reloadAll} />
           <AddTeam onAdd={reloadData} />
           <AddFixture  leagueId={leagueId}
-            onFixturesUpdated={refreshFixtures} 
+            onFixturesUpdated={reloadData} 
           />
         </div>
 

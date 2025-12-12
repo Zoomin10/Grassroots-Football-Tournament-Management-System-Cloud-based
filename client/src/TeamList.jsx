@@ -26,33 +26,40 @@ function TeamList({ teams = [], onDelete }) {
       console.error('❌ Delete team error:', err);
     }
   };
+// console.log('TeamList first team:', teams[0]);
+
 
   return (
     <div className="team-list">
       <h2>Teams</h2>
 
-      {teams.map(team => (
-        <div key={team.id} className="team-card">
-          <img
-            src={getLogoSrc(team.team)}
-            alt={team.team}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = '/logos/default.png';
-            }}
-            className="team-logo"
-          />
-          <span className="team-name">{team.team}</span>
-          <button
-            className="delete-btn"
-            onClick={() => handleDelete(team.id)}
-          >
-            🗑️
-          </button>
-        </div>
-      ))}
+      {teams.map(team => {
+        const teamName = team.team || team.name || '';
+
+        return (
+          <div key={team.id} className="team-card">
+            <img
+              src={getLogoSrc(teamName)}
+              alt={teamName}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/logos/default.png';
+              }}
+              className="team-logo"
+            />
+            <span className="team-name">{teamName}</span>
+            <button
+              className="delete-btn"
+              onClick={() => handleDelete(team.id)}
+            >
+              🗑️
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 export default TeamList;
+
