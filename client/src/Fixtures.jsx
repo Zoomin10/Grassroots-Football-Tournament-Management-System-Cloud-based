@@ -21,23 +21,25 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
   }, [fixturesKey]);
 
   const handleSubmitResult = (id, homeScore, awayScore) => {
-    fetch(`/api/matches/${id}/result`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        home_score: parseInt(homeScore),
-        away_score: parseInt(awayScore)
-      })
+  fetch(`/api/matches/${id}/result`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      home_score: parseInt(homeScore),
+      away_score: parseInt(awayScore)
     })
-      .then(() => {
-        if (typeof onResultsUpdated === 'function') onResultsUpdated();
-        loadFixtures(); // Local update
-      })
-      .catch(err => {
-        console.error('❌ Submit result error:', err);
-        alert('Failed to submit result');
-      });
-  };
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to submit result');
+      if (typeof onResultsUpdated === 'function') {
+        onResultsUpdated(); // ✅ correct closure
+      }
+    })
+    .catch(err => {
+      console.error('❌ Submit result error:', err);
+      alert('Failed to submit result');
+    });
+};
 
   return (
     <div className="fixtures-container">

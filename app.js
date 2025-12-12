@@ -90,33 +90,29 @@ app.get('/api/matches', async (req, res) => {
 
 // POST create a fixture
 app.post('/api/matches', async (req, res) => {
-  const { home_team_id, away_team_id } = req.body;
-  const leagueId = 1;
+  const { home_team_id, away_team_id, leagueId } = req.body;
 
-  if (!home_team_id || !away_team_id || home_team_id === away_team_id) {
-    return res.status(400).json({ error: 'Invalid team IDs' });
+  try {
+    await pool.query(
+      `
+      INSERT INTO matches (home_team_id, away_team_id, league_id, round)
+      VALUES ($1, $2, $3, 'league')
+      `,
+      [home_team_id, away_team_id, leagueId]
+    );
+
+    res.sendStatus(201);
+  } catch (err) {
+    console.error('❌ Create fixture error:', err);
+    res.status(500).json({ error: 'Failed to create fixture' });
   }
-
-try {
-  await pool.query(
-    `
-    INSERT INTO matches (home_team_id, away_team_id, league_id, round)
-    VALUES ($1, $2, $3, 'league')
-    `,
-    [home_team_id, away_team_id, leagueId]
-  );
-
-  res.sendStatus(201);
-} catch (err) {
-  console.error('❌ Insert fixture error:', err);
-  res.status(500).json({ error: 'Failed to create fixture' });
-}
-
 });
+
+
 
 // POST submit a match result
 app.post('/api/matches/:id/result', async (req, res) => {
-  const id = req.params.id;
+  const id = parseInt(req.params.id, 10);
   const { home_score, away_score } = req.body;
 
   try {
@@ -137,6 +133,7 @@ app.post('/api/matches/:id/result', async (req, res) => {
     res.status(500).json({ error: 'Failed to submit result' });
   }
 });
+
 
 
 // DELETE a fixture

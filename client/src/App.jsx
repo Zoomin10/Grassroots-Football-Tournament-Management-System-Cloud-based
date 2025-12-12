@@ -13,6 +13,7 @@ function App() {
   const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
   const [fixturesKey, setFixturesKey] = useState(0);
+  
 
   const reloadAll = () => setReloadKey(prev => prev + 1);
 
@@ -66,11 +67,23 @@ function App() {
         <h1>Summer Tournament</h1>
       </header>
 
+            <div style={{ marginBottom: '1rem' }}>
+              <label>
+                League:&nbsp;
+                <select value={leagueId} onChange={e => setLeagueId(Number(e.target.value))}>
+                  <option value={1}>League A</option>
+                  <option value={2}>League B</option>
+                </select>
+              </label>
+            </div>
+
       <div className="dashboard-wrapper">
         <div className="left-panel">
           <TeamList teams={teams} onDelete={reloadAll} />
           <AddTeam onAdd={reloadData} />
-          <AddFixture onFixturesUpdated={refreshFixtures} />
+          <AddFixture  leagueId={leagueId}
+            onFixturesUpdated={refreshFixtures} 
+          />
         </div>
 
         <div className="right-panel">

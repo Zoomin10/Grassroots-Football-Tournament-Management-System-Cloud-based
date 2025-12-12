@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './AddFixture.css';
 
-export default function AddFixture({ onFixturesUpdated }) {
+export default function AddFixture({ leagueId, onFixturesUpdated }) {
   const [teams, setTeams] = useState([]);
   const [homeTeam, setHomeTeam] = useState('');
   const [awayTeam, setAwayTeam] = useState('');
@@ -23,13 +23,15 @@ export default function AddFixture({ onFixturesUpdated }) {
       alert('A team cannot play against itself.');
       return;
     }
+console.log('Adding fixture for league:', leagueId);
 
     fetch('/api/matches', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         home_team_id: parseInt(homeTeam),
-        away_team_id: parseInt(awayTeam)
+        away_team_id: parseInt(awayTeam),
+        leagueId: leagueId
       })
     })
       .then(() => {
