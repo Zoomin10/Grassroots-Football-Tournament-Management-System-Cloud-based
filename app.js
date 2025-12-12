@@ -35,21 +35,31 @@ app.get('/api/teams', async (req, res) => {
 
 // POST a new team
 app.post('/api/teams', async (req, res) => {
-  const { team, logo } = req.body;
-  if (!team) {
-    return res.status(400).json({ error: 'Team name is required' });
+  console.log('POST /api/teams body:', req.body);
+  const { team, logo, leagueId } = req.body;
+
+
+  if (!team || !leagueId) {
+    return res.status(400).json({ error: 'Team name and leagueId are required' });
   }
+
   try {
     const result = await pool.query(
-      'INSERT INTO teams (team, logo) VALUES ($1, $2) RETURNING *',
-      [team, logo || null]
+      `
+      INSERT INTO teams (team, logo, league_id)
+      VALUES ($1, $2, $3)
+      RETURNING *
+      `,
+      [team, logo || null, leagueId]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('❌ Insert team error:', err);
     res.status(500).json({ error: 'Failed to add team' });
   }
 });
+
 
 // DELETE a team
 app.delete('/api/teams/:id', async (req, res) => {
