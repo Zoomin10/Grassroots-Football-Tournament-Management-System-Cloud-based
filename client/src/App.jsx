@@ -18,7 +18,7 @@ function App() {
   const reloadAll = () => setReloadKey(prev => prev + 1);
 
   const reloadData = () => {
-    fetch('/api/teams')
+    fetch(`/api/matches?leagueId=${leagueId}`)
       .then(res => res.json())
       .then(setTeams)
       .catch(err => console.error('❌ Fetch teams error:', err));
@@ -35,7 +35,7 @@ function App() {
       })
       .catch(err => console.error('❌ Fetch league error:', err));
 
-    fetch('/api/matches')
+      fetch(`/api/matches?leagueId=${leagueId}`)
       .then(res => res.json())
       .then(setFixtures)
       .catch(err => console.error('❌ Fetch fixtures error:', err));
@@ -67,15 +67,21 @@ function App() {
         <h1>Summer Tournament</h1>
       </header>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label>
-                League:&nbsp;
-                <select value={leagueId} onChange={e => setLeagueId(Number(e.target.value))}>
-                  <option value={1}>League A</option>
-                  <option value={2}>League B</option>
-                </select>
-              </label>
-            </div>
+          <div style={{ margin: '1rem 0' }}>
+            <label style={{ fontWeight: 'bold' }}>
+              League:&nbsp;
+              <select
+                value={leagueId}
+                onChange={e => setLeagueId(Number(e.target.value))}
+              >
+                <option value={1}>League A</option>
+                <option value={2}>League B</option>
+              </select>
+            </label>
+          </div>
+
+           
+
 
       <div className="dashboard-wrapper">
         <div className="left-panel">
@@ -90,6 +96,7 @@ function App() {
           <LeagueTable league={league} />
           <Fixtures
             key={fixturesKey}
+            fixtures={fixtures} 
             onResultsUpdated={reloadData}
             onDelete={handleDeleteFixture}
           />

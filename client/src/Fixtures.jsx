@@ -1,61 +1,43 @@
-import { useEffect, useState } from 'react';
 import './Fixtures.css';
 
-export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
-  const [localFixtures, setLocalFixtures] = useState([]);
-
-  const loadFixtures = () => {
-    fetch('/api/matches')
-      .then(res => res.json())
-      .then(data => setLocalFixtures(data))
-      .catch(err => {
-        console.error('❌ Load fixtures error:', err);
-        alert('Failed to load fixtures');
-      });
-  };
-
-  // Reload when fixturesKey changes
-  useEffect(() => {
-    console.log("📦 Fixtures loading..."); 
-    loadFixtures();    
-  }, [fixturesKey]);
+export default function Fixtures({ fixtures = [], onResultsUpdated, onDelete }) {
 
   const handleSubmitResult = (id, homeScore, awayScore) => {
-  fetch(`/api/matches/${id}/result`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      home_score: parseInt(homeScore),
-      away_score: parseInt(awayScore)
+    fetch(`/api/matches/${id}/result`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        home_score: parseInt(homeScore),
+        away_score: parseInt(awayScore)
+      })
     })
-  })
-    .then(res => {
-      if (!res.ok) throw new Error('Failed to submit result');
-      if (typeof onResultsUpdated === 'function') {
-        onResultsUpdated(); // ✅ correct closure
-      }
-    })
-    .catch(err => {
-      console.error('❌ Submit result error:', err);
-      alert('Failed to submit result');
-    });
-};
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to submit result');
+        if (typeof onResultsUpdated === 'function') {
+          onResultsUpdated();
+        }
+      })
+      .catch(err => {
+        console.error('❌ Submit result error:', err);
+        alert('Failed to submit result');
+      });
+  };
 
   return (
     <div className="fixtures-container">
       <h2>Results / Fixtures</h2>
+
       <ul className="fixture-list">
-        {localFixtures.map(fx => (
+        {fixtures.map(fx => (
           <li key={fx.id} className="fixture-card">
             <div className="fixture-content">
 
-              {/* Team vs Team Line */}
-             <div className="fixture-line fixture-teams-balanced">
+              {/* Team vs Team */}
+              <div className="fixture-line fixture-teams-balanced">
                 <span className="fixture-team home">{fx.home_team}</span>
                 <span className="vs">vs</span>
-  <             span className="fixture-team away">{fx.away_team}</span>
-            </div>
-
+                <span className="fixture-team away">{fx.away_team}</span>
+              </div>
 
               {/* Score or Submit Form */}
               {fx.played ? (
@@ -67,9 +49,11 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
                   className="fixture-score-form"
                   onSubmit={e => {
                     e.preventDefault();
-                    const home = e.target.home.value;
-                    const away = e.target.away.value;
-                    handleSubmitResult(fx.id, home, away);
+                    handleSubmitResult(
+                      fx.id,
+                      e.target.home.value,
+                      e.target.away.value
+                    );
                   }}
                 >
                   <input name="home" type="number" min="0" placeholder="Home" required />
@@ -84,9 +68,8 @@ export default function Fixtures({ onResultsUpdated, onDelete, fixturesKey }) {
                 className="delete-btn"
                 onClick={() => {
                   if (typeof onDelete === 'function') {
-                  onDelete(fx.id);
-                  }                
-                  loadFixtures();
+                    onDelete(fx.id);
+                  }
                 }}
               >
                 🗑️

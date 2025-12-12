@@ -65,12 +65,20 @@ app.delete('/api/teams/:id', async (req, res) => {
 
 // ----------------- FIXTURE ROUTES -----------------
 
-// GET all fixtures
+// GET fixtures for a specific league
 app.get('/api/matches', async (req, res) => {
+  const leagueId = parseInt(req.query.leagueId, 10);
+
+  if (!leagueId) {
+    return res.status(400).json({ error: 'leagueId is required' });
+  }
+
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT 
         matches.id,
+        matches.league_id,
         t1.team AS home_team,
         t2.team AS away_team,
         matches.home_score,
@@ -79,14 +87,19 @@ app.get('/api/matches', async (req, res) => {
       FROM matches
       JOIN teams t1 ON t1.id = matches.home_team_id
       JOIN teams t2 ON t2.id = matches.away_team_id
+      WHERE matches.league_id = $1
       ORDER BY matches.id ASC
-    `);
+      `,
+      [leagueId]
+    );
+
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Fetch fixtures error:', err);
     res.status(500).json({ error: 'Failed to fetch fixtures' });
   }
 });
+
 
 // POST create a fixture
 app.post('/api/matches', async (req, res) => {
