@@ -10,16 +10,9 @@ function App() {
   const [teams, setTeams] = useState([]);
   const [fixtures, setFixtures] = useState([]);
   const [league, setLeague] = useState([]);
+  const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
   const [fixturesKey, setFixturesKey] = useState(0);
-
-
-  // Load data from backend
-  useEffect(() => {
-    fetchTeams();
-    fetchFixtures();
-    fetchLeague();
-  }, [reloadKey]);
 
   const reloadAll = () => setReloadKey(prev => prev + 1);
 
@@ -29,9 +22,16 @@ function App() {
       .then(setTeams)
       .catch(err => console.error('❌ Fetch teams error:', err));
 
-    fetch('/api/league')
+    fetch(`/api/league?leagueId=${leagueId}`)
       .then(res => res.json())
-      .then(setLeague)
+      .then(data => {
+        const formatted = data.map(t => ({
+          ...t,
+          games_played: t.played,
+          goal_difference: t.goals_for - t.goals_against
+        }));
+        setLeague(formatted);
+      })
       .catch(err => console.error('❌ Fetch league error:', err));
 
     fetch('/api/matches')
@@ -42,55 +42,10 @@ function App() {
 
   useEffect(() => {
     reloadData();
-  }, []);
-
-  const fetchTeams = async () => {
-    try {
-      const res = await fetch('/api/teams');
-      const data = await res.json();
-      setTeams(data);
-    } catch (err) {
-      console.error('❌ Fetch teams error:', err);
-    }
-  };
-
-  const fetchFixtures = async () => {
-    try {
-      const res = await fetch('/api/matches');
-      const data = await res.json();
-      setFixtures(data);
-    } catch (err) {
-      console.error('❌ Fetch fixtures error:', err);
-    }
-  };
-
-  const fetchLeague = async () => {
-    try {
-      const res = await fetch('/api/league');
-      const data = await res.json();
-      setLeague(data);
-    } catch (err) {
-      console.error('❌ Fetch league error:', err);
-    }
-  };
+  }, [leagueId, reloadKey]);
 
   const refreshFixtures = () => {
-    console.log("🔄 Refreshing fixtures..."); 
-  setFixturesKey(prev => prev + 1); // Forces Fixtures component to reload
-};
-
-  const handleAddFixture = async (homeTeam, awayTeam) => {
-    try {
-      const res = await fetch('/api/matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ home_team: homeTeam, away_team: awayTeam }),
-      });
-      if (!res.ok) throw new Error('Failed to create fixture');
-      reloadAll();
-    } catch (err) {
-      console.error('❌ Add fixture error:', err);
-    }
+    setFixturesKey(prev => prev + 1);
   };
 
   const handleDeleteFixture = async (id) => {
@@ -103,60 +58,45 @@ function App() {
     }
   };
 
-  const updateLeague = () => {
-    fetchLeague();
-    fetchFixtures();
-  };
-
   return (
     <div className="App">
       <header className="app-title">
         <img src="/logos/wroughtonyouthfc.png" alt="Logo" className="title-logo" />
         <h1>Wroughton Youth FC</h1>
-         <h1>Summer Tournament</h1>
+        <h1>Summer Tournament</h1>
       </header>
 
       <div className="dashboard-wrapper">
         <div className="left-panel">
-         
           <TeamList teams={teams} onDelete={reloadAll} />
-           <AddTeam onAdd={reloadData} />
-           <AddFixture onFixturesUpdated={refreshFixtures} />
-         
+          <AddTeam onAdd={reloadData} />
+          <AddFixture onFixturesUpdated={refreshFixtures} />
         </div>
 
         <div className="right-panel">
-        <LeagueTable league={league} />
-        <Fixtures
+          <LeagueTable league={league} />
+          <Fixtures
             key={fixturesKey}
-    f       ixturesKey={fixturesKey}
-            onResultsUpdated={updateLeague}
+            onResultsUpdated={reloadData}
             onDelete={handleDeleteFixture}
-          
-  />
-  
+          />
         </div>
-
       </div>
+
       <footer className="sponsor-footer">
-  <h4>This WYFC tournament is proudly sponsored by :</h4>
-  <div className="sponsor-logos">
-    <img src="/sponsors/iew.png" alt="iew" />
-    <img src="/sponsors/southby.png" alt="southby" />
-    <img src="/sponsors/ajwaste.png" alt="ajwaste" />
-    <img src="/sponsors/oceanescape.png" alt="oceanescape" />
-    
-    <img src="/sponsors/headstart.png" alt="headstart" />
-    <img src="/sponsors/holloway.png" alt="holloway" />
-     <img src="/sponsors/mjd.png" alt="mjd" />
-  </div>
-</footer>
-
+        <h4>This WYFC tournament is proudly sponsored by :</h4>
+        <div className="sponsor-logos">
+          <img src="/sponsors/iew.png" alt="iew" />
+          <img src="/sponsors/southby.png" alt="southby" />
+          <img src="/sponsors/ajwaste.png" alt="ajwaste" />
+          <img src="/sponsors/oceanescape.png" alt="oceanescape" />
+          <img src="/sponsors/headstart.png" alt="headstart" />
+          <img src="/sponsors/holloway.png" alt="holloway" />
+          <img src="/sponsors/mjd.png" alt="mjd" />
+        </div>
+      </footer>
     </div>
- 
-
   );
 }
 
 export default App;
-

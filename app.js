@@ -91,22 +91,27 @@ app.get('/api/matches', async (req, res) => {
 // POST create a fixture
 app.post('/api/matches', async (req, res) => {
   const { home_team_id, away_team_id } = req.body;
+  const leagueId = 1;
 
   if (!home_team_id || !away_team_id || home_team_id === away_team_id) {
     return res.status(400).json({ error: 'Invalid team IDs' });
   }
 
-  try {
-    const result = await pool.query(
-      `INSERT INTO matches (home_team_id, away_team_id)
-       VALUES ($1, $2) RETURNING *`,
-      [home_team_id, away_team_id]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error('❌ Insert fixture error:', err);
-    res.status(500).json({ error: 'Failed to add fixture' });
-  }
+try {
+  await pool.query(
+    `
+    INSERT INTO matches (home_team_id, away_team_id, league_id, round)
+    VALUES ($1, $2, $3, 'league')
+    `,
+    [home_team_id, away_team_id, leagueId]
+  );
+
+  res.sendStatus(201);
+} catch (err) {
+  console.error('❌ Insert fixture error:', err);
+  res.status(500).json({ error: 'Failed to create fixture' });
+}
+
 });
 
 // POST submit a match result
@@ -116,19 +121,23 @@ app.post('/api/matches/:id/result', async (req, res) => {
 
   try {
     await pool.query(
-      `UPDATE matches
-       SET home_score = $1,
-           away_score = $2,
-           played = true
-       WHERE id = $3`,
+      `
+      UPDATE matches
+      SET home_score = $1,
+          away_score = $2,
+          played = true
+      WHERE id = $3
+      `,
       [home_score, away_score, id]
     );
+
     res.sendStatus(200);
   } catch (err) {
     console.error('❌ Update match result error:', err);
     res.status(500).json({ error: 'Failed to submit result' });
   }
 });
+
 
 // DELETE a fixture
 app.delete('/api/matches/:id', async (req, res) => {
@@ -144,34 +153,78 @@ app.delete('/api/matches/:id', async (req, res) => {
 
 // ----------------- LEAGUE TABLE -----------------
 
+
+ // ----------------- LEAGUE TABLE -----------------
 app.get('/api/league', async (req, res) => {
+  const leagueId = parseInt(req.query.leagueId, 10);
+
+  if (!leagueId) {
+    return res.status(400).json({ error: 'leagueId is required' });
+  }
+
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT
         t.id,
         t.team,
-        COUNT(CASE WHEN m.played = true THEN 1 END) AS games_played,
+        COUNT(m.id) AS played,
+
         COALESCE(SUM(
           CASE
-            WHEN m.played = true AND t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-            WHEN m.played = true AND t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-            WHEN m.played = true AND (t.id = m.home_team_id OR t.id = m.away_team_id) AND m.home_score = m.away_score THEN 1
-            ELSE 0
+            WHEN t.id = m.home_team_id THEN m.home_score
+            ELSE m.away_score
           END
-        ), 0) AS points,
+        ), 0) AS goals_for,
+
         COALESCE(SUM(
           CASE
-            WHEN m.played = true AND t.id = m.home_team_id THEN m.home_score - m.away_score
-            WHEN m.played = true AND t.id = m.away_team_id THEN m.away_score - m.home_score
+            WHEN t.id = m.home_team_id THEN m.away_score
+            ELSE m.home_score
+          END
+        ), 0) AS goals_against,
+
+        (
+          COALESCE(SUM(
+            CASE
+              WHEN t.id = m.home_team_id THEN m.home_score
+              ELSE m.away_score
+            END
+          ), 0)
+          -
+          COALESCE(SUM(
+            CASE
+              WHEN t.id = m.home_team_id THEN m.away_score
+              ELSE m.home_score
+            END
+          ), 0)
+        ) AS goal_difference,
+
+        COALESCE(SUM(
+          CASE
+            WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
+            WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
+            WHEN m.home_score = m.away_score THEN 1
             ELSE 0
           END
-        ), 0) AS goal_difference
+        ), 0) AS points
+
       FROM teams t
       LEFT JOIN matches m
-        ON t.id = m.home_team_id OR t.id = m.away_team_id
+        ON t.id IN (m.home_team_id, m.away_team_id)
+        AND m.league_id = $1
+        AND m.round = 'league'
+        AND m.played = true
+
+      WHERE t.league_id = $1
       GROUP BY t.id
-      ORDER BY points DESC, goal_difference DESC
-    `);
+      ORDER BY
+        points DESC,
+        goal_difference DESC,
+        goals_for DESC;
+      `,
+      [leagueId]
+    );
 
     res.json(result.rows);
   } catch (err) {
@@ -179,6 +232,8 @@ app.get('/api/league', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch league table' });
   }
 });
+
+ 
 
 // ----------------- SERVER START -----------------
 
