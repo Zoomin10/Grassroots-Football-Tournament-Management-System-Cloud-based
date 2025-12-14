@@ -64,16 +64,18 @@ export default function Fixtures({ fixtures = [], onResultsUpdated, onDelete }) 
               )}
 
               {/* Delete Button */}
-              <button
-                className="delete-btn"
-                onClick={() => {
-                  if (typeof onDelete === 'function') {
-                    onDelete(fx.id);
-                  }
-                }}
-              >
-                🗑️
-              </button>
+ <button
+  type="button"
+  className="delete-btn"
+  onClick={() => {
+    console.log('🔥 DELETE CLICKED', fx.id);
+    if (typeof onDelete === 'function') {
+      onDelete(fx.id);
+    }
+  }}
+>
+  🗑️
+</button>
 
             </div>
           </li>

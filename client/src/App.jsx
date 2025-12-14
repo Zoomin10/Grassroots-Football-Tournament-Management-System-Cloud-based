@@ -9,6 +9,7 @@ import AddFixture from './AddFixture';
 function App() {
   const [teams, setTeams] = useState([]);
   const [fixtures, setFixtures] = useState([]);
+  const [knockouts, setKnockouts] = useState([]);
   const [league, setLeague] = useState([]);
   const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
@@ -44,6 +45,13 @@ function App() {
     .catch(err => console.error('❌ Fetch fixtures error:', err));
 };
 
+// 🏆 Fetch KNOCKOUT fixtures
+fetch(`/api/matches?round=semi-final`, {
+  cache: 'no-store'
+})
+  .then(res => res.json())
+  .then(setKnockouts)
+  .catch(err => console.error('❌ Fetch knockout fixtures error:', err));
 
   useEffect(() => {
     reloadData();
@@ -53,15 +61,26 @@ function App() {
     setFixturesKey(prev => prev + 1);
   };
 
-  const handleDeleteFixture = async (id) => {
-    try {
-      const res = await fetch(`/api/matches/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete fixture');
-      reloadAll();
-    } catch (err) {
-      console.error('❌ Delete fixture error:', err);
-    }
-  };
+ const handleDeleteFixture = async (id) => {
+  console.log('🔥 HANDLE DELETE FIXTURE', id);
+
+  try {
+    const res = await fetch(
+      'http://localhost:3000/api/matches/' + id,
+      { method: 'DELETE' }
+    );
+
+    console.log('🔥 DELETE RESPONSE STATUS', res.status);
+
+    if (!res.ok) throw new Error('Failed to delete fixture');
+
+    await reloadAll();
+  } catch (err) {
+    console.error('❌ Delete fixture error:', err);
+  }
+};
+
+
 
   return (
     <div className="App">
@@ -125,6 +144,14 @@ function App() {
             onResultsUpdated={reloadData}
             onDelete={handleDeleteFixture}
           />
+         <Fixtures
+          fixtures={knockouts}
+          onResultsUpdated={reloadData}
+          onDelete={handleDeleteFixture}
+          />
+
+
+
         </div>
       </div>
 
@@ -140,6 +167,23 @@ function App() {
           <img src="/sponsors/mjd.png" alt="mjd" />
         </div>
       </footer>
+      <button
+  className="regenerate-btn"
+  onClick={() => {
+    if (!window.confirm('Regenerate knockout stage?')) return;
+
+    fetch('/api/knockout/regenerate', { method: 'POST' })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed');
+        return res.json();
+      })
+      .then(() => reloadData())
+      .catch(err => alert('Failed to regenerate knockouts'));
+  }}
+>
+  🔄 Regenerate Knockouts
+</button>
+
     </div>
   );
 }
