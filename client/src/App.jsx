@@ -80,6 +80,28 @@ fetch(`/api/matches?round=semi-final`, {
   }
 };
 
+const resetMatches = async () => {
+  const ok = window.confirm(
+    '⚠️ This will delete ALL fixtures and results.\nTeams and logos will be kept.\n\nContinue?'
+  );
+
+  if (!ok) return;
+
+  try {
+    const res = await fetch('/api/admin/reset-matches', {
+      method: 'POST'
+    });
+
+    if (!res.ok) throw new Error('Reset failed');
+
+    reloadAll(); // refresh league, fixtures, knockouts
+    alert('All match data cleared. Tournament reset.');
+  } catch (err) {
+    console.error(err);
+    alert('Failed to reset match data');
+  }
+};
+
 
 
   return (
@@ -123,6 +145,18 @@ fetch(`/api/matches?round=semi-final`, {
               </select>
             </label>
           </div>
+<button
+  onClick={resetMatches}
+  style={{
+    background: '#b00020',
+    color: 'white',
+    padding: '8px 12px',
+    marginTop: '1rem',
+    borderRadius: '4px'
+  }}
+>
+  🔥 Reset Fixtures & Results (Admin)
+</button>
 
            
 

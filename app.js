@@ -491,6 +491,17 @@ console.log('League B:', leagueB);
     res.status(500).json({ error: 'Failed to regenerate knockouts' });
   }
 });
+// 🔐 ADMIN: Reset all match data (keep teams)
+app.post('/api/admin/reset-matches', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM matches');
+
+    res.json({ message: 'All match data cleared' });
+  } catch (err) {
+    console.error('❌ Reset matches error:', err);
+    res.status(500).json({ error: 'Failed to reset matches' });
+  }
+});
 
 // ----------------- SERVER START -----------------
 
