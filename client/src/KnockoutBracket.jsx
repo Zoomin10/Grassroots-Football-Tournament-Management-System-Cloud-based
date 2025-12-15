@@ -1,26 +1,34 @@
 import './KnockoutBracket.css';
 
+/* =========================
+   Reusable Fixture Card
+========================= */
 function FixtureCard({ match, onDelete, onResultsUpdated }) {
   const submitResult = (home, away) => {
     fetch(`/api/matches/${match.id}/result`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        home_score: parseInt(home),
-        away_score: parseInt(away)
+        home_score: parseInt(home, 10),
+        away_score: parseInt(away, 10)
       })
     })
       .then(() => {
+        // Auto-generate final after semi-finals
         if (match.round === 'semi-final') {
           return fetch('/api/knockout/generate-final', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bracket: match.bracket })
-          }).catch(() => {});
+          }).catch(() => {
+            // Ignore 400 (other semi not finished yet)
+          });
         }
       })
       .finally(() => {
-        onResultsUpdated();
+        if (typeof onResultsUpdated === 'function') {
+          onResultsUpdated();
+        }
       });
   };
 
@@ -32,7 +40,7 @@ function FixtureCard({ match, onDelete, onResultsUpdated }) {
 
       {match.played ? (
         <div className="fixture-score">
-          {match.home_score} - {match.away_score}
+          {match.home_score} – {match.away_score}
         </div>
       ) : (
         <form
@@ -62,48 +70,84 @@ function FixtureCard({ match, onDelete, onResultsUpdated }) {
   );
 }
 
-function KnockoutSection({ title, semis, final, onDelete, onResultsUpdated }) {
+/* =========================
+   Placeholder Card
+========================= */
+function PlaceholderCard({ label }) {
   return (
-    <>
-      <h3>{title}</h3>
+    <div className="fixture-card placeholder">
+      <div className="fixture-line placeholder-text">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/* =========================
+   Section (Cup / Plate)
+========================= */
+function KnockoutSection({
+  title,
+  semis,
+  finalMatch,
+  placeholders,
+  onDelete,
+  onResultsUpdated
+}) {
+  const hasSemis = semis.length === 2;
+
+  return (
+    <section className="knockout-section">
+      <h3 className="knockout-title">{title}</h3>
+
       <div className="knockout-bracket">
+        {/* Left Semi */}
         <div className="bracket-column left">
-          {semis[0] && (
+          {hasSemis ? (
             <FixtureCard
               match={semis[0]}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
             />
+          ) : (
+            <PlaceholderCard label={placeholders[0]} />
           )}
         </div>
 
+        {/* Final */}
         <div className="bracket-column center">
-          {final ? (
+          {finalMatch ? (
             <FixtureCard
-              match={final}
+              match={finalMatch}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
             />
           ) : (
-            <div className="final-placeholder">🏆 Final</div>
+            <PlaceholderCard label={placeholders[2]} />
           )}
         </div>
 
+        {/* Right Semi */}
         <div className="bracket-column right">
-          {semis[1] && (
+          {hasSemis ? (
             <FixtureCard
               match={semis[1]}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
             />
+          ) : (
+            <PlaceholderCard label={placeholders[1]} />
           )}
         </div>
       </div>
-    </>
+    </section>
   );
 }
 
-export default function KnockoutBracket({ matches, onDelete, onResultsUpdated }) {
+/* =========================
+   Main Bracket Component
+========================= */
+export default function KnockoutBracket({ matches = [], onDelete, onResultsUpdated }) {
   const cupSemis = matches.filter(
     m => m.round === 'semi-final' && m.bracket === 'cup'
   );
@@ -121,22 +165,34 @@ export default function KnockoutBracket({ matches, onDelete, onResultsUpdated })
   );
 
   return (
-    <div>
+    <div className="knockout-stage">
+
       <KnockoutSection
-        title="🏆 Cup"
+        title="🏆 Cup Competition"
         semis={cupSemis}
-        final={cupFinal}
+        finalMatch={cupFinal}
+        placeholders={[
+          'League A – 1st vs League B – 2nd',
+          'League B – 1st vs League A – 2nd',
+          '🏆 Cup Final'
+        ]}
         onDelete={onDelete}
         onResultsUpdated={onResultsUpdated}
       />
 
       <KnockoutSection
-        title="🥈 Plate"
+        title="🥈 Plate Competition"
         semis={plateSemis}
-        final={plateFinal}
+        finalMatch={plateFinal}
+        placeholders={[
+          'League A – 3rd vs League B – 4th',
+          'League B – 3rd vs League A – 4th',
+          '🥈 Plate Final'
+        ]}
         onDelete={onDelete}
         onResultsUpdated={onResultsUpdated}
       />
+
     </div>
   );
 }
