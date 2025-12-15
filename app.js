@@ -223,32 +223,76 @@ app.get('/api/league', async (req, res) => {
     const result = await pool.query(
       `
       SELECT
-        t.id,
-        t.team,
-        COUNT(m.id) AS played,
-        COALESCE(SUM(
-          CASE WHEN t.id = m.home_team_id THEN m.home_score ELSE m.away_score END
-        ), 0) AS goals_for,
-        COALESCE(SUM(
-          CASE WHEN t.id = m.home_team_id THEN m.away_score ELSE m.home_score END
-        ), 0) AS goals_against,
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-            WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-            WHEN m.home_score = m.away_score THEN 1
-            ELSE 0
-          END
-        ), 0) AS points
-      FROM teams t
-      LEFT JOIN matches m
-        ON t.id IN (m.home_team_id, m.away_team_id)
-        AND m.round = 'league'
-        AND m.played = true
-        AND m.league_id = $1
-      WHERE t.league_id = $1
-      GROUP BY t.id
-      ORDER BY points DESC, (goals_for - goals_against) DESC, goals_for DESC
+  t.id,
+  t.team,
+  COUNT(m.id) AS played,
+
+  COALESCE(SUM(
+    CASE
+      WHEN t.id = m.home_team_id THEN m.home_score
+      ELSE m.away_score
+    END
+  ), 0) AS goals_for,
+
+  COALESCE(SUM(
+    CASE
+      WHEN t.id = m.home_team_id THEN m.away_score
+      ELSE m.home_score
+    END
+  ), 0) AS goals_against,
+
+  COALESCE(SUM(
+    CASE
+      WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
+      WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
+      WHEN m.home_score = m.away_score THEN 1
+      ELSE 0
+    END
+  ), 0) AS points
+
+FROM teams t
+LEFT JOIN matches m
+  ON t.id IN (m.home_team_id, m.away_team_id)
+  AND m.league_id = $1
+  AND m.round = 'league'
+  AND m.played = true
+
+WHERE t.league_id = $1
+GROUP BY t.id, t.team
+
+ORDER BY
+  COALESCE(SUM(
+    CASE
+      WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
+      WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
+      WHEN m.home_score = m.away_score THEN 1
+      ELSE 0
+    END
+  ), 0) DESC,
+
+  (
+    COALESCE(SUM(
+      CASE
+        WHEN t.id = m.home_team_id THEN m.home_score
+        ELSE m.away_score
+      END
+    ), 0)
+    -
+    COALESCE(SUM(
+      CASE
+        WHEN t.id = m.home_team_id THEN m.away_score
+        ELSE m.home_score
+      END
+    ), 0)
+  ) DESC,
+
+  COALESCE(SUM(
+    CASE
+      WHEN t.id = m.home_team_id THEN m.home_score
+      ELSE m.away_score
+    END
+  ), 0) DESC;
+
       `,
       [leagueId]
     );
