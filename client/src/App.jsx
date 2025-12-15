@@ -128,12 +128,7 @@ useEffect(() => {
       <h1>Summer Tournament</h1>
     </header>
 
-    {/* Admin toggle (temporary) */}
-    <div style={{ textAlign: 'center', margin: '1rem' }}>
-      <button onClick={() => setIsAdmin(a => !a)}>
-        {isAdmin ? '👀 Public View' : '🔐 Admin View'}
-      </button>
-    </div>
+    
 
     {/* 🔀 VIEW SWITCH */}
    {isAdmin ? (
