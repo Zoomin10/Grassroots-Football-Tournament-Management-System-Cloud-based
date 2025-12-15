@@ -1,5 +1,6 @@
-console.log('🔥 THIS FILE IS RUNNING 🔥');
-console.log('🚀 app.js loaded');
+  console.log('🔥 THIS FILE IS RUNNING 🔥');
+  console.log('🚀 app.js loaded');
+
 
 const express = require('express');
 const path = require('path');
@@ -9,7 +10,7 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PostgreSQL connection (update these to match your setup)
+// ----------------- DB -----------------
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -18,32 +19,37 @@ const pool = new Pool({
   port: 5432,
 });
 
-// Middleware
+// ----------------- MIDDLEWARE -----------------
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ----------------- TEAM ROUTES -----------------
+// ======================================================
+// ===================== TEAMS ===========================
+// ======================================================
 
-// GET all teams
+// GET all teams (optionally filtered by league)
 app.get('/api/teams', async (req, res) => {
+  const { leagueId } = req.query;
+
   try {
-    const result = await pool.query('SELECT * FROM teams');
+    const result = leagueId
+      ? await pool.query('SELECT * FROM teams WHERE league_id = $1', [leagueId])
+      : await pool.query('SELECT * FROM teams');
+
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ Error fetching teams:', err);
+    console.error('❌ Fetch teams error:', err);
     res.status(500).json({ error: 'Failed to fetch teams' });
   }
 });
 
-// POST a new team
+// POST add team
 app.post('/api/teams', async (req, res) => {
-  console.log('POST /api/teams body:', req.body);
   const { team, logo, leagueId } = req.body;
 
-
   if (!team || !leagueId) {
-    return res.status(400).json({ error: 'Team name and leagueId are required' });
+    return res.status(400).json({ error: 'Team name and leagueId required' });
   }
 
   try {
@@ -63,12 +69,10 @@ app.post('/api/teams', async (req, res) => {
   }
 });
 
-
-// DELETE a team
+// DELETE team
 app.delete('/api/teams/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    await pool.query('DELETE FROM teams WHERE id = $1', [id]);
+    await pool.query('DELETE FROM teams WHERE id = $1', [req.params.id]);
     res.sendStatus(204);
   } catch (err) {
     console.error('❌ Delete team error:', err);
@@ -76,91 +80,77 @@ app.delete('/api/teams/:id', async (req, res) => {
   }
 });
 
-// ----------------- FIXTURE ROUTES -----------------
-console.log('📌 Registering /api/matches route');
-// GET fixtures (league + knockout)
+// ======================================================
+// ==================== MATCHES ==========================
+// ======================================================
+
+// GET matches (league OR knockout)
 app.get('/api/matches', async (req, res) => {
   const { leagueId, round } = req.query;
 
-
-
   try {
     let query = `
-      SELECT 
-        matches.id,
-        matches.league_id,
-        matches.round,
+      SELECT
+        m.id,
+        m.league_id,
+        m.round,
+        m.bracket,
+        m.played,
+        m.home_score,
+        m.away_score,
         t1.team AS home_team,
-        t2.team AS away_team,
-        matches.home_score,
-        matches.away_score,
-        matches.played
-      FROM matches
-      JOIN teams t1 ON t1.id = matches.home_team_id
-      JOIN teams t2 ON t2.id = matches.away_team_id
+        t2.team AS away_team
+      FROM matches m
+      JOIN teams t1 ON t1.id = m.home_team_id
+      JOIN teams t2 ON t2.id = m.away_team_id
       WHERE 1=1
     `;
 
     const params = [];
 
     if (leagueId) {
-      params.push(parseInt(leagueId, 10));
-      query += ` AND matches.league_id = $${params.length}`;
+      params.push(leagueId);
+      query += ` AND m.league_id = $${params.length}`;
     }
 
     if (round) {
       params.push(round);
-      query += ` AND matches.round = $${params.length}`;
+      query += ` AND m.round = $${params.length}`;
     }
 
-    query += ` ORDER BY matches.id ASC`;
+    query += ' ORDER BY m.id ASC';
 
     const result = await pool.query(query, params);
     res.set('Cache-Control', 'no-store');
     res.json(result.rows);
-
   } catch (err) {
-    console.error('❌ Fetch fixtures error:', err);
-    res.status(500).json({ error: 'Failed to fetch fixtures' });
+    console.error('❌ Fetch matches error:', err);
+    res.status(500).json({ error: 'Failed to fetch matches' });
   }
 });
 
-
-// POST create a fixture
+// POST league fixture
 app.post('/api/matches', async (req, res) => {
   const { home_team_id, away_team_id, leagueId } = req.body;
 
   if (!home_team_id || !away_team_id || !leagueId) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: 'Missing fields' });
   }
 
   try {
-    // 🔒 VALIDATION STEP (this is the key part)
-    const teamsResult = await pool.query(
-      `
-      SELECT id, league_id
-      FROM teams
-      WHERE id IN ($1, $2)
-      `,
+    const teams = await pool.query(
+      'SELECT id, league_id FROM teams WHERE id IN ($1, $2)',
       [home_team_id, away_team_id]
     );
 
-    if (teamsResult.rows.length !== 2) {
-      return res.status(400).json({ error: 'Invalid teams selected' });
-    }
-
-    const [home, away] = teamsResult.rows;
-
     if (
-      home.league_id !== away.league_id ||
-      home.league_id !== leagueId
+      teams.rows.length !== 2 ||
+      teams.rows[0].league_id !== leagueId ||
+      teams.rows[1].league_id !== leagueId
     ) {
-      return res
-        .status(400)
-        .json({ error: 'Teams must belong to the selected league' });
+      return res.status(400).json({ error: 'Teams must be in same league' });
     }
 
-    // ✅ INSERT ONLY AFTER VALIDATION PASSES
     await pool.query(
       `
       INSERT INTO matches (home_team_id, away_team_id, league_id, round)
@@ -176,11 +166,8 @@ app.post('/api/matches', async (req, res) => {
   }
 });
 
-
-
-// POST submit a match result
+// POST submit result
 app.post('/api/matches/:id/result', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
   const { home_score, away_score } = req.body;
 
   try {
@@ -192,49 +179,44 @@ app.post('/api/matches/:id/result', async (req, res) => {
           played = true
       WHERE id = $3
       `,
-      [home_score, away_score, id]
+      [home_score, away_score, req.params.id]
     );
 
     res.sendStatus(200);
   } catch (err) {
-    console.error('❌ Update match result error:', err);
+    console.error('❌ Submit result error:', err);
     res.status(500).json({ error: 'Failed to submit result' });
   }
 });
 
-
-
-// DELETE a fixture
+// DELETE knockout fixture (admin)
 app.delete('/api/matches/:id', async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const result = await pool.query(
+    await pool.query(
       `
       DELETE FROM matches
       WHERE id = $1
-      AND round = 'semi-final'
+        AND round IN ('semi-final', 'final')
       `,
-      [id]
+      [req.params.id]
     );
 
     res.sendStatus(204);
   } catch (err) {
     console.error('❌ Delete fixture error:', err);
-    res.status(500).json({ error: 'Failed to delete fixture' });
+    res.status(500).json({ error: 'Delete failed' });
   }
 });
 
+// ======================================================
+// ================== LEAGUE TABLE =======================
+// ======================================================
 
-// ----------------- LEAGUE TABLE -----------------
-
-
- // ----------------- LEAGUE TABLE -----------------
 app.get('/api/league', async (req, res) => {
-  const leagueId = parseInt(req.query.leagueId, 10);
+  const leagueId = Number(req.query.leagueId);
 
   if (!leagueId) {
-    return res.status(400).json({ error: 'leagueId is required' });
+    return res.status(400).json({ error: 'leagueId required' });
   }
 
   try {
@@ -244,37 +226,12 @@ app.get('/api/league', async (req, res) => {
         t.id,
         t.team,
         COUNT(m.id) AS played,
-
         COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.home_score
-            ELSE m.away_score
-          END
+          CASE WHEN t.id = m.home_team_id THEN m.home_score ELSE m.away_score END
         ), 0) AS goals_for,
-
         COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.away_score
-            ELSE m.home_score
-          END
+          CASE WHEN t.id = m.home_team_id THEN m.away_score ELSE m.home_score END
         ), 0) AS goals_against,
-
-        (
-          COALESCE(SUM(
-            CASE
-              WHEN t.id = m.home_team_id THEN m.home_score
-              ELSE m.away_score
-            END
-          ), 0)
-          -
-          COALESCE(SUM(
-            CASE
-              WHEN t.id = m.home_team_id THEN m.away_score
-              ELSE m.home_score
-            END
-          ), 0)
-        ) AS goal_difference,
-
         COALESCE(SUM(
           CASE
             WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
@@ -283,293 +240,139 @@ app.get('/api/league', async (req, res) => {
             ELSE 0
           END
         ), 0) AS points
-
       FROM teams t
       LEFT JOIN matches m
         ON t.id IN (m.home_team_id, m.away_team_id)
-        AND m.league_id = $1
         AND m.round = 'league'
         AND m.played = true
-
+        AND m.league_id = $1
       WHERE t.league_id = $1
       GROUP BY t.id
-      ORDER BY
-        points DESC,
-        goal_difference DESC,
-        goals_for DESC;
+      ORDER BY points DESC, (goals_for - goals_against) DESC, goals_for DESC
       `,
       [leagueId]
     );
 
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ League query error:', err);
-    res.status(500).json({ error: 'Failed to fetch league table' });
+    console.error('❌ League error:', err);
+    res.status(500).json({ error: 'Failed to fetch league' });
   }
 });
 
- app.get('/api/knockout/qualifiers', async (req, res) => {
-  try {
-    const leagueA = await pool.query(
-      `
-      SELECT id, team
-      FROM (
-        SELECT
-          t.id,
-          t.team,
-          COALESCE(SUM(
-            CASE
-              WHEN t.id = m.home_team_id THEN m.home_score
-              ELSE m.away_score
-            END
-          ), 0) AS goals_for,
-          COALESCE(SUM(
-            CASE
-              WHEN t.id = m.home_team_id THEN m.away_score
-              ELSE m.home_score
-            END
-          ), 0) AS goals_against,
-          COALESCE(SUM(
-            CASE
-              WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-              WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-              WHEN m.home_score = m.away_score THEN 1
-              ELSE 0
-            END
-          ), 0) AS points
-        FROM teams t
-        LEFT JOIN matches m
-          ON t.id IN (m.home_team_id, m.away_team_id)
-          AND m.round = 'league'
-          AND m.played = true
-        WHERE t.league_id = 1
-        GROUP BY t.id
-      ) standings
-      ORDER BY points DESC, (goals_for - goals_against) DESC, goals_for DESC
-      LIMIT 4
-      `
-    );
+// ======================================================
+// ================== KNOCKOUTS ==========================
+// ======================================================
 
-    const leagueB = await pool.query(
-      `
-      /* same query but WHERE t.league_id = 2 */
-      `
-    );
-
-    res.json({
-      leagueA: leagueA.rows,
-      leagueB: leagueB.rows
-    });
-  } catch (err) {
-    console.error('❌ Knockout qualifier error:', err);
-    res.status(500).json({ error: 'Failed to fetch knockout qualifiers' });
-  }
-});
-
-console.log('📌 About to define knockout regenerate route');
-
+// REGENERATE Cup + Plate semis
 app.post('/api/knockout/regenerate', async (req, res) => {
-  console.log('🔥 Regenerate route HIT');
-
   try {
-    // 1️⃣ Delete existing knockouts
-   // 🔥 Delete existing knockouts (semis + final)
-await pool.query(
-  `DELETE FROM matches WHERE round IN ('semi-final', 'final')`
-);
-
-
-    // 2️⃣ Fetch top 4 from League A
-    const leagueA = await pool.query(
-      `
-      SELECT t.id, t.team
-      FROM teams t
-      LEFT JOIN matches m
-        ON t.id IN (m.home_team_id, m.away_team_id)
-        AND m.round = 'league'
-        AND m.played = true
-      WHERE t.league_id = 1
-      GROUP BY t.id
-      ORDER BY
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-            WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-            WHEN m.home_score = m.away_score THEN 1
-            ELSE 0
-          END
-        ), 0) DESC,
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.home_score
-            ELSE m.away_score
-          END
-        ), 0)
-        -
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.away_score
-            ELSE m.home_score
-          END
-        ), 0) DESC
-      LIMIT 4
-      `
+    await pool.query(
+      `DELETE FROM matches WHERE round IN ('semi-final', 'final')`
     );
 
-    // 3️⃣ Fetch top 4 from League B
-    const leagueB = await pool.query(
-      `
-      SELECT t.id, t.team
-      FROM teams t
-      LEFT JOIN matches m
-        ON t.id IN (m.home_team_id, m.away_team_id)
-        AND m.round = 'league'
-        AND m.played = true
-      WHERE t.league_id = 2
-      GROUP BY t.id
-      ORDER BY
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-            WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-            WHEN m.home_score = m.away_score THEN 1
-            ELSE 0
-          END
-        ), 0) DESC,
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.home_score
-            ELSE m.away_score
-          END
-        ), 0)
-        -
-        COALESCE(SUM(
-          CASE
-            WHEN t.id = m.home_team_id THEN m.away_score
-            ELSE m.home_score
-          END
-        ), 0) DESC
-      LIMIT 4
-      `
-    );
+    const [A, B] = await Promise.all([
+      pool.query(`SELECT id FROM teams WHERE league_id = 1 ORDER BY id LIMIT 4`),
+      pool.query(`SELECT id FROM teams WHERE league_id = 2 ORDER BY id LIMIT 4`)
+    ]);
 
-    if (leagueA.rows.length < 4 || leagueB.rows.length < 4) {
-      return res.status(400).json({
-        error: 'Not enough teams in one or both leagues'
-      });
+    if (A.rows.length < 4 || B.rows.length < 4) {
+      return res.status(400).json({ error: 'Not enough teams' });
     }
-console.log('League A:', leagueA);
-console.log('League B:', leagueB);
 
-    const A = leagueA.rows;
-    const B = leagueB.rows;
-
-    // 4️⃣ Build knockout fixtures
     const fixtures = [
-      // Top bracket
-      [A[0].id, B[1].id],
-      [B[0].id, A[1].id],
-
-      // Plate bracket
-      [A[2].id, B[3].id],
-      [B[2].id, A[3].id]
+      { home: A.rows[0].id, away: B.rows[1].id, bracket: 'cup' },
+      { home: B.rows[0].id, away: A.rows[1].id, bracket: 'cup' },
+      { home: A.rows[2].id, away: B.rows[3].id, bracket: 'plate' },
+      { home: B.rows[2].id, away: A.rows[3].id, bracket: 'plate' },
     ];
 
-    // 5️⃣ Insert knockouts
-    for (const [home, away] of fixtures) {
+    for (const f of fixtures) {
       await pool.query(
         `
-        INSERT INTO matches (home_team_id, away_team_id, round)
-        VALUES ($1, $2, 'semi-final')
+        INSERT INTO matches (home_team_id, away_team_id, round, bracket)
+        VALUES ($1, $2, 'semi-final', $3)
         `,
-        [home, away]
+        [f.home, f.away, f.bracket]
       );
     }
 
-    res.json({ message: 'Seni-Final stage regenerated' });
-
+    res.json({ message: 'Knockouts regenerated' });
   } catch (err) {
-    console.error('❌ Knockout regenerate error:', err);
+    console.error('❌ Regenerate error:', err);
     res.status(500).json({ error: 'Failed to regenerate knockouts' });
   }
 });
-// 🔐 ADMIN: Reset all match data (keep teams)
-app.post('/api/admin/reset-matches', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM matches');
 
-    res.json({ message: 'All match data cleared' });
-  } catch (err) {
-    console.error('❌ Reset matches error:', err);
-    res.status(500).json({ error: 'Failed to reset matches' });
-  }
-});
-// 🏆 Auto-generate final when semis are complete
+// AUTO-GENERATE FINAL (Cup or Plate)
 app.post('/api/knockout/generate-final', async (req, res) => {
+  const { bracket } = req.body;
+
+  if (!bracket) {
+    return res.status(400).json({ error: 'Bracket required' });
+  }
+
   try {
-    // 1️⃣ Get played semi-finals
     const semis = await pool.query(
       `
-      SELECT *
-      FROM matches
+      SELECT * FROM matches
       WHERE round = 'semi-final'
+        AND bracket = $1
         AND played = true
-      ORDER BY id ASC
-      `
+      `,
+      [bracket]
     );
-console.log(
-  '🧪 Semi-finals found:',
-  semis.rows.map(m => ({
-    id: m.id,
-    played: m.played,
-    home_score: m.home_score,
-    away_score: m.away_score
-  }))
-);
 
     if (semis.rows.length !== 2) {
-      return res.status(400).json({
-        error: 'Both semi-finals must be completed'
-      });
+      return res.status(400).json({ error: 'Both semis not complete' });
     }
 
-    // 2️⃣ Check if final already exists
     const existingFinal = await pool.query(
-      `SELECT id FROM matches WHERE round = 'final' LIMIT 1`
+      `
+      SELECT id FROM matches
+      WHERE round = 'final' AND bracket = $1
+      `,
+      [bracket]
     );
 
-    if (existingFinal.rows.length > 0) {
+    if (existingFinal.rows.length) {
       return res.json({ message: 'Final already exists' });
     }
 
-    // 3️⃣ Determine winners
-    const winners = semis.rows.map(m => {
-      if (m.home_score > m.away_score) return m.home_team_id;
-      if (m.away_score > m.home_score) return m.away_team_id;
-
-      throw new Error('Draws not allowed in semi-finals');
-    });
-
-    // 4️⃣ Insert final
-    await pool.query(
-      `
-      INSERT INTO matches (home_team_id, away_team_id, round)
-      VALUES ($1, $2, 'final')
-      `,
-      [winners[0], winners[1]]
+    const winners = semis.rows.map(m =>
+      m.home_score > m.away_score ? m.home_team_id : m.away_team_id
     );
 
-    res.json({ message: 'Final generated successfully' });
+    await pool.query(
+      `
+      INSERT INTO matches (home_team_id, away_team_id, round, bracket)
+      VALUES ($1, $2, 'final', $3)
+      `,
+      [winners[0], winners[1], bracket]
+    );
 
+    res.json({ message: `${bracket} final created` });
   } catch (err) {
-    console.error('❌ Generate final error:', err);
+    console.error('❌ Final generation error:', err);
     res.status(500).json({ error: 'Failed to generate final' });
   }
 });
 
-// ----------------- SERVER START -----------------
+// ======================================================
+// ================== ADMIN ==============================
+// ======================================================
 
+app.post('/api/admin/reset-matches', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM matches');
+    res.json({ message: 'All matches cleared' });
+  } catch (err) {
+    console.error('❌ Reset error:', err);
+    res.status(500).json({ error: 'Failed to reset matches' });
+  }
+});
+
+// ----------------- SERVER START -----------------
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
