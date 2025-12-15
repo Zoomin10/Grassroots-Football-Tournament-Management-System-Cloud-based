@@ -1,53 +1,113 @@
 // src/pages/AdminView.jsx
-import LeagueTable from '../LeagueTable';
+import { useEffect, useState } from 'react';
+
 import TeamList from '../TeamList';
 import AddTeam from '../AddTeam';
-import Fixtures from '../Fixtures';
 import AddFixture from '../AddFixture';
+import LeagueTable from '../LeagueTable';
+import Fixtures from '../Fixtures';
 import KnockoutBracket from '../KnockoutBracket';
-import { formatLeague } from '../utils/formatLeague';
 
-export default function AdminView({
-  teams,
-  league,
-  fixtures,
-  knockouts,
-  leagueId,
-  setLeagueId,
-  reloadData,
-  reloadAll,
-  resetMatches,
-  handleDeleteFixture
- 
+import '../App.css'; // reuse existing layout styles
 
-}) {
-     // ✅ LOG GOES HERE
-  console.log('ADMIN VIEW PROPS', {
-    teams,
-    league,
-    fixtures,
-    knockouts
-  });
+export default function AdminView() {
+  const [teams, setTeams] = useState([]);
+  const [league, setLeague] = useState([]);
+  const [fixtures, setFixtures] = useState([]);
+  const [knockouts, setKnockouts] = useState([]);
+  const [leagueId, setLeagueId] = useState(1);
+  const [reloadKey, setReloadKey] = useState(0);
 
+  const reloadData = () => setReloadKey(k => k + 1);
+
+  /* =========================
+     DATA LOADING
+  ========================= */
+  useEffect(() => {
+    // Teams
+    fetch(`/api/teams?leagueId=${leagueId}`)
+      .then(res => res.json())
+      .then(setTeams)
+      .catch(err => console.error('❌ Fetch teams error:', err));
+
+    // League table
+    fetch(`/api/league?leagueId=${leagueId}`)
+      .then(res => res.json())
+      .then(setLeague)
+      .catch(err => console.error('❌ Fetch league error:', err));
+
+    // League fixtures
+    fetch(`/api/matches?leagueId=${leagueId}`)
+      .then(res => res.json())
+      .then(setFixtures)
+      .catch(err => console.error('❌ Fetch fixtures error:', err));
+
+    // Knockouts (Cup + Plate)
+    Promise.all([
+      fetch('/api/matches?round=semi-final').then(r => r.json()),
+      fetch('/api/matches?round=final').then(r => r.json())
+    ])
+      .then(([semis, finals]) => setKnockouts([...semis, ...finals]))
+      .catch(err => console.error('❌ Fetch knockouts error:', err));
+
+  }, [leagueId, reloadKey]);
+
+  /* =========================
+     ADMIN ACTIONS
+  ========================= */
+  const handleDeleteFixture = async (id) => {
+    try {
+      const res = await fetch(`/api/matches/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      reloadData();
+    } catch (err) {
+      console.error('❌ Delete fixture error:', err);
+    }
+  };
+
+  const resetMatches = async () => {
+    if (!window.confirm('⚠️ Delete ALL fixtures & results?')) return;
+
+    try {
+      const res = await fetch('/api/admin/reset-matches', { method: 'POST' });
+      if (!res.ok) throw new Error('Reset failed');
+      reloadData();
+    } catch (err) {
+      console.error('❌ Reset error:', err);
+    }
+  };
+
+  const regenerateKnockouts = async () => {
+    if (!window.confirm('Regenerate knockout stage?')) return;
+
+    try {
+      const res = await fetch('/api/knockout/regenerate', { method: 'POST' });
+      if (!res.ok) throw new Error('Regenerate failed');
+      reloadData();
+    } catch (err) {
+      console.error('❌ Regenerate error:', err);
+    }
+  };
+
+  /* =========================
+     RENDER
+  ========================= */
   return (
-    <div className="admin-view">
+    <div className="App">
 
-      {/* 🔐 ADMIN BANNER */}
-      <div className="admin-banner">
-        🔐 Admin Mode
-      </div>
+      <header className="app-title">
+        <h1>🔐 Admin Control Panel</h1>
+      </header>
 
-      {/* League Selector */}
+      {/* League selector */}
       <div className="league-selector">
         <span className="league-label">League:</span>
-
         <button
           className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
           onClick={() => setLeagueId(1)}
         >
           League A
         </button>
-
         <button
           className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
           onClick={() => setLeagueId(2)}
@@ -56,52 +116,28 @@ export default function AdminView({
         </button>
       </div>
 
-      <h3 className="active-league-title">
-        {leagueId === 1 ? 'League A' : 'League B'}
-      </h3>
-
-      {/* 🔥 ADMIN CONTROLS */}
-      <div className="admin-controls">
+      {/* Admin controls */}
+      <div style={{ textAlign: 'center', margin: '1rem' }}>
         <button
-          className="admin-danger-btn"
           onClick={resetMatches}
+          style={{ background: '#b00020', color: 'white', marginRight: '1rem' }}
         >
-          🔥 Reset Fixtures & Results
+          🔥 Reset Tournament
         </button>
 
-        <button
-          className="admin-btn"
-          onClick={() => {
-            if (!window.confirm('Regenerate knockout stage?')) return;
-
-            fetch('/api/knockout/regenerate', { method: 'POST' })
-              .then(res => {
-                if (!res.ok) throw new Error('Failed');
-                return res.json();
-              })
-              .then(() => reloadData())
-              .catch(() => alert('Failed to regenerate knockouts'));
-          }}
-        >
+        <button onClick={regenerateKnockouts}>
           🔄 Regenerate Knockouts
         </button>
       </div>
 
-      {/* MAIN ADMIN DASHBOARD */}
+      {/* Main admin dashboard */}
       <div className="dashboard-wrapper">
-
-        {/* LEFT PANEL – TEAM & FIXTURE MANAGEMENT */}
         <div className="left-panel">
-          <TeamList teams={teams} onDelete={reloadAll} />
+          <TeamList teams={teams} onDelete={reloadData} />
           <AddTeam onAdd={reloadData} />
-
-          <AddFixture
-            leagueId={leagueId}
-            onFixturesUpdated={reloadData}
-          />
+          <AddFixture leagueId={leagueId} onFixturesUpdated={reloadData} />
         </div>
 
-        {/* RIGHT PANEL – TABLES & FIXTURES */}
         <div className="right-panel">
           <LeagueTable league={league} />
 
@@ -113,9 +149,9 @@ export default function AdminView({
         </div>
       </div>
 
-      {/* 🏆 KNOCKOUT STAGE */}
+      {/* Knockouts */}
       <section className="knockout-stage-wrapper">
-        <h2 className="knockout-stage-title">🏆 Knockout Stage (Admin)</h2>
+        <h2 className="knockout-stage-title">🏆 Knockout Stage</h2>
 
         <KnockoutBracket
           matches={knockouts}
@@ -123,7 +159,6 @@ export default function AdminView({
           onResultsUpdated={reloadData}
         />
       </section>
-
     </div>
   );
 }
