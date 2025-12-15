@@ -20,6 +20,14 @@ export default function AdminView({
  
 
 }) {
+     // ✅ LOG GOES HERE
+  console.log('ADMIN VIEW PROPS', {
+    teams,
+    league,
+    fixtures,
+    knockouts
+  });
+
   return (
     <div className="admin-view">
 

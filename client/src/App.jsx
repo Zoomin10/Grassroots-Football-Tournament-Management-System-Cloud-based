@@ -128,7 +128,23 @@ useEffect(() => {
     </div>
 
     {/* 🔀 VIEW SWITCH */}
-    {isAdmin ? <AdminView /> : <PublicView />}
+   {isAdmin ? (
+  <AdminView
+    teams={teams}
+    league={league}
+    fixtures={fixtures}
+    knockouts={knockouts}
+    leagueId={leagueId}
+    setLeagueId={setLeagueId}
+    reloadData={reloadData}
+    reloadAll={reloadAll}
+    resetMatches={resetMatches}
+    handleDeleteFixture={handleDeleteFixture}
+  />
+) : (
+  <PublicView />
+)}
+
 
  {/* Footer */}
     <footer className="sponsor-footer">
@@ -143,7 +159,7 @@ useEffect(() => {
         <img src="/sponsors/mjd.png" alt="mjd" />
       </div>
     </footer>
-    
+
   </div>
 );
 
