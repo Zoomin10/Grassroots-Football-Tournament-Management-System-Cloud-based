@@ -5,6 +5,8 @@ import TeamList from './TeamList';
 import LeagueTable from './LeagueTable';
 import Fixtures from './Fixtures';
 import AddFixture from './AddFixture';
+import KnockoutBracket from './KnockoutBracket';
+
 
 function App() {
   const [teams, setTeams] = useState([]);
@@ -38,28 +40,23 @@ function App() {
     })
     .catch(err => console.error('❌ Fetch league error:', err));
 
-  // ✅ Fetch FIXTURES
+  // ✅ Fetch LEAGUE FIXTURES
   fetch(`/api/matches?leagueId=${leagueId}`)
     .then(res => res.json())
     .then(setFixtures)
     .catch(err => console.error('❌ Fetch fixtures error:', err));
+
+  // 🔥 Fetch KNOCKOUTS (semi-finals + final)
+  Promise.all([
+    fetch('/api/matches?round=semi-final').then(r => r.json()),
+    fetch('/api/matches?round=final').then(r => r.json())
+  ])
+    .then(([semis, finals]) => {
+      setKnockouts([...semis, ...finals]);
+    })
+    .catch(err => console.error('❌ Fetch knockouts error:', err));
 };
 
-// 🏆 Fetch KNOCKOUT fixtures
-fetch(`/api/matches?round=semi-final`, {
-  cache: 'no-store'
-})
-  .then(res => res.json())
-  .then(setKnockouts)
-  .catch(err => console.error('❌ Fetch knockout fixtures error:', err));
-
-  useEffect(() => {
-    reloadData();
-  }, [leagueId, reloadKey]);
-
-  const refreshFixtures = () => {
-    setFixturesKey(prev => prev + 1);
-  };
 
  const handleDeleteFixture = async (id) => {
   console.log('🔥 HANDLE DELETE FIXTURE', id);
@@ -102,6 +99,9 @@ const resetMatches = async () => {
   }
 };
 
+useEffect(() => {
+  reloadData();
+}, [leagueId, reloadKey]);
 
 
   return (
@@ -170,23 +170,26 @@ const resetMatches = async () => {
           />
         </div>
 
-        <div className="right-panel">
-          <LeagueTable league={league} />
-          <Fixtures
-            key={fixturesKey}
-            fixtures={fixtures} 
-            onResultsUpdated={reloadData}
-            onDelete={handleDeleteFixture}
-          />
-         <Fixtures
-          fixtures={knockouts}
-          onResultsUpdated={reloadData}
-          onDelete={handleDeleteFixture}
-          />
+<div className="right-panel">
+  <LeagueTable league={league} />
 
+  <Fixtures
+    key={fixturesKey}
+    fixtures={fixtures}
+    onResultsUpdated={reloadData}
+    onDelete={handleDeleteFixture}
+  />
 
+  <h2>Knockout Stage</h2>
 
-        </div>
+  <KnockoutBracket
+    matches={knockouts}
+    onDelete={handleDeleteFixture}
+    onResultsUpdated={reloadData}
+  />
+</div>
+
+        
       </div>
 
       <footer className="sponsor-footer">

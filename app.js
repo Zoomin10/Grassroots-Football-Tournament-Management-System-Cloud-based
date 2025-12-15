@@ -373,9 +373,11 @@ app.post('/api/knockout/regenerate', async (req, res) => {
 
   try {
     // 1️⃣ Delete existing knockouts
-    await pool.query(
-      `DELETE FROM matches WHERE round = 'semi-final'`
-    );
+   // 🔥 Delete existing knockouts (semis + final)
+await pool.query(
+  `DELETE FROM matches WHERE round IN ('semi-final', 'final')`
+);
+
 
     // 2️⃣ Fetch top 4 from League A
     const leagueA = await pool.query(
@@ -500,6 +502,68 @@ app.post('/api/admin/reset-matches', async (req, res) => {
   } catch (err) {
     console.error('❌ Reset matches error:', err);
     res.status(500).json({ error: 'Failed to reset matches' });
+  }
+});
+// 🏆 Auto-generate final when semis are complete
+app.post('/api/knockout/generate-final', async (req, res) => {
+  try {
+    // 1️⃣ Get played semi-finals
+    const semis = await pool.query(
+      `
+      SELECT *
+      FROM matches
+      WHERE round = 'semi-final'
+        AND played = true
+      ORDER BY id ASC
+      `
+    );
+console.log(
+  '🧪 Semi-finals found:',
+  semis.rows.map(m => ({
+    id: m.id,
+    played: m.played,
+    home_score: m.home_score,
+    away_score: m.away_score
+  }))
+);
+
+    if (semis.rows.length !== 2) {
+      return res.status(400).json({
+        error: 'Both semi-finals must be completed'
+      });
+    }
+
+    // 2️⃣ Check if final already exists
+    const existingFinal = await pool.query(
+      `SELECT id FROM matches WHERE round = 'final' LIMIT 1`
+    );
+
+    if (existingFinal.rows.length > 0) {
+      return res.json({ message: 'Final already exists' });
+    }
+
+    // 3️⃣ Determine winners
+    const winners = semis.rows.map(m => {
+      if (m.home_score > m.away_score) return m.home_team_id;
+      if (m.away_score > m.home_score) return m.away_team_id;
+
+      throw new Error('Draws not allowed in semi-finals');
+    });
+
+    // 4️⃣ Insert final
+    await pool.query(
+      `
+      INSERT INTO matches (home_team_id, away_team_id, round)
+      VALUES ($1, $2, 'final')
+      `,
+      [winners[0], winners[1]]
+    );
+
+    res.json({ message: 'Final generated successfully' });
+
+  } catch (err) {
+    console.error('❌ Generate final error:', err);
+    res.status(500).json({ error: 'Failed to generate final' });
   }
 });
 

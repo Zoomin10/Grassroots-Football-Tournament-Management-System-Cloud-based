@@ -1,0 +1,33 @@
+.knockout-bracket {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.bracket-column {
+  display: flex;
+  justify-content: center;
+}
+
+.bracket-column.left {
+  justify-content: flex-end;
+}
+
+.bracket-column.right {
+  justify-content: flex-start;
+}
+
+.bracket-column.center {
+  justify-content: center;
+}
+
+.final-placeholder {
+  font-size: 20px;
+  font-weight: bold;
+  color: #888;
+  border: 2px dashed #ccc;
+  padding: 20px;
+  border-radius: 8px;
+}
