@@ -51,3 +51,58 @@
 .knockout-title.plate {
   color: #6b7280;
 }
+/* =========================
+   Bracket Grid Layout
+========================= */
+.bracket-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* =========================
+   Arrows
+========================= */
+.flow-arrow {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #9ca3af; /* neutral grey */
+  opacity: 0.7;
+  text-align: center;
+  user-select: none;
+}
+.flow-arrow.to-final {
+  text-align: center;
+}
+
+.flow-arrow.from-final {
+  text-align: center;
+}
+
+.flow-arrow.left {
+    transform: none;
+}
+
+.flow-arrow.right {
+    transform: rotate(180deg);
+}
+
+/* Cup colouring */
+.knockout-section:first-of-type .flow-arrow {
+  color: goldenrod;
+}
+
+/* Plate colouring */
+.knockout-section:last-of-type .flow-arrow {
+  color: silver;
+}
+
+/* =========================
+   Semis / Final alignment
+========================= */
+.semi,
+.final {
+  display: flex;
+  justify-content: center;
+}

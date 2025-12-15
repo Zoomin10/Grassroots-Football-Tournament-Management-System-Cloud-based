@@ -14,15 +14,12 @@ function FixtureCard({ match, onDelete, onResultsUpdated }) {
       })
     })
       .then(() => {
-        // Auto-generate final after semi-finals
         if (match.round === 'semi-final') {
           return fetch('/api/knockout/generate-final', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bracket: match.bracket })
-          }).catch(() => {
-            // Ignore 400 (other semi not finished yet)
-          });
+          }).catch(() => {});
         }
       })
       .finally(() => {
@@ -100,9 +97,9 @@ function KnockoutSection({
     <section className="knockout-section">
       <h3 className="knockout-title">{title}</h3>
 
-      <div className="knockout-bracket">
-        {/* Left Semi */}
-        <div className="bracket-column left">
+      <div className="bracket-grid">
+        {/* LEFT SEMI */}
+        <div className="semi left">
           {hasSemis ? (
             <FixtureCard
               match={semis[0]}
@@ -114,8 +111,11 @@ function KnockoutSection({
           )}
         </div>
 
-        {/* Final */}
-        <div className="bracket-column center">
+        {/* LEFT ARROW */}
+     <div className="flow-arrow left">➜</div>
+
+        {/* FINAL */}
+        <div className="final">
           {finalMatch ? (
             <FixtureCard
               match={finalMatch}
@@ -127,8 +127,13 @@ function KnockoutSection({
           )}
         </div>
 
-        {/* Right Semi */}
-        <div className="bracket-column right">
+        {/* RIGHT ARROW */}
+       
+
+<div className="flow-arrow right">➜</div>
+
+        {/* RIGHT SEMI */}
+        <div className="semi right">
           {hasSemis ? (
             <FixtureCard
               match={semis[1]}
@@ -142,12 +147,16 @@ function KnockoutSection({
       </div>
     </section>
   );
-}
+} // ✅ THIS WAS MISSING
 
 /* =========================
    Main Bracket Component
 ========================= */
-export default function KnockoutBracket({ matches = [], onDelete, onResultsUpdated }) {
+export default function KnockoutBracket({
+  matches = [],
+  onDelete,
+  onResultsUpdated
+}) {
   const cupSemis = matches.filter(
     m => m.round === 'semi-final' && m.bracket === 'cup'
   );
@@ -166,7 +175,6 @@ export default function KnockoutBracket({ matches = [], onDelete, onResultsUpdat
 
   return (
     <div className="knockout-stage">
-
       <KnockoutSection
         title="🏆 Cup Competition"
         semis={cupSemis}
@@ -192,7 +200,6 @@ export default function KnockoutBracket({ matches = [], onDelete, onResultsUpdat
         onDelete={onDelete}
         onResultsUpdated={onResultsUpdated}
       />
-
     </div>
   );
 }
