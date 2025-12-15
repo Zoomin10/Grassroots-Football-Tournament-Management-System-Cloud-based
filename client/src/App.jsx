@@ -104,125 +104,117 @@ useEffect(() => {
 }, [leagueId, reloadKey]);
 
 
-  return (
-    <div className="App">
-      <header className="app-title">
-        <img src="/logos/wroughtonyouthfc.png" alt="Logo" className="title-logo" />
-        <h1>Wroughton Youth FC</h1>
-        <h1>Summer Tournament</h1>
-      </header>
+ return (
+  <div className="App">
+    <header className="app-title">
+      <img src="/logos/wroughtonyouthfc.png" alt="Logo" className="title-logo" />
+      <h1>Wroughton Youth FC</h1>
+      <h1>Summer Tournament</h1>
+    </header>
 
-            <div className="league-selector">
-              <span className="league-label">League:</span>
+    {/* League Selector */}
+    <div className="league-selector">
+      <span className="league-label">League:</span>
 
-              <button
-                className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
-                onClick={() => setLeagueId(1)}
-              >
-                League A
-              </button>
+      <button
+        className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
+        onClick={() => setLeagueId(1)}
+      >
+        League A
+      </button>
 
-              <button
-                className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
-                onClick={() => setLeagueId(2)}
-              >
-                League B
-              </button>
-            </div>
-<h3 className="active-league-title">
-  {leagueId === 1 ? 'League A' : 'League B'}
-</h3>
+      <button
+        className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
+        onClick={() => setLeagueId(2)}
+      >
+        League B
+      </button>
+    </div>
 
-          <div style={{ margin: '1rem 0' }}>
-            <label style={{ fontWeight: 'bold' }}>
-              League:&nbsp;
-              <select
-                value={leagueId}
-                onChange={e => setLeagueId(Number(e.target.value))}
-              >
-                <option value={1}>League A</option>
-                <option value={2}>League B</option>
-              </select>
-            </label>
-          </div>
-<button
-  onClick={resetMatches}
-  style={{
-    background: '#b00020',
-    color: 'white',
-    padding: '8px 12px',
-    marginTop: '1rem',
-    borderRadius: '4px'
-  }}
->
-  🔥 Reset Fixtures & Results (Admin)
-</button>
+    <h3 className="active-league-title">
+      {leagueId === 1 ? 'League A' : 'League B'}
+    </h3>
 
-           
+    {/* Admin Reset */}
+    <button
+      onClick={resetMatches}
+      style={{
+        background: '#b00020',
+        color: 'white',
+        padding: '8px 12px',
+        marginTop: '1rem',
+        borderRadius: '4px'
+      }}
+    >
+      🔥 Reset Fixtures & Results (Admin)
+    </button>
 
-
-      <div className="dashboard-wrapper">
-        <div className="left-panel">
-          <TeamList teams={teams} onDelete={reloadAll} />
-          <AddTeam onAdd={reloadData} />
-          <AddFixture  leagueId={leagueId}
-            onFixturesUpdated={reloadData} 
-          />
-        </div>
-
-<div className="right-panel">
-  <LeagueTable league={league} />
-
-  <Fixtures
-    key={fixturesKey}
-    fixtures={fixtures}
-    onResultsUpdated={reloadData}
-    onDelete={handleDeleteFixture}
-  />
-
-  <h2>Knockout Stage</h2>
-
-  <KnockoutBracket
-    matches={knockouts}
-    onDelete={handleDeleteFixture}
-    onResultsUpdated={reloadData}
-  />
-</div>
-
-        
+    {/* Main Dashboard */}
+    <div className="dashboard-wrapper">
+      <div className="left-panel">
+        <TeamList teams={teams} onDelete={reloadAll} />
+        <AddTeam onAdd={reloadData} />
+        <AddFixture
+          leagueId={leagueId}
+          onFixturesUpdated={reloadData}
+        />
       </div>
 
-      <footer className="sponsor-footer">
-        <h4>This WYFC tournament is proudly sponsored by :</h4>
-        <div className="sponsor-logos">
-          <img src="/sponsors/iew.png" alt="iew" />
-          <img src="/sponsors/southby.png" alt="southby" />
-          <img src="/sponsors/ajwaste.png" alt="ajwaste" />
-          <img src="/sponsors/oceanescape.png" alt="oceanescape" />
-          <img src="/sponsors/headstart.png" alt="headstart" />
-          <img src="/sponsors/holloway.png" alt="holloway" />
-          <img src="/sponsors/mjd.png" alt="mjd" />
-        </div>
-      </footer>
-      <button
-  className="regenerate-btn"
-  onClick={() => {
-    if (!window.confirm('Regenerate knockout stage?')) return;
+      <div className="right-panel">
+        <LeagueTable league={league} />
 
-    fetch('/api/knockout/regenerate', { method: 'POST' })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed');
-        return res.json();
-      })
-      .then(() => reloadData())
-      .catch(err => alert('Failed to regenerate knockouts'));
-  }}
->
-  🔄 Regenerate Knockouts
-</button>
-
+        <Fixtures
+          key={fixturesKey}
+          fixtures={fixtures}
+          onResultsUpdated={reloadData}
+          onDelete={handleDeleteFixture}
+        />
+      </div>
     </div>
-  );
-}
 
-export default App;
+    {/* 🔥 FULL-WIDTH KNOCKOUT STAGE */}
+    <section className="knockout-stage-wrapper">
+      <h2 className="knockout-stage-title">🏆 Knockout Stage</h2>
+
+      <KnockoutBracket
+        matches={knockouts}
+        onDelete={handleDeleteFixture}
+        onResultsUpdated={reloadData}
+      />
+    </section>
+
+    {/* Footer */}
+    <footer className="sponsor-footer">
+      <h4>This WYFC tournament is proudly sponsored by :</h4>
+      <div className="sponsor-logos">
+        <img src="/sponsors/iew.png" alt="iew" />
+        <img src="/sponsors/southby.png" alt="southby" />
+        <img src="/sponsors/ajwaste.png" alt="ajwaste" />
+        <img src="/sponsors/oceanescape.png" alt="oceanescape" />
+        <img src="/sponsors/headstart.png" alt="headstart" />
+        <img src="/sponsors/holloway.png" alt="holloway" />
+        <img src="/sponsors/mjd.png" alt="mjd" />
+      </div>
+    </footer>
+
+    {/* Regenerate Knockouts */}
+    <button
+      className="regenerate-btn"
+      onClick={() => {
+        if (!window.confirm('Regenerate knockout stage?')) return;
+
+        fetch('/api/knockout/regenerate', { method: 'POST' })
+          .then(res => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+          })
+          .then(() => reloadData())
+          .catch(() => alert('Failed to regenerate knockouts'));
+      }}
+    >
+      🔄 Regenerate Knockouts
+    </button>
+  </div>
+);
+}
+export default App; 
