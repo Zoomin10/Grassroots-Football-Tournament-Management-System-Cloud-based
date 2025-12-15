@@ -1,6 +1,13 @@
 import './Fixtures.css';
 
-export default function Fixtures({ fixtures = [], onResultsUpdated, onDelete }) {
+export default function Fixtures({
+  fixtures = [],
+  onResultsUpdated,
+  onDelete,
+  readOnly = false
+}) {
+
+
 
   const handleSubmitResult = (id, homeScore, awayScore) => {
     fetch(`/api/matches/${id}/result`, {
@@ -43,7 +50,10 @@ export default function Fixtures({ fixtures = [], onResultsUpdated, onDelete }) 
               {fx.played ? (
                 <div className="fixture-line fixture-score-centered">
                   {fx.home_score} - {fx.away_score}
-                </div>
+                  </div>
+                  ) : readOnly ? (
+                 <div className="fixture-line fixture-score-centered">TBD</div>
+                
               ) : (
                 <form
                   className="fixture-score-form"

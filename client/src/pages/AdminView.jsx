@@ -5,6 +5,7 @@ import AddTeam from '../AddTeam';
 import Fixtures from '../Fixtures';
 import AddFixture from '../AddFixture';
 import KnockoutBracket from '../KnockoutBracket';
+import { formatLeague } from '../utils/formatLeague';
 
 export default function AdminView({
   teams,

@@ -14,6 +14,8 @@ import AdminView from './pages/AdminView';
 function App() {
   const [teams, setTeams] = useState([]);
   const [fixtures, setFixtures] = useState([]);
+const [fixturesA, setFixturesA] = useState([]);
+const [fixturesB, setFixturesB] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
   const [league, setLeague] = useState([]);
   const [leagueId, setLeagueId] = useState(1);
@@ -30,8 +32,14 @@ function App() {
   // ✅ Fetch TEAMS
   fetch(`/api/teams?leagueId=${leagueId}`)
     .then(res => res.json())
-    .then(setTeams)
+    .then(setFixturesA)
     .catch(err => console.error('❌ Fetch teams error:', err));
+
+// League B fixtures
+fetch('/api/matches?leagueId=2')
+  .then(res => res.json())
+  .then(setFixturesB)
+  .catch(err => console.error('❌ Fetch League B fixtures', err));
 
   // ✅ Fetch LEAGUE TABLE
   fetch(`/api/league?leagueId=${leagueId}`)

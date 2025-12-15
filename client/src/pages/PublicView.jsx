@@ -1,6 +1,6 @@
 // src/pages/PublicView.jsx
 import { useEffect, useState } from 'react';
-
+import { formatLeague } from '../utils/formatLeague';
 import LeagueTable from '../LeagueTable';
 import Fixtures from '../Fixtures';
 import KnockoutBracket from '../KnockoutBracket';
@@ -12,16 +12,22 @@ export default function PublicView() {
   const [leagueB, setLeagueB] = useState([]);
   const [fixtures, setFixtures] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
+  const fixturesA = fixtures.filter(f => f.league_id === 1);
+  const fixturesB = fixtures.filter(f => f.league_id === 2);
+
 
   useEffect(() => {
     // League tables
-    fetch('/api/league?leagueId=1')
-      .then(res => res.json())
-      .then(setLeagueA);
+  fetch('/api/league?leagueId=1')
+  .then(res => res.json())
+  .then(data => setLeagueA(formatLeague(data)))
+  .catch(err => console.error('❌ Fetch League A error:', err));
 
-    fetch('/api/league?leagueId=2')
-      .then(res => res.json())
-      .then(setLeagueB);
+fetch('/api/league?leagueId=2')
+  .then(res => res.json())
+  .then(data => setLeagueB(formatLeague(data)))
+  .catch(err => console.error('❌ Fetch League B error:', err));
+
 
     // League fixtures
     fetch('/api/matches')
@@ -38,33 +44,43 @@ export default function PublicView() {
   }, []);
 
   return (
-    <div className="public-view">
+    <div className="public-dashboard">
 
-      {/* Tables */}
-      <section className="public-tables">
-        <div className="table-column">
-          <h2>League A</h2>
-          <LeagueTable league={leagueA} />
-        </div>
+  {/* LEAGUE A */}
+  <section className="league-section">
+    <h2 className="league-title">League A</h2>
 
-        <div className="table-column">
-          <h2>League B</h2>
-          <LeagueTable league={leagueB} />
-        </div>
-      </section>
+    <LeagueTable league={leagueA} />
 
-      {/* Fixtures */}
-      <section className="public-fixtures">
-        <h2>Fixtures & Results</h2>
-        <Fixtures fixtures={fixtures} />
-      </section>
+    <Fixtures
+      fixtures={fixturesA}
+      readOnly   // optional flag to hide delete/buttons
+    />
+  </section>
 
-      {/* Knockouts */}
-      <section className="public-knockouts">
-        <h2>🏆 Knockout Stage</h2>
-        <KnockoutBracket matches={knockouts} />
-      </section>
+  {/* LEAGUE B */}
+  <section className="league-section">
+    <h2 className="league-title">League B</h2>
 
-    </div>
+    <LeagueTable league={leagueB} />
+
+    <Fixtures
+      fixtures={fixturesB}
+      readOnly
+    />
+  </section>
+
+  {/* KNOCKOUTS */}
+  <section className="knockout-stage-wrapper">
+    <h2>🏆 Knockout Stage</h2>
+
+    <KnockoutBracket
+      matches={knockouts}
+      readOnly
+    />
+  </section>
+
+</div>
+
   );
 }
