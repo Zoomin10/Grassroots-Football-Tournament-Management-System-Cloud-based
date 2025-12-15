@@ -1,0 +1,25 @@
+.public-view {
+  padding: 1rem;
+}
+
+/* League tables */
+.public-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.table-column h2 {
+  text-align: center;
+}
+
+/* Fixtures */
+.public-fixtures {
+  margin-bottom: 3rem;
+}
+
+/* Knockouts */
+.public-knockouts {
+  margin-top: 3rem;
+}

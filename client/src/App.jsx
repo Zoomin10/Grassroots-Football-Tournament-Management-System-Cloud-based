@@ -6,6 +6,9 @@ import LeagueTable from './LeagueTable';
 import Fixtures from './Fixtures';
 import AddFixture from './AddFixture';
 import KnockoutBracket from './KnockoutBracket';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import PublicView from './pages/PublicView';
+import AdminView from './pages/AdminView';
 
 
 function App() {
@@ -16,9 +19,12 @@ function App() {
   const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
   const [fixturesKey, setFixturesKey] = useState(0);
-  
-
+  const [isAdmin, setIsAdmin] = useState(false);
   const reloadAll = () => setReloadKey(prev => prev + 1);
+
+<button onClick={() => setIsAdmin(a => !a)}>
+  {isAdmin ? 'Switch to Public View' : 'Admin Login'}
+</button>
 
   const reloadData = () => {
   // ✅ Fetch TEAMS
@@ -106,84 +112,25 @@ useEffect(() => {
 
  return (
   <div className="App">
+
+    {/* Header always visible */}
     <header className="app-title">
       <img src="/logos/wroughtonyouthfc.png" alt="Logo" className="title-logo" />
       <h1>Wroughton Youth FC</h1>
       <h1>Summer Tournament</h1>
     </header>
 
-    {/* League Selector */}
-    <div className="league-selector">
-      <span className="league-label">League:</span>
-
-      <button
-        className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
-        onClick={() => setLeagueId(1)}
-      >
-        League A
-      </button>
-
-      <button
-        className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
-        onClick={() => setLeagueId(2)}
-      >
-        League B
+    {/* Admin toggle (temporary) */}
+    <div style={{ textAlign: 'center', margin: '1rem' }}>
+      <button onClick={() => setIsAdmin(a => !a)}>
+        {isAdmin ? '👀 Public View' : '🔐 Admin View'}
       </button>
     </div>
 
-    <h3 className="active-league-title">
-      {leagueId === 1 ? 'League A' : 'League B'}
-    </h3>
+    {/* 🔀 VIEW SWITCH */}
+    {isAdmin ? <AdminView /> : <PublicView />}
 
-    {/* Admin Reset */}
-    <button
-      onClick={resetMatches}
-      style={{
-        background: '#b00020',
-        color: 'white',
-        padding: '8px 12px',
-        marginTop: '1rem',
-        borderRadius: '4px'
-      }}
-    >
-      🔥 Reset Fixtures & Results (Admin)
-    </button>
-
-    {/* Main Dashboard */}
-    <div className="dashboard-wrapper">
-      <div className="left-panel">
-        <TeamList teams={teams} onDelete={reloadAll} />
-        <AddTeam onAdd={reloadData} />
-        <AddFixture
-          leagueId={leagueId}
-          onFixturesUpdated={reloadData}
-        />
-      </div>
-
-      <div className="right-panel">
-        <LeagueTable league={league} />
-
-        <Fixtures
-          key={fixturesKey}
-          fixtures={fixtures}
-          onResultsUpdated={reloadData}
-          onDelete={handleDeleteFixture}
-        />
-      </div>
-    </div>
-
-    {/* 🔥 FULL-WIDTH KNOCKOUT STAGE */}
-    <section className="knockout-stage-wrapper">
-      <h2 className="knockout-stage-title">🏆 Knockout Stage</h2>
-
-      <KnockoutBracket
-        matches={knockouts}
-        onDelete={handleDeleteFixture}
-        onResultsUpdated={reloadData}
-      />
-    </section>
-
-    {/* Footer */}
+ {/* Footer */}
     <footer className="sponsor-footer">
       <h4>This WYFC tournament is proudly sponsored by :</h4>
       <div className="sponsor-logos">
@@ -196,25 +143,10 @@ useEffect(() => {
         <img src="/sponsors/mjd.png" alt="mjd" />
       </div>
     </footer>
-
-    {/* Regenerate Knockouts */}
-    <button
-      className="regenerate-btn"
-      onClick={() => {
-        if (!window.confirm('Regenerate knockout stage?')) return;
-
-        fetch('/api/knockout/regenerate', { method: 'POST' })
-          .then(res => {
-            if (!res.ok) throw new Error('Failed');
-            return res.json();
-          })
-          .then(() => reloadData())
-          .catch(() => alert('Failed to regenerate knockouts'));
-      }}
-    >
-      🔄 Regenerate Knockouts
-    </button>
+    
   </div>
 );
+
+
 }
 export default App; 

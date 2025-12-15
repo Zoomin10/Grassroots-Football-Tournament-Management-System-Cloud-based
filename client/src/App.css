@@ -275,3 +275,32 @@ button:hover {
   color: #555;
   font-weight: 600;
 }
+.admin-banner {
+  background: #222;
+  color: #fff;
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.admin-btn {
+  background: #1976d2;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.admin-danger-btn {
+  background: #b00020;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
