@@ -322,3 +322,10 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
+.league-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}

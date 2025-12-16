@@ -125,12 +125,15 @@ const generateFixtures = async (leagueId) => {
       {/* League selector */}
       <div className="league-selector">
         <span className="league-label">League:</span>
+       
         <button
           className={leagueId === 1 ? 'league-btn active' : 'league-btn'}
           onClick={() => setLeagueId(1)}
-        >
+        
+       >
           League A
         </button>
+        
         <button
           className={leagueId === 2 ? 'league-btn active' : 'league-btn'}
           onClick={() => setLeagueId(2)}
@@ -138,12 +141,7 @@ const generateFixtures = async (leagueId) => {
           League B
         </button>
       </div>
-<button
-  onClick={() => generateFixtures(leagueId)}
-  className="admin-button"
->
-  ⚽ Auto-generate League Fixtures
-</button>
+
 
       {/* Admin controls */}
       <div style={{ textAlign: 'center', margin: '1rem' }}>
@@ -162,16 +160,29 @@ const generateFixtures = async (leagueId) => {
       {/* Main admin dashboard */}
       <div className="dashboard-wrapper">
         <div className="left-panel">
+         
           <TeamList teams={teams} onDelete={reloadData} />
           <AddTeam onAdd={reloadData} />
           <AddFixture leagueId={leagueId} onFixturesUpdated={reloadData} />
-        </div>
+                </div>
 
         <div className="right-panel">
-          
-<LeagueTable league={formattedLeague} />
+ <div className="league-actions">
+  <div className="league-actions">
+  <button
+    onClick={() => generateFixtures(leagueId)}
+    className="admin-button"
+  >
+    ⚽ Auto-generate {leagueId === 1 ? "League A" : "League B"} Fixtures
+  </button>
+</div>
+</div>
 
-          <Fixtures
+<LeagueTable league={formattedLeague} />
+         
+
+
+<Fixtures
             fixtures={fixtures}
             onResultsUpdated={reloadData}
             onDelete={handleDeleteFixture}
