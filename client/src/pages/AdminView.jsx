@@ -67,6 +67,26 @@ export default function AdminView() {
       console.error('❌ Delete fixture error:', err);
     }
   };
+const generateFixtures = async (leagueId) => {
+  if (!window.confirm("This will overwrite existing league fixtures. Continue?")) {
+    return;
+  }
+
+  try {
+    await fetch("/api/league/generate-fixtures", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ leagueId }),
+    });
+
+    reloadData();
+  } catch (err) {
+    console.error("Failed to generate fixtures", err);
+  }
+};
+
 
   const resetMatches = async () => {
     if (!window.confirm('⚠️ Delete ALL fixtures & results?')) return;
@@ -118,6 +138,12 @@ export default function AdminView() {
           League B
         </button>
       </div>
+<button
+  onClick={() => generateFixtures(leagueId)}
+  className="admin-button"
+>
+  ⚽ Auto-generate League Fixtures
+</button>
 
       {/* Admin controls */}
       <div style={{ textAlign: 'center', margin: '1rem' }}>

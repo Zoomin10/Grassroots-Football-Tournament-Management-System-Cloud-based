@@ -83,6 +83,57 @@ app.delete('/api/teams/:id', async (req, res) => {
 // ======================================================
 // ==================== MATCHES ==========================
 // ======================================================
+// auto generate round robin fixtures
+app.post("/api/league/generate-fixtures", async (req, res) => {
+  const { leagueId } = req.body;
+
+  try {
+    // Get teams in this league
+    const teamsResult = await pool.query(
+      "SELECT id FROM teams WHERE league_id = $1 ORDER BY id",
+      [leagueId]
+    );
+
+    const teams = teamsResult.rows.map(t => t.id);
+
+    if (teams.length < 2) {
+      return res.status(400).json({ error: "Not enough teams" });
+    }
+
+    // Optional safety: remove existing league fixtures
+    await pool.query(
+      "DELETE FROM matches WHERE league_id = $1 AND round = 'league'",
+      [leagueId]
+    );
+
+    // Generate unique pairs
+    const fixtures = [];
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        fixtures.push([teams[i], teams[j]]);
+      }
+    }
+
+    // Insert fixtures
+    for (const [home, away] of fixtures) {
+      await pool.query(
+        `
+        INSERT INTO matches
+          (home_team_id, away_team_id, league_id, round)
+        VALUES
+          ($1, $2, $3, 'league')
+        `,
+        [home, away, leagueId]
+      );
+    }
+
+    res.json({ success: true, fixturesCreated: fixtures.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to generate fixtures" });
+  }
+});
+
 
 // GET matches (league OR knockout)
 app.get('/api/matches', async (req, res) => {
