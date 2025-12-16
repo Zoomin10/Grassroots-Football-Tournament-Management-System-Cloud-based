@@ -42,27 +42,34 @@ export default function PublicView() {
   }, []);
 
   return (
-    <div className="public-page">
-      <div className="public-dashboard">
+   <div className="public-page">
+  <div className="public-dashboard">
 
-        <section className="league-section">
-          <h2>League A</h2>
-          <LeagueTable league={leagueA} />
-          <Fixtures fixtures={fixturesA} readOnly />
+    <div className="leagues-row">
+      <section className="league-section">
+        <h2>League A</h2>
+         <div className="league-table-wrapper">
+            <LeagueTable league={leagueA} />
+          </div>        
+        <Fixtures fixtures={fixturesA} readOnly />
+        
         </section>
-
-        <section className="league-section">
-          <h2>League B</h2>
-          <LeagueTable league={leagueB} />
-          <Fixtures fixtures={fixturesB} readOnly />
-        </section>
-
-        <section className="knockout-stage-wrapper">
-          <h2>🏆 Knockout Stage</h2>
-          <KnockoutBracket matches={knockouts} readOnly />
-        </section>
-
-      </div>
+       <section className="league-section">   
+        <h2>League B</h2>
+         <div className="league-table-wrapper">
+        <LeagueTable league={leagueB} />
+        </div>
+        <Fixtures fixtures={fixturesB} readOnly />
+      </section>
     </div>
+
+    <section className="knockout-stage-wrapper">
+      <h2>🏆 Knockout Stage 🏆 </h2>
+      <KnockoutBracket matches={knockouts} readOnly />
+    </section>
+
+  </div>
+</div>
+
   );
 }

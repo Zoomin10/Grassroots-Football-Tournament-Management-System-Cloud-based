@@ -125,7 +125,7 @@ useEffect(() => {
       <header className="app-title">
         <img src="/logos/wroughtonyouthfc.png" alt="Logo" className="title-logo" />
         <h1>Wroughton Youth FC</h1>
-        <h1>Summer Tournament</h1>
+        <h1>Summer Tournament - 2026</h1>
       </header>
 
       <Routes>

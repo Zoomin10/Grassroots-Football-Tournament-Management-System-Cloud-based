@@ -7,6 +7,8 @@ import AddFixture from '../AddFixture';
 import LeagueTable from '../LeagueTable';
 import Fixtures from '../Fixtures';
 import KnockoutBracket from '../KnockoutBracket';
+import { formatLeague } from "../utils/formatLeague";
+
 
 import '../App.css'; // reuse existing layout styles
 
@@ -17,6 +19,7 @@ export default function AdminView() {
   const [knockouts, setKnockouts] = useState([]);
   const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
+  const formattedLeague = formatLeague(league);
 
   const reloadData = () => setReloadKey(k => k + 1);
 
@@ -139,7 +142,8 @@ export default function AdminView() {
         </div>
 
         <div className="right-panel">
-          <LeagueTable league={league} />
+          
+<LeagueTable league={formattedLeague} />
 
           <Fixtures
             fixtures={fixtures}

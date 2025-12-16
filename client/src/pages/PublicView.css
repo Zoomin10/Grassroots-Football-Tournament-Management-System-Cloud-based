@@ -40,10 +40,24 @@
 /* League blocks */
 .league-section {
   margin-bottom: 3rem;
+  text-align: center;
+  color: rgb(233, 7, 7);
+  font-size: 30px;
 }
 
 /* Titles */
 .league-title {
   text-align: center;
   margin-bottom: 1rem;
+
 }
+.league-table-wrapper {
+  display: flex;
+  justify-content: center;
+   
+}
+
+.knockout-stage-wrapper {
+   margin-bottom: 20rem;
+ text-align: center;
+  }
