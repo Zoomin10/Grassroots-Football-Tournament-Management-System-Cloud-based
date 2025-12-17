@@ -226,69 +226,47 @@ const handleDeleteTournament = async () => {
   return (
   <div className="App">
 
-    {/* ================= HEADER / CONTROL PANEL ================= */}
+    {/* ================= HEADER ================= */}
     <header className="admin-header">
       <h1>🔐 Admin Control Panel</h1>
+    </header>
 
-      {/* Tournament selector */}
-      <div className="admin-row">
-        <div className="admin-group">
-          <label>Tournament</label>
+    {/* ================= TOURNAMENT CONTROLS ================= */}
+    <div className="admin-card tournament-actions">
 
-          <select
-            value={selectedTournamentId || ""}
-            onChange={e => setSelectedTournamentId(Number(e.target.value))}
-          >
-            <option value="" disabled>Select tournament</option>
-            {tournaments.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.year} – {t.gender} {t.age_group}
-              </option>
-            ))}
-          </select>
+      <div className="admin-group">
+        <label>Select Active Tournament</label>
 
-          <button
-            className="admin-button"
-            onClick={() => setShowNewTournament(true)}
-          >
-            ➕ New Tournament
-          </button>
-        </div>
-      </div>
+        <select
+          value={selectedTournamentId || ""}
+          onChange={e => setSelectedTournamentId(Number(e.target.value))}
+        >
+          <option value="" disabled>Select tournament</option>
+          {tournaments.map(t => (
+            <option key={t.id} value={t.id}>
+              {t.year} – {t.gender} {t.age_group}
+            </option>
+          ))}
+        </select>
 
-      {/* League selector */}
-      <div className="admin-row">
-        <div className="admin-group">
-          <label>League</label>
-
-          <div className="league-toggle">
-            <button
-              className={leagueId === 1 ? "league-btn active" : "league-btn"}
-              onClick={() => setLeagueId(1)}
-            >
-              League A
-            </button>
-
-            <button
-              className={leagueId === 2 ? "league-btn active" : "league-btn"}
-              onClick={() => setLeagueId(2)}
-            >
-              League B
-            </button>
-          </div>
-        </div>
+        <button
+          className="admin-button"
+          onClick={() => setShowNewTournament(true)}
+        >
+          ➕ New Tournament
+        </button>
       </div>
 
       {/* Danger zone */}
-      <div className="admin-row danger-zone">
-        <span className="danger-label">⚠️ Tournament Actions</span>
+      <div className="danger-zone">
+        <span className="danger-label">Tournament actions</span>
 
         <button
           className="admin-button danger"
           onClick={resetTournamentData}
           disabled={!selectedTournamentId}
         >
-          🔥 Reset Tournament Data
+          Reset data
         </button>
 
         <button
@@ -296,15 +274,15 @@ const handleDeleteTournament = async () => {
           onClick={handleDeleteTournament}
           disabled={!selectedTournamentId}
         >
-          🗑️ Delete Tournament
+          Delete tournament
         </button>
       </div>
-    </header>
+    </div>
 
     {/* ================= DASHBOARD ================= */}
     <div className="dashboard-wrapper">
 
-      {/* -------- LEFT PANEL -------- */}
+      {/* -------- LEFT PANEL (Teams) -------- */}
       <div className="left-panel">
         <TeamList
           teams={teams}
@@ -319,33 +297,62 @@ const handleDeleteTournament = async () => {
         />
       </div>
 
-      {/* -------- RIGHT PANEL -------- */}
-      <div className="right-panel">
-        <div className="league-actions">
-          <button
-            className="admin-button"
-            onClick={generateFixtures}
-            disabled={!selectedTournamentId}
-          >
-            ⚽ Auto-generate League Fixtures
-          </button>
-        </div>
+   
+      {/* -------- RIGHT PANEL (League) -------- */}
+<div className="league-column">
 
-        <LeagueTable league={formattedLeague} />
+  {/* League card */}
+  <div className="admin-card">
+    <div className="admin-card-header">
+      <h3>🏆 League</h3>
 
-        <AddFixture
-          leagueId={leagueId}
-          tournamentId={selectedTournamentId}
-          onFixturesUpdated={reloadData}
-        />
+      <div className="league-toggle">
+        <button
+          className={leagueId === 1 ? "league-btn active" : "league-btn"}
+          onClick={() => setLeagueId(1)}
+        >
+          League A
+        </button>
 
-        <Fixtures
-          fixtures={fixtures}
-          onResultsUpdated={reloadData}
-          onDelete={handleDeleteFixture}
-        />
+        <button
+          className={leagueId === 2 ? "league-btn active" : "league-btn"}
+          onClick={() => setLeagueId(2)}
+        >
+          League B
+        </button>
       </div>
     </div>
+
+    <LeagueTable league={formattedLeague} />
+  </div>
+
+  {/* Auto-generate fixtures */}
+  <button
+    className="admin-button"
+    onClick={generateFixtures}
+    disabled={!selectedTournamentId}
+  >
+    ⚽ Auto-generate League Fixtures
+  </button>
+
+  {/* Manual add fixture */}
+  <AddFixture
+    leagueId={leagueId}
+    tournamentId={selectedTournamentId}
+    onFixturesUpdated={reloadData}
+  />
+
+  {/* Fixtures list */}
+  <Fixtures
+    fixtures={fixtures}
+    onResultsUpdated={reloadData}
+    onDelete={handleDeleteFixture}
+  />
+</div>
+</div>
+
+
+
 
     {/* ================= KNOCKOUTS ================= */}
     <section className="knockout-stage-wrapper">

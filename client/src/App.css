@@ -29,7 +29,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  padding-bottom: 1600px;
+  /* padding-bottom: 1600px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,7 +37,7 @@ body {
 
 /* Header */
 .app-title {
-  display: fkex;
+  display: flex;
   color: #007bff;
   background: #fffeff;
   border: 2px solid #ddd;
@@ -70,22 +70,23 @@ border-radius: 8px;
   color: #003366;
   margin: 0;
   text-align: center;
+  margin-bottom: 1rem;
 }
 
 /* Main content layout */
 .dashboard-wrapper {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+   align-items: flex-start; 
+
   width: 100%;
-   max-width: 800px;
-  gap: 40px;
+   max-width: 1200px;
+  gap: 2rem;
 }
 
 /* Left & Right Panels */
 .left-panel {
   flex: 1;
-  max-width: 400px;
+
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -95,7 +96,7 @@ border-radius: 8px;
 
 .right-panel {
   flex: 1;
-   max-width: 400px;
+
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -107,6 +108,14 @@ border-radius: 8px;
     max-width: 100%;
   }
 }
+.league-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;              /* allows vertical growth */
+  min-width: 360px;
+}
+
 /* Headings */
 h2 {
   margin-top: 0;
@@ -241,11 +250,18 @@ button:hover {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+/* Admin Functions */ 
+
 .league-selector {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin: 1rem 0 1.5rem;
+}
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .league-label {
@@ -263,20 +279,14 @@ button:hover {
   transition: all 0.2s ease;
 }
 
-.league-btn:hover {
-  background: #e8e8e8;
-}
 
-.league-btn.active {
-  background: #1f7aec;
-  color: white;
-  border-color: #1f7aec;
-}
+
 .active-league-title {
   margin: 0 0 1rem;
   color: #555;
   font-weight: 600;
 }
+
 .admin-banner {
   background: #222;
   color: #fff;
@@ -285,19 +295,38 @@ button:hover {
   font-weight: bold;
 }
 
+/* Compact rows (league + danger) */
+.admin-row.compact {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+
+}
 .admin-controls {
   display: flex;
   gap: 1rem;
   margin: 1rem 0;
 }
-
+/* Grouping */
+.admin-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 .admin-btn {
   background: #1976d2;
   color: white;
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
+   
 }
+.admin-button {
+  padding: 0.4rem 0.8rem;
+  font-size: 2rem;
+  align-items: center;
+   text-align: center;
+   width: 100%;
+   margin-bottom: 2rem;
 
 .admin-danger-btn {
   background: #b00020;
@@ -305,23 +334,13 @@ button:hover {
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
+  
 }
 .leagues-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   align-items: start;
-}
-
-.league-section {
-  background: #fff;
-}
-
-/* Mobile / small screens */
-@media (max-width: 900px) {
-  .leagues-row {
-    grid-template-columns: 1fr;
-  }
 }
 .league-actions {
   display: flex;
@@ -330,36 +349,9 @@ button:hover {
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
-.admin-button.danger {
-  background: #b00020;
-  color: white;
+.league-section {
+  background: #fff;
 }
-
-.admin-button.danger:hover {
-  background: #d32f2f;
-}
-.admin-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.admin-row {
-  display: flex;
-  justify-content: center;
-  margin: 0.75rem 0;
-}
-
-.admin-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.admin-group label {
-  font-weight: 600;
-  margin-right: 0.25rem;
-}
-
 .league-toggle {
   display: flex;
   gap: 0.5rem;
@@ -371,6 +363,7 @@ button:hover {
   border: 1px solid #ccc;
   background: #f5f5f5;
   cursor: pointer;
+  color: rgb(14, 13, 13);
 }
 
 .league-btn.active {
@@ -379,23 +372,66 @@ button:hover {
   border-color: #1976d2;
 }
 
-/* Danger Zone */
-.danger-zone {
-  border-top: 1px solid #eee;
-  padding-top: 0.75rem;
-  gap: 0.75rem;
+/* Mobile / small screens */
+@media (max-width: 900px) {
+  .leagues-row {
+    grid-template-columns: 1fr;
+  }
 }
-
-.danger-label {
-  font-weight: 600;
-  color: #b00020;
-  margin-right: 0.5rem;
-}
+/* Admin danger button */
 
 .admin-button.danger {
   background: #b00020;
   color: white;
 }
+
+.admin-button.danger:hover {
+  background: #d32f2f;
+}
+.admin-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+    justify-content: space-between;
+  align-items: center;
+}
+
+.admin-row {
+  display: flex;
+  justify-content: center;
+   align-items: flex-start;   /* important */
+  gap: 1.5rem;
+  margin: 0.75rem;
+}
+
+.admin-group {
+  display: flex;
+  align-items: center;
+  
+  gap: 0.75rem;
+}
+
+.admin-group label {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+
+
+
+/* Danger Zone */
+.danger-zone {
+  border-top: 1px solid #eee;
+  padding-top: 0.5rem;
+  gap: 0.5rem;
+}
+
+.danger-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #b00020;
+  margin-right: 0.5rem;
+}
+
 
 .admin-button.danger.outline {
   background: transparent;

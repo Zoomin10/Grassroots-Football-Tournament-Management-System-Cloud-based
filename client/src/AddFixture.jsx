@@ -65,11 +65,11 @@ export default function AddFixture({
   return (
     <div className="add-fixture-form">
       <p className="fixture-league-note">
-        Creating fixture for{" "}
+        Manually Creating Fixture for{" "}
         <strong>{leagueId === 1 ? "League A" : "League B"}</strong>
       </p>
 
-      <h3>Add Fixture</h3>
+      <h3>Manually Add Fixture</h3>
 
       <form onSubmit={handleAddFixture}>
         <select
