@@ -585,6 +585,43 @@ app.post('/api/admin/reset-matches', async (req, res) => {
   }
 });
 
+app.delete("/api/tournaments/:id", async (req, res) => {
+  const tournamentId = req.params.id;
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Matches
+    await client.query(
+      "DELETE FROM matches WHERE tournament_id = $1",
+      [tournamentId]
+    );
+
+    // Teams
+    await client.query(
+      "DELETE FROM teams WHERE tournament_id = $1",
+      [tournamentId]
+    );
+
+    // Tournament
+    await client.query(
+      "DELETE FROM tournaments WHERE id = $1",
+      [tournamentId]
+    );
+
+    await client.query("COMMIT");
+    res.sendStatus(204);
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("❌ Delete tournament error:", err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+
 // ----------------- SERVER START -----------------
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

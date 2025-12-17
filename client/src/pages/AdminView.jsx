@@ -150,18 +150,90 @@ export default function AdminView() {
       console.error("❌ Delete fixture error:", err);
     }
   };
+const resetTournamentData = async () => {
+  if (!selectedTournamentId) return;
+
+  const confirm = window.confirm(
+    "⚠️ This will delete ALL fixtures and results for this tournament.\n\nTeams will be kept.\n\nContinue?"
+  );
+
+  if (!confirm) return;
+
+  try {
+    const res = await fetch("/api/admin/reset-tournament", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tournamentId: selectedTournamentId }),
+    });
+
+    if (!res.ok) throw new Error("Reset failed");
+
+    reloadData();
+  } catch (err) {
+    console.error("❌ Reset tournament error:", err);
+    alert("Failed to reset tournament data");
+  }
+};
+const handleDeleteTournament = async () => {
+  if (!selectedTournamentId) return;
+
+  const tournament = tournaments.find(
+    t => t.id === selectedTournamentId
+  );
+
+  const label = tournament
+    ? `${tournament.year} – ${tournament.gender} ${tournament.age_group}`
+    : "this tournament";
+
+  const firstConfirm = window.confirm(
+    `⚠️ This will PERMANENTLY delete:\n\n${label}\n\nAll teams, fixtures and results will be lost.\n\nContinue?`
+  );
+
+  if (!firstConfirm) return;
+
+  const secondConfirm = window.confirm(
+    "❗ FINAL WARNING ❗\n\nThis action CANNOT be undone.\n\nDelete tournament?"
+  );
+
+  if (!secondConfirm) return;
+
+  try {
+    const res = await fetch(
+      `/api/tournaments/${selectedTournamentId}`,
+      { method: "DELETE" }
+    );
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    // Remove tournament from local state
+    setTournaments(prev =>
+      prev.filter(t => t.id !== selectedTournamentId)
+    );
+
+    // Clear selection
+    setSelectedTournamentId(null);
+
+    reloadData();
+  } catch (err) {
+    console.error("❌ Delete tournament error:", err);
+    alert("Failed to delete tournament");
+  }
+};
 
   /* =========================
      RENDER
   ========================= */
   return (
-    <div className="App">
-      {/* HEADER */}
-      <header className="admin-header">
-        <h1>🔐 Admin Control Panel</h1>
+  <div className="App">
 
-        <div className="tournament-bar">
-          <label>Tournament:</label>
+    {/* ================= HEADER / CONTROL PANEL ================= */}
+    <header className="admin-header">
+      <h1>🔐 Admin Control Panel</h1>
+
+      {/* Tournament selector */}
+      <div className="admin-row">
+        <div className="admin-group">
+          <label>Tournament</label>
 
           <select
             value={selectedTournamentId || ""}
@@ -182,94 +254,110 @@ export default function AdminView() {
             ➕ New Tournament
           </button>
         </div>
-      </header>
+      </div>
 
-      {/* NEW TOURNAMENT MODAL */}
-      {showNewTournament && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Create Tournament</h2>
+      {/* League selector */}
+      <div className="admin-row">
+        <div className="admin-group">
+          <label>League</label>
 
-            <select value={year} onChange={e => setYear(Number(e.target.value))}>
-              {[2026, 2027, 2028, 2029, 2030].map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-
-            <select value={gender} onChange={e => setGender(e.target.value)}>
-              <option value="boys">Boys</option>
-              <option value="girls">Girls</option>
-              <option value="mixed">Mixed</option>
-            </select>
-
-            <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
-              {Array.from({ length: 12 }, (_, i) => `U${i + 7}`).map(u => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
-
-            <div className="modal-actions">
-              <button onClick={createTournament} className="admin-button">
-                Create
-              </button>
-              <button onClick={() => setShowNewTournament(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DASHBOARD */}
-      <div className="dashboard-wrapper">
-        <div className="left-panel">
-          <TeamList teams={teams} onDelete={reloadData} />
-          <AddTeam
-            tournamentId={selectedTournamentId}
-            onAdd={reloadData}
-            disabled={!selectedTournamentId}
-          />
-        </div>
-
-        <div className="right-panel">
-          <div className="league-actions">
+          <div className="league-toggle">
             <button
-              className="admin-button"
-              onClick={generateFixtures}
-              disabled={!selectedTournamentId}
+              className={leagueId === 1 ? "league-btn active" : "league-btn"}
+              onClick={() => setLeagueId(1)}
             >
-              ⚽ Auto-generate League Fixtures
+              League A
+            </button>
+
+            <button
+              className={leagueId === 2 ? "league-btn active" : "league-btn"}
+              onClick={() => setLeagueId(2)}
+            >
+              League B
             </button>
           </div>
-
-          <LeagueTable league={formattedLeague} />
-
-          <AddFixture
-            leagueId={leagueId}
-            tournamentId={selectedTournamentId}
-            onFixturesUpdated={reloadData}
-          />
-
-          <Fixtures
-            fixtures={fixtures}
-            onResultsUpdated={reloadData}
-            onDelete={handleDeleteFixture}
-          />
         </div>
       </div>
 
-      {/* KNOCKOUTS */}
-      <section className="knockout-stage-wrapper">
-        <h2>🏆 Knockout Stage</h2>
+      {/* Danger zone */}
+      <div className="admin-row danger-zone">
+        <span className="danger-label">⚠️ Tournament Actions</span>
 
-        <KnockoutBracket
-          matches={knockouts}
-          onDelete={handleDeleteFixture}
-          onResultsUpdated={reloadData}
+        <button
+          className="admin-button danger"
+          onClick={resetTournamentData}
+          disabled={!selectedTournamentId}
+        >
+          🔥 Reset Tournament Data
+        </button>
+
+        <button
+          className="admin-button danger outline"
+          onClick={handleDeleteTournament}
+          disabled={!selectedTournamentId}
+        >
+          🗑️ Delete Tournament
+        </button>
+      </div>
+    </header>
+
+    {/* ================= DASHBOARD ================= */}
+    <div className="dashboard-wrapper">
+
+      {/* -------- LEFT PANEL -------- */}
+      <div className="left-panel">
+        <TeamList
+          teams={teams}
+          onDelete={reloadData}
         />
-      </section>
-    </div>
-  );
-}
 
-  
+        <AddTeam
+          tournamentId={selectedTournamentId}
+          leagueId={leagueId}
+          onAdd={reloadData}
+          disabled={!selectedTournamentId}
+        />
+      </div>
+
+      {/* -------- RIGHT PANEL -------- */}
+      <div className="right-panel">
+        <div className="league-actions">
+          <button
+            className="admin-button"
+            onClick={generateFixtures}
+            disabled={!selectedTournamentId}
+          >
+            ⚽ Auto-generate League Fixtures
+          </button>
+        </div>
+
+        <LeagueTable league={formattedLeague} />
+
+        <AddFixture
+          leagueId={leagueId}
+          tournamentId={selectedTournamentId}
+          onFixturesUpdated={reloadData}
+        />
+
+        <Fixtures
+          fixtures={fixtures}
+          onResultsUpdated={reloadData}
+          onDelete={handleDeleteFixture}
+        />
+      </div>
+    </div>
+
+    {/* ================= KNOCKOUTS ================= */}
+    <section className="knockout-stage-wrapper">
+      <h2 className="knockout-stage-title">🏆 Knockout Stage</h2>
+
+      <KnockoutBracket
+        matches={knockouts}
+        onDelete={handleDeleteFixture}
+        onResultsUpdated={reloadData}
+      />
+    </section>
+
+  </div>
+);
+}
