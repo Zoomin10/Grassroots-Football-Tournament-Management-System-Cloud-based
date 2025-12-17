@@ -234,50 +234,51 @@ const handleDeleteTournament = async () => {
     {/* ================= TOURNAMENT CONTROLS ================= */}
     <div className="admin-card tournament-actions">
 
-      <div className="admin-group">
-        <label>Select Active Tournament</label>
+  <div className="admin-group">
+    <label>Select Active Tournament</label>
 
-        <select
-          value={selectedTournamentId || ""}
-          onChange={e => setSelectedTournamentId(Number(e.target.value))}
-        >
-          <option value="" disabled>Select tournament</option>
-          {tournaments.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.year} – {t.gender} {t.age_group}
-            </option>
-          ))}
-        </select>
+    <select
+      value={selectedTournamentId || ""}
+      onChange={e => setSelectedTournamentId(Number(e.target.value))}
+    >
+      <option value="" disabled>Select tournament</option>
+      {tournaments.map(t => (
+        <option key={t.id} value={t.id}>
+          {t.year} – {t.gender} {t.age_group}
+        </option>
+      ))}
+    </select>
+  </div>
 
-        <button
-          className="admin-button"
-          onClick={() => setShowNewTournament(true)}
-        >
-          ➕ New Tournament
-        </button>
-      </div>
+  {/* Tournament action buttons */}
+  <div className="tournament-actions-buttons">
+    <button
+      className="admin-button primary"
+      onClick={() => setShowNewTournament(true)}
+    >
+      ➕ Create new tournament
+    </button>
 
-      {/* Danger zone */}
-      <div className="danger-zone">
-        <span className="danger-label">Tournament actions</span>
+    <button
+      className="admin-button warning"
+      onClick={resetTournamentData}
+      disabled={!selectedTournamentId}
+    >
+      ⚠️ Reset data
+    </button>
 
-        <button
-          className="admin-button danger"
-          onClick={resetTournamentData}
-          disabled={!selectedTournamentId}
-        >
-          Reset data
-        </button>
+    <button
+      className="admin-button danger"
+      onClick={handleDeleteTournament}
+      disabled={!selectedTournamentId}
+    >
+      🗑️  Delete tournament 
+    </button>
+  </div>
 
-        <button
-          className="admin-button danger outline"
-          onClick={handleDeleteTournament}
-          disabled={!selectedTournamentId}
-        >
-          Delete tournament
-        </button>
-      </div>
-    </div>
+</div>
+
+        
 
     {/* ================= DASHBOARD ================= */}
     <div className="dashboard-wrapper">
