@@ -6,16 +6,23 @@ import Fixtures from '../Fixtures';
 import KnockoutBracket from '../KnockoutBracket';
 import './PublicView.css';
 
+
+
 export default function PublicView() {
   const [leagueA, setLeagueA] = useState([]);
   const [leagueB, setLeagueB] = useState([]);
   const [fixtures, setFixtures] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
-
+  const [tournament, setTournament] = useState(null);
   const fixturesA = fixtures.filter(f => f.league_id === 1);
   const fixturesB = fixtures.filter(f => f.league_id === 2);
 
   useEffect(() => {
+    fetch("/api/tournaments/active")
+    .then(res => res.json())
+    .then(data => setTournament(data))
+    .catch(err => console.error("Failed to load tournament", err));
+
     fetch('/api/league?leagueId=1')
       .then(res => res.json())
       .then(data => setLeagueA(formatLeague(data)))
@@ -42,8 +49,20 @@ export default function PublicView() {
   }, []);
 
   return (
+  
    <div className="public-page">
   <div className="public-dashboard">
+{tournament ? (
+  <h2 className="tournament-title">
+    {tournament.year} –{" "}
+    {tournament.gender.charAt(0).toUpperCase() + tournament.gender.slice(1)}{" "}
+    {tournament.age_group}
+  </h2>
+) : (
+  <h2 className="tournament-title">Loading tournament…</h2>
+)}
+
+
 
     <div className="leagues-row">
       <section className="league-section">

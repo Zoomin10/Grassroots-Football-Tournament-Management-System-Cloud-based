@@ -61,3 +61,8 @@
    margin-bottom: 20rem;
  text-align: center;
   }
+
+  .tournament-title {
+    text-align: center;
+    color: #007bff;
+  }

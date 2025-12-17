@@ -24,23 +24,102 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ======================================================
+
+// Get active tournament (latest created for now)
+app.get("/api/tournaments/active", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM tournaments
+      ORDER BY created_at DESC
+      LIMIT 1
+      `
+    );
+
+    if (result.rows.length === 0) {
+      return res.json(null);
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch active tournament" });
+  }
+});
+
 // ===================== TEAMS ===========================
 // ======================================================
-
-// GET all teams (optionally filtered by league)
-app.get('/api/teams', async (req, res) => {
-  const { leagueId } = req.query;
+app.get("/api/teams", async (req, res) => {
+  const { leagueId, tournamentId } = req.query;
 
   try {
-    const result = leagueId
-      ? await pool.query('SELECT * FROM teams WHERE league_id = $1', [leagueId])
-      : await pool.query('SELECT * FROM teams');
+    let query = `
+      SELECT *
+      FROM teams
+      WHERE league_id = $1
+      AND tournament_id = $2
+    `;
+    const params = [leagueId];
+
+    if (tournamentId) {
+      query += " AND tournament_id = $2";
+      params.push(tournamentId);
+    }
+
+    query += " ORDER BY team";
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Fetch teams error:", err);
+    res.status(500).json({ error: "Failed to fetch teams" });
+  }
+});
+
+// GET all teams (optionally filtered by league)
+app.post("/api/teams", async (req, res) => {
+  const { team, leagueId, tournamentId } = req.body;
+
+  if (!tournamentId) {
+    return res.status(400).json({ error: "tournamentId is required" });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      INSERT INTO teams (team, league_id, tournament_id)
+      VALUES ($1, $2, $3)
+      RETURNING *
+      `,
+      [team, leagueId, tournamentId]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Add team error:", err);
+    res.status(500).json({ error: "Failed to add team" });
+  }
+});
+
+
+
+
+// Get all tournaments
+app.get("/api/tournaments", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM tournaments
+      ORDER BY created_at DESC
+      `
+    );
 
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ Fetch teams error:', err);
-    res.status(500).json({ error: 'Failed to fetch teams' });
+    console.error("❌ Fetch tournaments error:", err);
+    res.status(500).json({ error: "Failed to fetch tournaments" });
   }
 });
 
@@ -70,28 +149,71 @@ app.post('/api/teams', async (req, res) => {
 });
 
 // DELETE team
-app.delete('/api/teams/:id', async (req, res) => {
+app.delete("/api/teams/:id", async (req, res) => {
+  const teamId = req.params.id;
+
   try {
-    await pool.query('DELETE FROM teams WHERE id = $1', [req.params.id]);
+    // Delete matches where this team is home or away
+    await pool.query(
+      `
+      DELETE FROM matches
+      WHERE home_team_id = $1
+         OR away_team_id = $1
+      `,
+      [teamId]
+    );
+
+    // Delete the team itself
+    await pool.query(
+      "DELETE FROM teams WHERE id = $1",
+      [teamId]
+    );
+
     res.sendStatus(204);
   } catch (err) {
-    console.error('❌ Delete team error:', err);
-    res.status(500).json({ error: 'Delete failed' });
+    console.error("❌ Delete team error:", err);
+    res.status(500).json({ error: "Delete failed" });
   }
 });
 
-// ======================================================
+
+// Create Tournament
+app.post("/api/tournaments", async (req, res) => {
+  const { year, gender, ageGroup } = req.body;
+
+  try {
+    const result = await pool.query(
+      `
+      INSERT INTO tournaments (year, gender, age_group)
+      VALUES ($1, $2, $3)
+      RETURNING *
+      `,
+      [year, gender, ageGroup]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create tournament" });
+  }
+});
+
 // ==================== MATCHES ==========================
 // ======================================================
 // auto generate round robin fixtures
-app.post("/api/league/generate-fixtures", async (req, res) => {
-  const { leagueId } = req.body;
+ app.post("/api/league/generate-fixtures", async (req, res) => {
+  const { leagueId, tournamentId } = req.body;
 
   try {
-    // Get teams in this league
     const teamsResult = await pool.query(
-      "SELECT id FROM teams WHERE league_id = $1 ORDER BY id",
-      [leagueId]
+      `
+      SELECT id
+      FROM teams
+      WHERE league_id = $1
+        AND tournament_id = $2
+      ORDER BY id
+      `,
+      [leagueId, tournamentId]
     );
 
     const teams = teamsResult.rows.map(t => t.id);
@@ -100,63 +222,54 @@ app.post("/api/league/generate-fixtures", async (req, res) => {
       return res.status(400).json({ error: "Not enough teams" });
     }
 
-    // Optional safety: remove existing league fixtures
+    // Remove existing fixtures for this league + tournament
     await pool.query(
-      "DELETE FROM matches WHERE league_id = $1 AND round = 'league'",
-      [leagueId]
+      `
+      DELETE FROM matches
+      WHERE league_id = $1
+        AND tournament_id = $2
+        AND round = 'league'
+      `,
+      [leagueId, tournamentId]
     );
 
-    // Generate unique pairs
-    const fixtures = [];
+    // Generate round-robin fixtures
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
-        fixtures.push([teams[i], teams[j]]);
+        await pool.query(
+          `
+          INSERT INTO matches
+            (home_team_id, away_team_id, league_id, tournament_id, round)
+          VALUES
+            ($1, $2, $3, $4, 'league')
+          `,
+          [teams[i], teams[j], leagueId, tournamentId]
+        );
       }
     }
 
-    // Insert fixtures
-    for (const [home, away] of fixtures) {
-      await pool.query(
-        `
-        INSERT INTO matches
-          (home_team_id, away_team_id, league_id, round)
-        VALUES
-          ($1, $2, $3, 'league')
-        `,
-        [home, away, leagueId]
-      );
-    }
-
-    res.json({ success: true, fixturesCreated: fixtures.length });
+    res.json({ success: true, fixturesCreated: (teams.length * (teams.length - 1)) / 2 });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Generate fixtures error:", err);
     res.status(500).json({ error: "Failed to generate fixtures" });
   }
 });
 
 
 // GET matches (league OR knockout)
-app.get('/api/matches', async (req, res) => {
-  const { leagueId, round } = req.query;
+app.get("/api/matches", async (req, res) => {
+  const { leagueId, tournamentId, round } = req.query;
 
   try {
     let query = `
-      SELECT
-        m.id,
-        m.league_id,
-        m.round,
-        m.bracket,
-        m.played,
-        m.home_score,
-        m.away_score,
-        t1.team AS home_team,
-        t2.team AS away_team
+      SELECT m.*, 
+             ht.team AS home_team,
+             at.team AS away_team
       FROM matches m
-      JOIN teams t1 ON t1.id = m.home_team_id
-      JOIN teams t2 ON t2.id = m.away_team_id
+      JOIN teams ht ON m.home_team_id = ht.id
+      JOIN teams at ON m.away_team_id = at.id
       WHERE 1=1
     `;
-
     const params = [];
 
     if (leagueId) {
@@ -164,21 +277,26 @@ app.get('/api/matches', async (req, res) => {
       query += ` AND m.league_id = $${params.length}`;
     }
 
+    if (tournamentId) {
+      params.push(tournamentId);
+      query += ` AND m.tournament_id = $${params.length}`;
+    }
+
     if (round) {
       params.push(round);
       query += ` AND m.round = $${params.length}`;
     }
 
-    query += ' ORDER BY m.id ASC';
+    query += " ORDER BY m.id";
 
     const result = await pool.query(query, params);
-    res.set('Cache-Control', 'no-store');
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ Fetch matches error:', err);
-    res.status(500).json({ error: 'Failed to fetch matches' });
+    console.error("❌ Fetch matches error:", err);
+    res.status(500).json({ error: "Failed to fetch matches" });
   }
 });
+
 
 // POST league fixture
 app.post('/api/matches', async (req, res) => {
@@ -204,10 +322,10 @@ app.post('/api/matches', async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO matches (home_team_id, away_team_id, league_id, round)
-      VALUES ($1, $2, $3, 'league')
+      INSERT INTO matches (home_team_id, away_team_id, league_id, tournament_id, round)
+      VALUES ($1, $2, $3, $4, 'league')
       `,
-      [home_team_id, away_team_id, leagueId]
+      [home_team_id, away_team_id, leagueId, tournament_id, round]
     );
 
     res.sendStatus(201);
