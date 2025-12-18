@@ -8,7 +8,8 @@ import Fixtures from "../Fixtures";
 import KnockoutBracket from "../KnockoutBracket";
 import { formatLeague } from "../utils/formatLeague";
 
-import "../App.css";
+import "../styles/admin.css";
+
 
 export default function AdminView() {
   /* =========================

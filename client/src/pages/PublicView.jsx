@@ -4,7 +4,7 @@ import { formatLeague } from '../utils/formatLeague';
 import LeagueTable from '../LeagueTable';
 import Fixtures from '../Fixtures';
 import KnockoutBracket from '../KnockoutBracket';
-import './PublicView.css';
+import '../styles/public.css';
 
 
 
@@ -49,46 +49,50 @@ export default function PublicView() {
   }, []);
 
   return (
-  
-   <div className="public-page">
-  <div className="public-dashboard">
-{tournament ? (
-  <h2 className="tournament-title">
-    {tournament.year} –{" "}
-    {tournament.gender.charAt(0).toUpperCase() + tournament.gender.slice(1)}{" "}
-    {tournament.age_group}
-  </h2>
-) : (
-  <h2 className="tournament-title">Loading tournament…</h2>
-)}
+  <div className="public-view">
+    <div className="public-container">
+      <div className="public-page">
+        <div className="public-dashboard">
+
+          {tournament ? (
+            <h2 className="tournament-title">
+              {tournament.year} –{" "}
+              {tournament.gender.charAt(0).toUpperCase() +
+                tournament.gender.slice(1)}{" "}
+              {tournament.age_group}
+            </h2>
+          ) : (
+            <h2 className="tournament-title">Loading tournament…</h2>
+          )}
+
+         <div className="public-leagues">
+            <section className="league-section">
+              <h2>League A</h2>
+              <div className="league-table-wrapper">
+                <LeagueTable league={leagueA} />
+              </div>
+              <Fixtures fixtures={fixturesA} readOnly />
+            </section>
+
+            <section className="league-section">
+              <h2>League B</h2>
+              <div className="league-table-wrapper">
+                <LeagueTable league={leagueB} />
+              </div>
+              <Fixtures fixtures={fixturesB} readOnly />
+            </section>
+          </div>
+
+     <section className="knockout-stage-wrapper">
+      <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+ 
+  <KnockoutBracket matches={knockouts} readOnly />
+</section>
 
 
-
-    <div className="leagues-row">
-      <section className="league-section">
-        <h2>League A</h2>
-         <div className="league-table-wrapper">
-            <LeagueTable league={leagueA} />
-          </div>        
-        <Fixtures fixtures={fixturesA} readOnly />
-        
-        </section>
-       <section className="league-section">   
-        <h2>League B</h2>
-         <div className="league-table-wrapper">
-        <LeagueTable league={leagueB} />
         </div>
-        <Fixtures fixtures={fixturesB} readOnly />
-      </section>
+      </div>
     </div>
-
-    <section className="knockout-stage-wrapper">
-      <h2>🏆 Knockout Stage 🏆 </h2>
-      <KnockoutBracket matches={knockouts} readOnly />
-    </section>
-
   </div>
-</div>
-
-  );
+);
 }

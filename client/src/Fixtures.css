@@ -1,98 +1,99 @@
+/* Fixtures container */
 .fixtures-container {
   display: flex;
   flex-direction: column;
-   max-width: 480px;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
+
+.fixtures-container h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Fixture list */
+.fixture-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Fixture card */
 .fixture-card {
-  background-color: #fff;
-  padding: 10px 14px; /* Reduced padding */
-  margin-bottom: 10px; /* Less vertical spacing */
-  border-radius: 6px; /* Slightly tighter corners */
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  font-size: 12px; /* Smaller text */
+  width: 100%;
+  max-width: 420px;
+
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 2px solid rgb(105, 115, 255);
+
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 14px;
 }
+
 .fixture-card:hover {
   transform: scale(1.01);
 }
 
-.fixture-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.teams {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-.fixture-delete {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #999;
-  cursor: pointer;
-  margin-left: 1rem;
-  align-self: flex-start;
-}
-
-.fixture-delete:hover {
-  color: red;
-}
-
-
-
-.score-line {
-  margin-top: 0.5rem;
-  font-size: 12px;
-  color: #333;
-}
-.fixtures-container {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-.fixture-card {
-  border: 2px solid rgb(105, 115, 255) !important;
-  width: 90%;
-  max-width: 500px;
-  margin: auto;
-  font-size: 14px;
-}
-.fixture-list {
-  display: flex;
-  list-style-type: none;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 0;
-  margin: 0;
-}
-
+/* Inner content */
 .fixture-content {
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+}
+
+/* Teams row */
+.fixture-teams-balanced {
+  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 8px;
+  width: 100%;
 }
 
-.fixture-line {
-  margin-bottom: 4px 0;
-  font-size: 16px;
-  color: #333;
+.fixture-team.home {
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.fixture-teams-centered,
+.fixture-team.away {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vs {
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Score / status */
 .fixture-score-centered {
   text-align: center;
   font-weight: bold;
   color: red;
 }
 
+/* Score form (admin mode) */
 .fixture-score-form {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 6px;
-  font-size: 16px;
 }
 
 .fixture-score-form input {
@@ -107,54 +108,19 @@
   cursor: pointer;
 }
 
+/* Delete button */
 .delete-btn {
-  align-self: flex-end;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
   background: none;
   border: none;
   color: #888;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 6px;
-  pointer-events: auto;
 }
+
 .delete-btn:hover {
   color: red;
-}
-
-  color: red;
-}
-.vs-text {
-  margin: 0 0.5rem;
-}
-.fixture-teams-balanced {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.fixture-team.home {
-  flex: 1;
-  text-align: right;
-   font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.fixture-team.away {
-  flex: 1;
-  text-align: left;
-   font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.vs {
-  font-weight: bold;
-  color: #333;
-  min-width: 30px;
-  text-align: center;
 }

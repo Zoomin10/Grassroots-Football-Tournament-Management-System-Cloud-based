@@ -1,0 +1,130 @@
+/* App layout */
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.tournament-title {
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+.public-view {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.league-section > h2 {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.league-section .fixtures {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.league-section .fixture-card {
+  max-width: 420px;
+  width: 100%;
+}
+
+.public-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  padding-bottom: 160px; /* space for sponsor footer */
+}
+.league-table-wrapper {
+  display: flex;
+  justify-content: center;
+}
+.league-table-wrapper > * {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* League table */
+.league-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.league-table th,
+.league-table td {
+  padding: 8px;
+  text-align: center;
+}
+
+.league-table th {
+  background-color: #003366;
+  color: white;
+}
+.public-leagues {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 0 auto;          /* centers the grid */
+  align-items: start;
+}
+
+.league-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.knockout-stage-wrapper {
+  background-color: #f2f2f2;
+    display: flex;
+  flex-direction: column;   /* 👈 key */
+  align-items: center;      /* 👈 key */
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+  background-color: #f2f2f2;
+}
+
+
+  
+.knockout-container {
+  background-color: #f2f2f2;
+    width: 100%;
+  max-width: 1200px;
+  padding: 1.5rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.knockout-title {
+    width: 100%;
+  display: block;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Sponsor footer */
+.sponsor-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #f6f6f6;
+  padding: 10px 0;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  z-index: 999;
+}
+
+.sponsor-logos {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  flex-wrap: wrap;
+}
+
+.sponsor-logos img {
+  height: 80px;
+}
+@media (max-width: 900px) {
+  .public-leagues {
+    grid-template-columns: 1fr;
+  }
+}
