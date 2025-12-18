@@ -3,7 +3,7 @@ import './KnockoutBracket.css';
 /* =========================
    Reusable Fixture Card
 ========================= */
-function FixtureCard({ match, onDelete, onResultsUpdated }) {
+function FixtureCard({ match, onDelete, onResultsUpdated, readOnly }) {
   const submitResult = (home, away) => {
     fetch(`/api/matches/${match.id}/result`, {
       method: 'POST',
@@ -32,14 +32,17 @@ function FixtureCard({ match, onDelete, onResultsUpdated }) {
   return (
     <div className="fixture-card">
       <div className="fixture-line">
-        <strong>{match.home_team}</strong> vs <strong>{match.away_team}</strong>
+        <strong>{match.home_team}</strong> vs{' '}
+        <strong>{match.away_team}</strong>
       </div>
 
-      {match.played ? (
+      {match.played && (
         <div className="fixture-score">
           {match.home_score} – {match.away_score}
         </div>
-      ) : (
+      )}
+
+      {!match.played && !readOnly && (
         <form
           className="fixture-score-form"
           onSubmit={e => {
@@ -54,7 +57,11 @@ function FixtureCard({ match, onDelete, onResultsUpdated }) {
         </form>
       )}
 
-      {onDelete && (
+      {!match.played && readOnly && (
+        <div className="fixture-score">TBD</div>
+      )}
+
+      {!readOnly && typeof onDelete === 'function' && (
         <button
           type="button"
           className="fixture-delete-btn"
@@ -89,13 +96,14 @@ function KnockoutSection({
   finalMatch,
   placeholders,
   onDelete,
-  onResultsUpdated
+  onResultsUpdated,
+  readOnly
 }) {
   const hasSemis = semis.length === 2;
 
   return (
     <section className="knockout-section">
-      <h3 className="knockout-title">{title}</h3>
+      {title && <h3 className="knockout-title">{title}</h3>}
 
       <div className="bracket-grid">
         {/* LEFT SEMI */}
@@ -105,6 +113,7 @@ function KnockoutSection({
               match={semis[0]}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
+              readOnly={readOnly}
             />
           ) : (
             <PlaceholderCard label={placeholders[0]} />
@@ -112,7 +121,7 @@ function KnockoutSection({
         </div>
 
         {/* LEFT ARROW */}
-     <div className="flow-arrow left">➜</div>
+        <div className="flow-arrow left">➜</div>
 
         {/* FINAL */}
         <div className="final">
@@ -121,6 +130,7 @@ function KnockoutSection({
               match={finalMatch}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
+              readOnly={readOnly}
             />
           ) : (
             <PlaceholderCard label={placeholders[2]} />
@@ -128,9 +138,7 @@ function KnockoutSection({
         </div>
 
         {/* RIGHT ARROW */}
-       
-
-<div className="flow-arrow right">➜</div>
+        <div className="flow-arrow right">➜</div>
 
         {/* RIGHT SEMI */}
         <div className="semi right">
@@ -139,6 +147,7 @@ function KnockoutSection({
               match={semis[1]}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
+              readOnly={readOnly}
             />
           ) : (
             <PlaceholderCard label={placeholders[1]} />
@@ -147,7 +156,7 @@ function KnockoutSection({
       </div>
     </section>
   );
-} // ✅ THIS WAS MISSING
+}
 
 /* =========================
    Main Bracket Component
@@ -155,7 +164,8 @@ function KnockoutSection({
 export default function KnockoutBracket({
   matches = [],
   onDelete,
-  onResultsUpdated
+  onResultsUpdated,
+  readOnly = false
 }) {
   const cupSemis = matches.filter(
     m => m.round === 'semi-final' && m.bracket === 'cup'
@@ -186,10 +196,17 @@ export default function KnockoutBracket({
         ]}
         onDelete={onDelete}
         onResultsUpdated={onResultsUpdated}
+        readOnly={readOnly}
       />
 
+      {/* Divider between Cup and Plate */}
+      <div className="knockout-divider">
+        <span className="divider-line" />
+        <span className="divider-label">🥈 Plate Competition</span>
+        <span className="divider-line" />
+      </div>
+
       <KnockoutSection
-        title="🥈 Plate Competition"
         semis={plateSemis}
         finalMatch={plateFinal}
         placeholders={[
@@ -199,6 +216,7 @@ export default function KnockoutBracket({
         ]}
         onDelete={onDelete}
         onResultsUpdated={onResultsUpdated}
+        readOnly={readOnly}
       />
     </div>
   );

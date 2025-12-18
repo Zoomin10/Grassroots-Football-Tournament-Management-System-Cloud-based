@@ -85,9 +85,10 @@ export default function PublicView() {
 
      <section className="knockout-stage-wrapper">
       <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
- 
+ </section>
+
+
   <KnockoutBracket matches={knockouts} readOnly />
-</section>
 
 
         </div>

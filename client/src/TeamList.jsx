@@ -1,19 +1,7 @@
 import './TeamList.css';
+import { getLogoSrc } from './utils/getLogoSrc';
 
-function TeamList({ teams = [], onDelete }) {
-
-  const getLogoSrc = (teamName) => {
-    if (!teamName || typeof teamName !== 'string') {
-      return '/logos/default.png';
-    }
-
-    const safeName = teamName
-      .toLowerCase()
-      .replace(/\s+/g, '')
-      .replace(/[^a-z0-9]/g, '');
-
-    return `/logos/${safeName}.png`;
-  };
+function TeamList({ teams = [], onDelete, readOnly = false }) {
 
   const handleDelete = async (teamId) => {
     try {
@@ -26,8 +14,6 @@ function TeamList({ teams = [], onDelete }) {
       console.error('❌ Delete team error:', err);
     }
   };
-// console.log('TeamList first team:', teams[0]);
-
 
   return (
     <div className="team-list">
@@ -41,19 +27,23 @@ function TeamList({ teams = [], onDelete }) {
             <img
               src={getLogoSrc(teamName)}
               alt={teamName}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/logos/default.png';
-              }}
               className="team-logo"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = '/logos/default.png';
+              }}
             />
+
             <span className="team-name">{teamName}</span>
-            <button
-              className="delete-btn"
-              onClick={() => handleDelete(team.id)}
-            >
-              🗑️
-            </button>
+
+            {!readOnly && typeof onDelete === 'function' && (
+              <button
+                className="delete-btn"
+                onClick={() => handleDelete(team.id)}
+              >
+                🗑️
+              </button>
+            )}
           </div>
         );
       })}
@@ -62,4 +52,3 @@ function TeamList({ teams = [], onDelete }) {
 }
 
 export default TeamList;
-

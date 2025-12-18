@@ -31,7 +31,7 @@
   width: 100%;
   max-width: 1200px;
   padding: 20px;
-  padding-bottom: 160px; /* space for sponsor footer */
+  padding-bottom: 250px; /* space for sponsor footer */
 }
 .league-table-wrapper {
   display: flex;
@@ -78,6 +78,7 @@
   flex-direction: column;   /* 👈 key */
   align-items: center;      /* 👈 key */
   margin-top: 2.5rem;
+  margin-bottom: 3rem;
   padding-top: 2rem;
   border-top: 1px solid #eee;
   background-color: #f2f2f2;
@@ -100,6 +101,7 @@
   text-align: center;
   margin: 0 0 1.5rem 0;
 }
+
 
 /* Sponsor footer */
 .sponsor-footer {
