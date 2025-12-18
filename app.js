@@ -51,31 +51,30 @@ app.get("/api/tournaments/active", async (req, res) => {
 // ===================== TEAMS ===========================
 // ======================================================
 app.get("/api/teams", async (req, res) => {
-  const { leagueId, tournamentId } = req.query;
-
   try {
-    let query = `
-      SELECT *
+    const { tournamentId, leagueId } = req.query;
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        team,
+        league_id,
+        tournament_id
       FROM teams
-      WHERE league_id = $1
-      AND tournament_id = $2
-    `;
-    const params = [leagueId];
+      WHERE tournament_id = $1
+      ORDER BY team ASC
+      `,
+      [Number(tournamentId)]
+    );
 
-    if (tournamentId) {
-      query += " AND tournament_id = $2";
-      params.push(tournamentId);
-    }
-
-    query += " ORDER BY team";
-
-    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
     console.error("❌ Fetch teams error:", err);
     res.status(500).json({ error: "Failed to fetch teams" });
   }
 });
+
 
 // GET all teams (optionally filtered by league)
 app.post("/api/teams", async (req, res) => {
@@ -124,29 +123,32 @@ app.get("/api/tournaments", async (req, res) => {
 });
 
 // POST add team
-app.post('/api/teams', async (req, res) => {
-  const { team, logo, leagueId } = req.body;
-
-  if (!team || !leagueId) {
-    return res.status(400).json({ error: 'Team name and leagueId required' });
-  }
-
+app.post("/api/teams", async (req, res) => {
   try {
+    const { team, leagueId, tournamentId } = req.body;
+
+    console.log("POST /api/teams body:", req.body);
+
+    if (!team || !leagueId || !tournamentId) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const result = await pool.query(
       `
-      INSERT INTO teams (team, logo, league_id)
+      INSERT INTO teams (team, league_id, tournament_id)
       VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [team, logo || null, leagueId]
+      [team, Number(leagueId), Number(tournamentId)]
     );
 
-    res.status(201).json(result.rows[0]);
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('❌ Insert team error:', err);
-    res.status(500).json({ error: 'Failed to add team' });
+    console.error("❌ Add team backend error:", err);
+    res.status(500).json({ error: "Failed to add team" });
   }
 });
+
 
 // DELETE team
 app.delete("/api/teams/:id", async (req, res) => {
@@ -179,24 +181,31 @@ app.delete("/api/teams/:id", async (req, res) => {
 
 // Create Tournament
 app.post("/api/tournaments", async (req, res) => {
-  const { year, gender, ageGroup } = req.body;
-
   try {
+    const { year, gender, ageGroup } = req.body;
+
+    console.log("POST /api/tournaments body:", req.body);
+
+    if (!year || !gender || !ageGroup) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const result = await pool.query(
       `
       INSERT INTO tournaments (year, gender, age_group)
       VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [year, gender, ageGroup]
+      [Number(year), gender, ageGroup]
     );
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create tournament" });
+    console.error("❌ Create tournament backend error:", err);
+    res.status(500).json({ error: "Create tournament failed" });
   }
 });
+
 
 // ==================== MATCHES ==========================
 // ======================================================

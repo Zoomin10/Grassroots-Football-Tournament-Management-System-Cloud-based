@@ -8,8 +8,7 @@ import Fixtures from "../Fixtures";
 import KnockoutBracket from "../KnockoutBracket";
 import { formatLeague } from "../utils/formatLeague";
 
-import "../styles/admin.css";
-
+import "../App.css";
 
 export default function AdminView() {
   /* =========================
@@ -26,13 +25,13 @@ export default function AdminView() {
   const [leagueId, setLeagueId] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
 
-  const [showNewTournament, setShowNewTournament] = useState(false);
-  const [year, setYear] = useState(2026);
-  const [gender, setGender] = useState("boys");
-  const [ageGroup, setAgeGroup] = useState("U7");
-
   const reloadData = () => setReloadKey(k => k + 1);
   const formattedLeague = formatLeague(league);
+  const [showNewTournament, setShowNewTournament] = useState(false);
+const [year, setYear] = useState(new Date().getFullYear());
+const [gender, setGender] = useState("boys");
+const [ageGroup, setAgeGroup] = useState("U7");
+
 
   /* =========================
      LOAD TOURNAMENTS
@@ -50,49 +49,59 @@ export default function AdminView() {
   }, []);
 
   /* =========================
-     LOAD TOURNAMENT DATA
+     LOAD ALL TEAMS (BOTH LEAGUES)
+  ========================= */
+  
+  useEffect(() => {
+  if (!selectedTournamentId) {
+    setTeams([]);
+    return;
+  }
+
+  fetch(`/api/teams?tournamentId=${selectedTournamentId}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("🧪 Teams from /api/teams:", data);
+      setTeams(data);
+    })
+    .catch(err => console.error("❌ Fetch teams error:", err));
+
+}, [selectedTournamentId, reloadKey]);
+
+
+  
+
+
+
+  /* =========================
+     LOAD LEAGUE DATA
   ========================= */
   useEffect(() => {
     if (!selectedTournamentId) {
-      setTeams([]);
       setLeague([]);
       setFixtures([]);
       setKnockouts([]);
       return;
     }
 
-    // Teams
-    fetch(
-      `/api/teams?leagueId=${leagueId}&tournamentId=${selectedTournamentId}`
-    )
-      .then(res => res.json())
-      .then(setTeams)
-      .catch(err => console.error("❌ Fetch teams error:", err));
-
     // League table
-    fetch(
-      `/api/league?leagueId=${leagueId}&tournamentId=${selectedTournamentId}`
-    )
+    fetch(`/api/league?leagueId=${leagueId}&tournamentId=${selectedTournamentId}`)
       .then(res => res.json())
       .then(setLeague)
       .catch(err => console.error("❌ Fetch league error:", err));
 
     // League fixtures
-    fetch(
-      `/api/matches?leagueId=${leagueId}&tournamentId=${selectedTournamentId}`
-    )
+    fetch(`/api/matches?leagueId=${leagueId}&tournamentId=${selectedTournamentId}`)
       .then(res => res.json())
       .then(setFixtures)
       .catch(err => console.error("❌ Fetch fixtures error:", err));
 
     // Knockouts
     Promise.all([
-      fetch(
-        `/api/matches?round=semi-final&tournamentId=${selectedTournamentId}`
-      ).then(r => r.json()),
-      fetch(
-        `/api/matches?round=final&tournamentId=${selectedTournamentId}`
-      ).then(r => r.json())
+      fetch(`/api/matches?round=semi-final&tournamentId=${selectedTournamentId}`)
+        .then(r => r.json()),
+      fetch(`/api/matches?round=final&tournamentId=${selectedTournamentId}`)
+        .then(r => r.json())
     ])
       .then(([semis, finals]) => setKnockouts([...semis, ...finals]))
       .catch(err => console.error("❌ Fetch knockouts error:", err));
@@ -102,271 +111,258 @@ export default function AdminView() {
   /* =========================
      ACTIONS
   ========================= */
+  const resetTournamentData = async () => {
+    if (!selectedTournamentId) return;
+
+    if (!window.confirm("⚠️ Reset all fixtures & results?")) return;
+
+    await fetch("/api/admin/reset-tournament", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tournamentId: selectedTournamentId })
+    });
+
+    reloadData();
+  };
+
   const createTournament = async () => {
-    try {
-      const res = await fetch("/api/tournaments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year, gender, ageGroup }),
-      });
+  try {
+    const res = await fetch("/api/tournaments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ year, gender, ageGroup }),
+    });
 
-      if (!res.ok) throw new Error("Create tournament failed");
+    if (!res.ok) throw new Error("Create tournament failed");
 
-      const tournament = await res.json();
-      setTournaments(prev => [...prev, tournament]);
-      setSelectedTournamentId(tournament.id);
-      setShowNewTournament(false);
-      reloadData();
-    } catch (err) {
-      console.error("❌ Create tournament error:", err);
-    }
+    const tournament = await res.json();
+    setTournaments(prev => [...prev, tournament]);
+    setSelectedTournamentId(tournament.id);
+    setShowNewTournament(false);
+  } catch (err) {
+    console.error("❌ Create tournament error:", err);
+  }
+};
+
+  const handleDeleteTournament = async () => {
+    if (!selectedTournamentId) return;
+
+    if (!window.confirm("❗ DELETE tournament permanently?")) return;
+
+    await fetch(`/api/tournaments/${selectedTournamentId}`, { method: "DELETE" });
+
+    setSelectedTournamentId(null);
+    reloadData();
   };
 
   const generateFixtures = async () => {
-    if (!window.confirm("Auto-generate fixtures for this league?")) return;
+    if (!window.confirm("Generate fixtures for this league?")) return;
 
-    try {
-      const res = await fetch("/api/league/generate-fixtures", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leagueId,
-          tournamentId: selectedTournamentId
-        }),
-      });
+    await fetch("/api/league/generate-fixtures", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        leagueId,
+        tournamentId: selectedTournamentId
+      })
+    });
 
-      if (!res.ok) throw new Error("Generate fixtures failed");
-      reloadData();
-    } catch (err) {
-      console.error("❌ Generate fixtures error:", err);
-    }
+    reloadData();
   };
 
   const handleDeleteFixture = async (id) => {
-    try {
-      const res = await fetch(`/api/matches/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
-      reloadData();
-    } catch (err) {
-      console.error("❌ Delete fixture error:", err);
-    }
+    await fetch(`/api/matches/${id}`, { method: "DELETE" });
+    reloadData();
   };
-const resetTournamentData = async () => {
-  if (!selectedTournamentId) return;
-
-  const confirm = window.confirm(
-    "⚠️ This will delete ALL fixtures and results for this tournament.\n\nTeams will be kept.\n\nContinue?"
-  );
-
-  if (!confirm) return;
-
-  try {
-    const res = await fetch("/api/admin/reset-tournament", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tournamentId: selectedTournamentId }),
-    });
-
-    if (!res.ok) throw new Error("Reset failed");
-
-    reloadData();
-  } catch (err) {
-    console.error("❌ Reset tournament error:", err);
-    alert("Failed to reset tournament data");
-  }
-};
-const handleDeleteTournament = async () => {
-  if (!selectedTournamentId) return;
-
-  const tournament = tournaments.find(
-    t => t.id === selectedTournamentId
-  );
-
-  const label = tournament
-    ? `${tournament.year} – ${tournament.gender} ${tournament.age_group}`
-    : "this tournament";
-
-  const firstConfirm = window.confirm(
-    `⚠️ This will PERMANENTLY delete:\n\n${label}\n\nAll teams, fixtures and results will be lost.\n\nContinue?`
-  );
-
-  if (!firstConfirm) return;
-
-  const secondConfirm = window.confirm(
-    "❗ FINAL WARNING ❗\n\nThis action CANNOT be undone.\n\nDelete tournament?"
-  );
-
-  if (!secondConfirm) return;
-
-  try {
-    const res = await fetch(
-      `/api/tournaments/${selectedTournamentId}`,
-      { method: "DELETE" }
-    );
-
-    if (!res.ok) throw new Error("Delete failed");
-
-    // Remove tournament from local state
-    setTournaments(prev =>
-      prev.filter(t => t.id !== selectedTournamentId)
-    );
-
-    // Clear selection
-    setSelectedTournamentId(null);
-
-    reloadData();
-  } catch (err) {
-    console.error("❌ Delete tournament error:", err);
-    alert("Failed to delete tournament");
-  }
-};
 
   /* =========================
      RENDER
   ========================= */
   return (
-  <div className="App">
+    <div className="App">
 
-    {/* ================= HEADER ================= */}
-    <header className="admin-header">
-      <h1>🔐 Admin Control Panel</h1>
-    </header>
+      <header className="admin-header">
+        <h1>🔐 Admin Control Panel</h1>
+      </header>
 
-    {/* ================= TOURNAMENT CONTROLS ================= */}
-    <div className="admin-card tournament-actions">
+      {/* Tournament controls */}
+      <div className="tournament-actions">
+        <label>Select Active Tournament</label>
 
-  <div className="admin-group">
-    <label>Select Active Tournament</label>
-
-    <select
-      value={selectedTournamentId || ""}
-      onChange={e => setSelectedTournamentId(Number(e.target.value))}
-    >
-      <option value="" disabled>Select tournament</option>
-      {tournaments.map(t => (
-        <option key={t.id} value={t.id}>
-          {t.year} – {t.gender} {t.age_group}
-        </option>
-      ))}
-    </select>
-  </div>
-
-  {/* Tournament action buttons */}
-  <div className="tournament-actions-buttons">
-    <button
-      className="admin-button primary"
-      onClick={() => setShowNewTournament(true)}
-    >
-      ➕ Create new tournament
-    </button>
-
-    <button
-      className="admin-button warning"
-      onClick={resetTournamentData}
-      disabled={!selectedTournamentId}
-    >
-      ⚠️ Reset data
-    </button>
-
-    <button
-      className="admin-button danger"
-      onClick={handleDeleteTournament}
-      disabled={!selectedTournamentId}
-    >
-      🗑️  Delete tournament 
-    </button>
-  </div>
-
-</div>
-
-        
-
-    {/* ================= DASHBOARD ================= */}
-    <div className="dashboard-wrapper">
-
-      {/* -------- LEFT PANEL (Teams) -------- */}
-      <div className="left-panel">
-        <TeamList
-          teams={teams}
-          onDelete={reloadData}
-        />
-
-        <AddTeam
-          tournamentId={selectedTournamentId}
-          leagueId={leagueId}
-          onAdd={reloadData}
-          disabled={!selectedTournamentId}
-        />
-      </div>
-
-   
-      {/* -------- RIGHT PANEL (League) -------- */}
-<div className="league-column">
-
-  {/* League card */}
-  <div className="admin-card">
-    <div className="admin-card-header">
-      <h3>🏆 League</h3>
-
-      <div className="league-toggle">
-        <button
-          className={leagueId === 1 ? "league-btn active" : "league-btn"}
-          onClick={() => setLeagueId(1)}
+        <select
+          value={selectedTournamentId || ""}
+          onChange={e => setSelectedTournamentId(Number(e.target.value))}
         >
-          League A
-        </button>
+          <option value="" disabled>Select tournament</option>
+          {tournaments.map(t => (
+            <option key={t.id} value={t.id}>
+              {t.year} – {t.gender} {t.age_group}
+            </option>
+          ))}
+        </select>
 
-        <button
-          className={leagueId === 2 ? "league-btn active" : "league-btn"}
-          onClick={() => setLeagueId(2)}
-        >
-          League B
-        </button>
-      </div>
+        <div className="tournament-actions-buttons">
+          <button
+  className="admin-button primary"
+  onClick={() => setShowNewTournament(true)}
+>
+  ➕ Create new tournament
+</button>
+
+{showNewTournament && (
+  <div className="admin-card new-tournament-form">
+
+    <h3>Create New Tournament</h3>
+
+    <div className="admin-group">
+      <label>Year</label>
+      <input
+        type="number"
+        value={year}
+        onChange={e => setYear(Number(e.target.value))}
+      />
     </div>
 
-    <LeagueTable league={formattedLeague} />
+    <div className="admin-group">
+      <label>Gender</label>
+      <select
+        value={gender}
+        onChange={e => setGender(e.target.value)}
+      >
+        <option value="boys">Boys</option>
+        <option value="girls">Girls</option>
+        <option value="mixed">Mixed</option>
+      </select>
+    </div>
+
+    <div className="admin-group">
+      <label>Age Group</label>
+      <select
+        value={ageGroup}
+        onChange={e => setAgeGroup(e.target.value)}
+      >
+        <option value="U7">U7</option>
+        <option value="U8">U8</option>
+        <option value="U9">U9</option>
+        <option value="U10">U10</option>
+        <option value="U11">U11</option>
+        <option value="U12">U12</option>
+      </select>
+    </div>
+
+    <div className="admin-actions">
+      <button
+        className="admin-button primary"
+        onClick={createTournament}
+      >
+        ✅ Create Tournament
+      </button>
+
+      <button
+        className="admin-button outline"
+        onClick={() => setShowNewTournament(false)}
+      >
+        Cancel
+      </button>
+    </div>
+
   </div>
+)}
 
-  {/* Auto-generate fixtures */}
-  <button
-    className="admin-button"
-    onClick={generateFixtures}
-    disabled={!selectedTournamentId}
-  >
-    ⚽ Auto-generate League Fixtures
-  </button>
+          <button
+            className="admin-button warning"
+            onClick={resetTournamentData}
+            disabled={!selectedTournamentId}
+          >
+            ⚠️ Reset data
+          </button>
 
-  {/* Manual add fixture */}
-  <AddFixture
-    leagueId={leagueId}
-    tournamentId={selectedTournamentId}
-    onFixturesUpdated={reloadData}
-  />
+          <button
+            className="admin-button danger"
+            onClick={handleDeleteTournament}
+            disabled={!selectedTournamentId}
+          >
+            🗑️ Delete tournament
+          </button>
+        </div>
+      </div>
 
-  {/* Fixtures list */}
-  <Fixtures
-    fixtures={fixtures}
-    onResultsUpdated={reloadData}
-    onDelete={handleDeleteFixture}
-  />
-</div>
-</div>
+      {/* Dashboard */}
+      <div className="dashboard-wrapper">
 
+        {/* Teams */}
+        <div className="left-panel">
+          <TeamList
+            teams={teams}
+            onDelete={reloadData}
+          />
 
+          <AddTeam
+            tournamentId={selectedTournamentId}
+            onAdd={reloadData}
+            disabled={!selectedTournamentId}
+          />
+        </div>
 
+        {/* League */}
+        <div className="league-column">
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h3>🏆 League</h3>
 
-    {/* ================= KNOCKOUTS ================= */}
-    <section className="knockout-stage-wrapper">
-      <h2 className="knockout-stage-title">🏆 Knockout Stage</h2>
+              <div className="league-toggle">
+                <button
+                  className={leagueId === 1 ? "league-btn active" : "league-btn"}
+                  onClick={() => setLeagueId(1)}
+                >
+                  League A
+                </button>
 
-      <KnockoutBracket
-        matches={knockouts}
-        onDelete={handleDeleteFixture}
-        onResultsUpdated={reloadData}
-      />
-    </section>
+                <button
+                  className={leagueId === 2 ? "league-btn active" : "league-btn"}
+                  onClick={() => setLeagueId(2)}
+                >
+                  League B
+                </button>
+              </div>
+            </div>
 
-  </div>
-);
+            <LeagueTable league={formattedLeague} />
+          </div>
+
+          <button
+            className="admin-button"
+            onClick={generateFixtures}
+            disabled={!selectedTournamentId}
+          >
+            ⚽ Auto-generate League Fixtures
+          </button>
+
+          <AddFixture
+            leagueId={leagueId}
+            tournamentId={selectedTournamentId}
+            onFixturesUpdated={reloadData}
+          />
+
+          <Fixtures
+            fixtures={fixtures}
+            onResultsUpdated={reloadData}
+            onDelete={handleDeleteFixture}
+          />
+        </div>
+      </div>
+
+      {/* Knockouts */}
+      <section className="knockout-stage-wrapper">
+        <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+
+        <KnockoutBracket
+          matches={knockouts}
+          onDelete={handleDeleteFixture}
+          onResultsUpdated={reloadData}
+        />
+      </section>
+
+    </div>
+  );
 }

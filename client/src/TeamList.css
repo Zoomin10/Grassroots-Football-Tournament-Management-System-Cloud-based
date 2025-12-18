@@ -21,13 +21,14 @@
   font-weight: 500;
 }
 
+/* ✅ TeamList-specific delete button */
 .team-delete {
   background: none;
   border: none;
   color: #999;
   font-size: 1rem;
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: auto;
 }
 
 .team-delete:hover {
