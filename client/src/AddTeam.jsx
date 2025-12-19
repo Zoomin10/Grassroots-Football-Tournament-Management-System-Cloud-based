@@ -3,53 +3,39 @@ import "./AddTeam.css";
 
 export default function AddTeam({
   tournamentId,
+  leagues = [],
   onAdd,
-  disabled = false
+  disabled
 }) {
   const [team, setTeam] = useState("");
-  const [leagueId, setLeagueId] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [leagueId, setLeagueId] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!tournamentId || !team.trim()) return;
-
-    const payload = {
-      team: team.trim(),
-      leagueId,
-      tournamentId
-    };
-
-    console.log("ADD TEAM payload:", payload);
+    if (!team || !leagueId || !tournamentId) return;
 
     try {
-      setLoading(true);
-
       const res = await fetch("/api/teams", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          team,
+          leagueId,        // ← real DB id
+          tournamentId
+        })
       });
 
       if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || "Failed to add team");
+        const err = await res.json();
+        throw new Error(err.error || "Failed to add team");
       }
 
       setTeam("");
-      setLeagueId(1);
-
-      if (typeof onAdd === "function") {
-        onAdd();
-      }
+      setLeagueId("");
+      onAdd?.();
     } catch (err) {
       console.error("❌ Add team error:", err);
-      alert("Failed to add team");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -61,25 +47,30 @@ export default function AddTeam({
         type="text"
         placeholder="Team name"
         value={team}
-        onChange={(e) => setTeam(e.target.value)}
-        disabled={disabled || loading}
+        onChange={e => setTeam(e.target.value)}
+        disabled={disabled}
         required
       />
 
       <select
         value={leagueId}
-        onChange={(e) => setLeagueId(Number(e.target.value))}
-        disabled={disabled || loading}
+        onChange={e => setLeagueId(Number(e.target.value))}
+        disabled={disabled || leagues.length === 0}
+        required
       >
-        <option value={1}>League A</option>
-        <option value={2}>League B</option>
+        <option value="">Select league</option>
+        {leagues.map(l => (
+          <option key={l.id} value={l.id}>
+            {l.name}
+          </option>
+        ))}
       </select>
 
       <button
         type="submit"
-        disabled={disabled || loading || !tournamentId}
+        disabled={disabled || !leagueId}
       >
-        {loading ? "Adding…" : "➕ Add Team"}
+        ➕ Add Team
       </button>
     </form>
   );

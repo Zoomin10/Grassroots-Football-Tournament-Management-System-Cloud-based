@@ -53,7 +53,7 @@ app.get("/api/tournaments/active", async (req, res) => {
 app.get("/api/teams", async (req, res) => {
   try {
     const { tournamentId, leagueId } = req.query;
-
+console.log("🧪 GET /api/teams tournamentId:", tournamentId);
     const result = await pool.query(
       `
       SELECT
@@ -63,11 +63,11 @@ app.get("/api/teams", async (req, res) => {
         tournament_id
       FROM teams
       WHERE tournament_id = $1
-      ORDER BY team ASC
+      ORDER BY LOWER (team) ASC
       `,
       [Number(tournamentId)]
     );
-
+console.log("🧪 GET /api/teams tournamentId:", tournamentId);
     res.json(result.rows);
   } catch (err) {
     console.error("❌ Fetch teams error:", err);
@@ -76,30 +76,6 @@ app.get("/api/teams", async (req, res) => {
 });
 
 
-// GET all teams (optionally filtered by league)
-app.post("/api/teams", async (req, res) => {
-  const { team, leagueId, tournamentId } = req.body;
-
-  if (!tournamentId) {
-    return res.status(400).json({ error: "tournamentId is required" });
-  }
-
-  try {
-    const result = await pool.query(
-      `
-      INSERT INTO teams (team, league_id, tournament_id)
-      VALUES ($1, $2, $3)
-      RETURNING *
-      `,
-      [team, leagueId, tournamentId]
-    );
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error("❌ Add team error:", err);
-    res.status(500).json({ error: "Failed to add team" });
-  }
-});
 
 
 
@@ -180,29 +156,37 @@ app.delete("/api/teams/:id", async (req, res) => {
 
 
 // Create Tournament
-app.post("/api/tournaments", async (req, res) => {
+app.post('/api/tournaments', async (req, res) => {
+  const { year, gender, ageGroup } = req.body;
+
   try {
-    const { year, gender, ageGroup } = req.body;
-
-    console.log("POST /api/tournaments body:", req.body);
-
-    if (!year || !gender || !ageGroup) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const result = await pool.query(
+    // 1️⃣ Create tournament
+    const tournamentResult = await pool.query(
       `
       INSERT INTO tournaments (year, gender, age_group)
       VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [Number(year), gender, ageGroup]
+      [year, gender, ageGroup]
     );
 
-    res.json(result.rows[0]);
+    const tournament = tournamentResult.rows[0];
+
+    // 2️⃣ Create leagues for this tournament
+    await pool.query(
+      `
+      INSERT INTO leagues (name, tournament_id)
+      VALUES
+        ('League A', $1),
+        ('League B', $1)
+      `,
+      [tournament.id]
+    );
+
+    res.json(tournament);
   } catch (err) {
-    console.error("❌ Create tournament backend error:", err);
-    res.status(500).json({ error: "Create tournament failed" });
+    console.error('❌ Create tournament backend error:', err);
+    res.status(500).json({ error: 'Failed to create tournament' });
   }
 });
 
@@ -390,89 +374,96 @@ app.delete('/api/matches/:id', async (req, res) => {
 // ================== LEAGUE TABLE =======================
 // ======================================================
 
-app.get('/api/league', async (req, res) => {
-  const leagueId = Number(req.query.leagueId);
+// api/leagues //
+app.get('/api/leagues', async (req, res) => {
+  const tournamentId = Number(req.query.tournamentId);
 
-  if (!leagueId) {
-    return res.status(400).json({ error: 'leagueId required' });
+  if (!tournamentId) {
+    return res.status(400).json({ error: 'tournamentId required' });
   }
 
   try {
     const result = await pool.query(
       `
-      SELECT
-  t.id,
-  t.team,
-  COUNT(m.id) AS played,
+      SELECT id, name
+      FROM leagues
+      WHERE tournament_id = $1
+      ORDER BY name ASC
+      `,
+      [tournamentId]
+    );
 
-  COALESCE(SUM(
-    CASE
-      WHEN t.id = m.home_team_id THEN m.home_score
-      ELSE m.away_score
-    END
-  ), 0) AS goals_for,
+    res.json(result.rows);
+  } catch (err) {
+    console.error('❌ Fetch leagues error:', err);
+    res.status(500).json({ error: 'Failed to fetch leagues' });
+  }
+});
 
-  COALESCE(SUM(
-    CASE
-      WHEN t.id = m.home_team_id THEN m.away_score
-      ELSE m.home_score
-    END
-  ), 0) AS goals_against,
+// league //
+app.get('/api/league', async (req, res) => {
+  const leagueId = Number(req.query.leagueId);
+  const tournamentId = Number(req.query.tournamentId);
 
-  COALESCE(SUM(
-    CASE
-      WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-      WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-      WHEN m.home_score = m.away_score THEN 1
-      ELSE 0
-    END
-  ), 0) AS points
+  if (!leagueId || !tournamentId) {
+    return res.status(400).json({
+      error: 'leagueId and tournamentId are required'
+    });
+  }
 
-FROM teams t
-LEFT JOIN matches m
-  ON t.id IN (m.home_team_id, m.away_team_id)
-  AND m.league_id = $1
-  AND m.round = 'league'
-  AND m.played = true
+  try {
+    const result = await pool.query(
+      `
+ SELECT *
+FROM (
+  SELECT
+    t.id,
+    t.team,
 
-WHERE t.league_id = $1
-GROUP BY t.id, t.team
+    COUNT(m.id) AS played,
 
-ORDER BY
-  COALESCE(SUM(
-    CASE
-      WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
-      WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
-      WHEN m.home_score = m.away_score THEN 1
-      ELSE 0
-    END
-  ), 0) DESC,
-
-  (
     COALESCE(SUM(
       CASE
         WHEN t.id = m.home_team_id THEN m.home_score
         ELSE m.away_score
       END
-    ), 0)
-    -
+    ), 0) AS goals_for,
+
     COALESCE(SUM(
       CASE
         WHEN t.id = m.home_team_id THEN m.away_score
         ELSE m.home_score
       END
-    ), 0)
-  ) DESC,
+    ), 0) AS goals_against,
 
-  COALESCE(SUM(
-    CASE
-      WHEN t.id = m.home_team_id THEN m.home_score
-      ELSE m.away_score
-    END
-  ), 0) DESC;
+    COALESCE(SUM(
+      CASE
+        WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 3
+        WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 3
+        WHEN m.home_score = m.away_score THEN 1
+        ELSE 0
+      END
+    ), 0) AS points
 
+  FROM teams t
+  JOIN leagues l ON t.league_id = l.id
+  LEFT JOIN matches m
+    ON t.id IN (m.home_team_id, m.away_team_id)
+    AND m.league_id = l.id
+    AND m.round = 'league'
+    AND m.played = true
+
+  WHERE l.id = $1
+    AND l.tournament_id = $2
+
+  GROUP BY t.id, t.team
+) league_table
+ORDER BY
+  points DESC,
+  (goals_for - goals_against) DESC,
+  goals_for DESC;
       `,
-      [leagueId]
+      [leagueId, tournamentId]
     );
 
     res.json(result.rows);
@@ -481,6 +472,7 @@ ORDER BY
     res.status(500).json({ error: 'Failed to fetch league' });
   }
 });
+
 
 // ======================================================
 // ================== KNOCKOUTS ==========================
