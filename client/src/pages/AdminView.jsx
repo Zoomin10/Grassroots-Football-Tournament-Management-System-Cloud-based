@@ -22,6 +22,7 @@ export default function AdminView() {
 
   const [teams, setTeams] = useState([]);
   const [league, setLeague] = useState([]);
+
   const [fixtures, setFixtures] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
 
@@ -315,12 +316,12 @@ export default function AdminView() {
       <div className="dashboard-wrapper">
         <div className="left-panel">
           <TeamList teams={teams} onDelete={reloadData} />
-          <AddTeam
-            tournamentId={selectedTournamentId}
-            leagues={leagues}
-            onAdd={reloadData}
-            disabled={!selectedTournamentId}
-          />
+         <AddTeam
+         tournamentId={selectedTournamentId}
+         leagues={leagues}
+         onAdd={reloadData}
+         disabled={!selectedTournamentId}
+        />
         </div>
 
         <div className="league-column">

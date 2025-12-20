@@ -41,7 +41,7 @@ export default function TeamList({
 
   return (
     <div className="team-list">
-      <h2>Teams</h2>
+      <h2>Registered Teams</h2>
 
       {sortedTeams.length === 0 && (
         <p className="empty-state">No teams added yet</p>
