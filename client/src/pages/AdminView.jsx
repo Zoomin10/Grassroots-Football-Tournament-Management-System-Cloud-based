@@ -224,7 +224,7 @@ export default function AdminView() {
   if (!selectedTournamentId) return;
 
   try {
-    const res = await fetch("/api/matches/generate-knockouts", {
+    const res = await fetch("/api/knockout/regenerate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -241,6 +241,29 @@ export default function AdminView() {
   } catch (err) {
     console.error(err);
     alert("Could not generate knockout stages");
+  }
+};
+const generateFinal = async (bracket) => {
+  if (!selectedTournamentId) return;
+
+  try {
+    const res = await fetch("/api/knockout/generate-final", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tournamentId: selectedTournamentId,
+        bracket
+      })
+    });
+
+    if (!res.ok) {
+      // Not fatal — often means semis not ready yet
+      return;
+    }
+
+    setReloadKey(prev => prev + 1);
+  } catch (err) {
+    console.error(`❌ Generate ${bracket} final error:`, err);
   }
 };
 
@@ -369,9 +392,13 @@ export default function AdminView() {
   </div>
 
   <KnockoutBracket
-    matches={knockouts}
-    onDelete={handleDeleteFixture}
-    onResultsUpdated={reloadData}
+      matches={knockouts}
+  onDelete={handleDeleteFixture}
+  onResultsUpdated={() => {
+    reloadData();
+    generateFinal("cup");
+    generateFinal("plate");
+  }}
   />
 </section>
 
