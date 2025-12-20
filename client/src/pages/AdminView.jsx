@@ -220,97 +220,85 @@ export default function AdminView() {
     }
   };
 
+  const generateKnockouts = async () => {
+  if (!selectedTournamentId) return;
+
+  try {
+    const res = await fetch("/api/matches/generate-knockouts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tournamentId: selectedTournamentId,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to generate knockout stages");
+    }
+
+    // Re-fetch all data including knockouts
+    reloadData();
+  } catch (err) {
+    console.error(err);
+    alert("Could not generate knockout stages");
+  }
+};
+
   /* =========================
      RENDER
   ========================= */
   return (
-    <div className="App">
-      <header className="admin-header">
-        <h1>🔐 Admin Control Panel</h1>
-      </header>
+    <div className="admin-view">
+  <div className="admin-container">
 
-      {/* Tournament controls */}
-      <div className="tournament-actions">
-        <label>Select Active Tournament</label>
+      <div className="admin-header">
+  <h1>🔐 Admin Control Panel</h1>
 
-        <select
-          value={selectedTournamentId ?? ""}
-          onChange={e => setSelectedTournamentId(Number(e.target.value))}
-        >
-          <option value="" disabled>Select tournament</option>
-          {tournaments.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.year} – {t.gender} {t.age_group}
-            </option>
-          ))}
-        </select>
-      </div>
+<div className="admin-tournament-card">
+  <div className="admin-tournament-selector">
+    <label htmlFor="admin-tournament-select">Active Tournament</label>
+    <select
+      id="admin-tournament-select"
+      value={selectedTournamentId ?? ""}
+      onChange={e => setSelectedTournamentId(Number(e.target.value))}
+    >
+      <option value="" disabled>Select tournament</option>
+      {tournaments.map(t => (
+        <option key={t.id} value={t.id}>
+          {t.year} – {t.gender} {t.age_group}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
 
-      <div className="tournament-actions-buttons">
-        <button
-          className="admin-button primary"
-          onClick={() => setShowNewTournament(true)}
-        >
-          ➕ Create new tournament
-        </button>
 
-        {showNewTournament && (
-          <div className="admin-card new-tournament-form">
-            <h3>Create New Tournament</h3>
+  <div className="admin-actions">
+    <button
+      className="admin-button primary"
+      onClick={() => setShowNewTournament(true)}
+    >
+      ➕ Create new tournament
+    </button>
 
-            <div className="admin-group">
-              <label>Year</label>
-              <input type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
-            </div>
+    <button
+      className="admin-button warning"
+      onClick={resetTournamentData}
+      disabled={!selectedTournamentId}
+    >
+      ⚠️ Reset data
+    </button>
 
-            <div className="admin-group">
-              <label>Gender</label>
-              <select value={gender} onChange={e => setGender(e.target.value)}>
-                <option value="boys">Boys</option>
-                <option value="girls">Girls</option>
-                <option value="mixed">Mixed</option>
-              </select>
-            </div>
+    <button
+      className="admin-button danger"
+      onClick={handleDeleteTournament}
+      disabled={!selectedTournamentId}
+    >
+      🗑️ Delete tournament
+    </button>
+  </div>
+</div>
 
-            <div className="admin-group">
-              <label>Age Group</label>
-              <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
-                <option value="U7">U7</option>
-                <option value="U8">U8</option>
-                <option value="U9">U9</option>
-                <option value="U10">U10</option>
-                <option value="U11">U11</option>
-                <option value="U12">U12</option>
-              </select>
-            </div>
-
-            <div className="admin-actions">
-              <button className="admin-button primary" onClick={createTournament}>
-                ✅ Create Tournament
-              </button>
-              <button className="admin-button outline" onClick={() => setShowNewTournament(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        <button
-          className="admin-button warning"
-          onClick={resetTournamentData}
-          disabled={!selectedTournamentId}
-        >
-          ⚠️ Reset data
-        </button>
-
-        <button
-          className="admin-button danger"
-          onClick={handleDeleteTournament}
-          disabled={!selectedTournamentId}
-        >
-          🗑️ Delete tournament
-        </button>
-      </div>
 
       {/* Dashboard */}
       <div className="dashboard-wrapper">
@@ -368,13 +356,26 @@ export default function AdminView() {
 
       {/* Knockouts */}
       <section className="knockout-stage-wrapper">
-        <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
-        <KnockoutBracket
-          matches={knockouts}
-          onDelete={handleDeleteFixture}
-          onResultsUpdated={reloadData}
-        />
-      </section>
+  <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+
+  <div className="admin-knockout-actions">
+    <button
+      className="admin-button primary"
+      onClick={generateKnockouts}
+      disabled={!selectedTournamentId}
+    >
+      🏆 Generate Knockout Stages
+    </button>
+  </div>
+
+  <KnockoutBracket
+    matches={knockouts}
+    onDelete={handleDeleteFixture}
+    onResultsUpdated={reloadData}
+  />
+</section>
+
+    </div>
     </div>
   );
 }

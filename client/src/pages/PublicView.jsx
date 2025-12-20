@@ -118,32 +118,34 @@ export default function PublicView() {
       <div className="public-container">
         <div className="public-dashboard">
 
-          {selectedTournament ? (
-            <h2 className="tournament-title">
-              {selectedTournament.year} –{" "}
-              {selectedTournament.gender.charAt(0).toUpperCase() +
-                selectedTournament.gender.slice(1)}{" "}
-              {selectedTournament.age_group}
-            </h2>
-          ) : (
-            <h2 className="tournament-title">Select a tournament</h2>
-          )}
+          <div className="public-header">
+  {selectedTournament ? (
+    <h2 className="tournament-title">
+      {selectedTournament.year} –{" "}
+      {selectedTournament.gender.charAt(0).toUpperCase() +
+        selectedTournament.gender.slice(1)}{" "}
+      {selectedTournament.age_group}
+    </h2>
+  ) : (
+    <h2 className="tournament-title">Select a tournament</h2>
+  )}
 
-          <div className="public-tournament-selector">
-            <label>Select Tournament</label>
-            <select
-              value={selectedTournamentId || ""}
-              onChange={e =>
-                setSelectedTournamentId(Number(e.target.value))
-              }
-            >
-              {tournaments.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.year} – {t.gender} {t.age_group}
-                </option>
-              ))}
-            </select>
-          </div>
+  <div className="public-tournament-selector">
+    <label htmlFor="tournament-select">Tournament</label>
+    <select
+      id="tournament-select"
+      value={selectedTournamentId || ""}
+      onChange={e => setSelectedTournamentId(Number(e.target.value))}
+    >
+      {tournaments.map(t => (
+        <option key={t.id} value={t.id}>
+          {t.year} – {t.gender} {t.age_group}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
 
           <div className="public-leagues">
             <section className="league-section">

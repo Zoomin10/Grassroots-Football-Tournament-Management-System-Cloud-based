@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicView from "./pages/PublicView";
 import AdminView from "./pages/AdminView";
 import "./App.css";
+import "./styles/public.css";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
       <footer className="sponsor-footer">
         <h4>This WYFC tournament is proudly sponsored by:</h4>
         <div className="sponsor-logos">
-          <img src="/sponsors/iew.png" alt="iew" />
+          <img src="/sponsors/house.png" alt="house" />
           <img src="/sponsors/southby.png" alt="southby" />
           <img src="/sponsors/ajwaste.png" alt="ajwaste" />
           <img src="/sponsors/oceanescape.png" alt="oceanescape" />
