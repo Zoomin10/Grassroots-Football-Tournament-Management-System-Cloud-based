@@ -25,6 +25,24 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+// =======================
+// GET all tournaments
+// =======================
+app.get("/api/tournaments", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM tournaments
+      ORDER BY created_at DESC
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Fetch tournaments error:", err);
+    res.status(500).json({ error: "Failed to fetch tournaments" });
+  }
+});
+
 // Get active tournament (latest created for now)
 app.get("/api/tournaments/active", async (req, res) => {
   try {
@@ -81,19 +99,55 @@ console.log("🧪 GET /api/teams tournamentId:", tournamentId);
 
 
 // Get all tournaments
-app.get("/api/tournaments", async (req, res) => {
+app.post("/api/tournaments", async (req, res) => {
+  const {
+    year,
+    gender,
+    age_group,
+    date,
+    kickoff_time,
+    match_length
+  } = req.body;
+
+  if (!year || !gender || !age_group) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      received: req.body
+    });
+  }
+
   try {
-    const result = await pool.query(`      
-      SELECT *
-      FROM tournaments
-      ORDER BY created_at DESC
+    const result = await pool.query(
       `
+      INSERT INTO tournaments (
+        year,
+        gender,
+        age_group,
+        date,
+        kickoff_time,
+        match_length
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+      `,
+      [year, gender, age_group, date, kickoff_time, match_length]
     );
 
-    res.json(result.rows);
+    const tournament = result.rows[0];
+
+    // auto-create leagues
+    await pool.query(
+      `
+      INSERT INTO leagues (name, tournament_id)
+      VALUES ('League A', $1), ('League B', $1)
+      `,
+      [tournament.id]
+    );
+
+    res.json(tournament);
   } catch (err) {
-    console.error("❌ Fetch tournaments error:", err);
-    res.status(500).json({ error: "Failed to fetch tournaments" });
+    console.error("❌ Create tournament backend error:", err);
+    res.status(500).json({ error: "Failed to create tournament" });
   }
 });
 
@@ -646,6 +700,26 @@ app.post('/api/knockout/generate-final', async (req, res) => {
 // ======================================================
 // ================== ADMIN ==============================
 // ======================================================
+app.post("/api/admin/reset-tournament", async (req, res) => {
+  const { tournamentId } = req.body;
+
+  if (!tournamentId) {
+    return res.status(400).json({ error: "tournamentId required" });
+  }
+
+  try {
+    // Delete ALL matches for this tournament (league + knockouts)
+    await pool.query(
+      "DELETE FROM matches WHERE tournament_id = $1",
+      [tournamentId]
+    );
+
+    res.json({ message: "Tournament reset" });
+  } catch (err) {
+    console.error("❌ Reset tournament error:", err);
+    res.status(500).json({ error: "Failed to reset tournament" });
+  }
+});
 
 app.post('/api/admin/reset-matches', async (req, res) => {
   try {

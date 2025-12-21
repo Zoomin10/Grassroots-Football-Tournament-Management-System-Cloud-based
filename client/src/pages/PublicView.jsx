@@ -24,18 +24,19 @@ export default function PublicView() {
   /* =========================
      Load tournaments
   ========================= */
-  useEffect(() => {
-    fetch("/api/tournaments")
-      .then(res => res.json())
-      .then(data => {
-        setTournaments(data);
-        if (data.length && !selectedTournamentId) {
-          setSelectedTournamentId(data[0].id);
-        }
-      })
-      .catch(err => console.error("❌ Failed to load tournaments", err));
-  }, []);
+useEffect(() => {
+  fetch("/api/tournaments")
+    .then(res => res.json())
+    .then(data => {
+      setTournaments(data);
 
+      // ✅ auto-select first tournament
+      if (data.length && !selectedTournamentId) {
+        setSelectedTournamentId(data[0].id);
+      }
+    })
+    .catch(err => console.error("❌ Failed to load tournaments", err));
+}, []);
   /* =========================
      Load leagues for tournament
   ========================= */
@@ -144,7 +145,20 @@ export default function PublicView() {
   const cupResult = getFinalResult("cup");
   const plateResult = getFinalResult("plate");
 
-  console.log("PUBLIC KNOCKOUTS:", knockouts);
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const formatTime = (timeStr) => {
+  if (!timeStr) return "";
+  return timeStr.slice(0, 5); // HH:MM
+};
 
   /* =========================
      Render
@@ -182,32 +196,48 @@ export default function PublicView() {
 
           {/* Header */}
           <div className="public-header">
-            {selectedTournament ? (
-              <h2 className="tournament-title">
-                {selectedTournament.year} –{" "}
-                {selectedTournament.gender.charAt(0).toUpperCase() +
-                  selectedTournament.gender.slice(1)}{" "}
-                {selectedTournament.age_group}
-              </h2>
-            ) : (
-              <h2 className="tournament-title">Select a tournament</h2>
-            )}
+  {selectedTournament ? (
+    <>
+      <h2 className="tournament-title">
+        {selectedTournament.year} –{" "}
+        {selectedTournament.gender.charAt(0).toUpperCase() +
+          selectedTournament.gender.slice(1)}{" "}
+        {selectedTournament.age_group}
+      </h2>
 
-            <div className="public-tournament-selector">
-              <label htmlFor="tournament-select">Tournament</label>
-              <select
-                id="tournament-select"
-                value={selectedTournamentId || ""}
-                onChange={e => setSelectedTournamentId(Number(e.target.value))}
-              >
-                {tournaments.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.year} – {t.gender} {t.age_group}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+
+      {(selectedTournament.date || selectedTournament.kickoff_time) && (
+        <div className="tournament-meta">
+          {selectedTournament.date && (
+            <span>📅 {formatDate(selectedTournament.date)}</span>
+          )}
+          {selectedTournament.kickoff_time && (
+            <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
+          )}
+        </div>
+        
+      )}
+    </>
+  ) : (
+    <h2 className="tournament-title">Select a tournament</h2>
+  )}
+
+  <div className="public-tournament-selector">
+    <label htmlFor="tournament-select">Tournament</label>
+    <select
+      id="tournament-select"
+      value={selectedTournamentId || ""}
+      onChange={e => setSelectedTournamentId(Number(e.target.value))}
+    >
+      {tournaments.map(t => (
+        <option key={t.id} value={t.id}>
+          {t.year} – {t.gender} {t.age_group}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
 
           {/* Leagues */}
           <div className="public-leagues">

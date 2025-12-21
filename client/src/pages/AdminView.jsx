@@ -51,11 +51,18 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
      LOAD TOURNAMENTS
   ========================= */
   useEffect(() => {
-    fetch("/api/tournaments")
-      .then(res => res.json())
-      .then(data => setTournaments(data))
-      .catch(err => console.error("❌ Fetch tournaments error:", err));
-  }, []);
+  fetch("/api/tournaments")
+    .then(res => res.json())
+    .then(data => {
+      setTournaments(data);
+
+      // ✅ auto-select most recent tournament
+      if (data.length && !selectedTournamentId) {
+        setSelectedTournamentId(data[0].id);
+      }
+    })
+    .catch(err => console.error("❌ Fetch tournaments error:", err));
+}, []);
 
   /* =========================
      LOAD LEAGUES FOR TOURNAMENT
@@ -208,23 +215,29 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
   };
 
   const resetTournamentData = async () => {
-    if (!selectedTournamentId) return;
+  if (!selectedTournamentId) return;
 
-    if (!window.confirm("This will delete all fixtures and results. Continue?")) return;
+  if (!window.confirm("This will delete all fixtures and results. Continue?")) return;
 
-    try {
-      const res = await fetch("/api/admin/reset-tournament", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tournamentId: selectedTournamentId }),
-      });
+  try {
+    const res = await fetch("/api/admin/reset-tournament", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tournamentId: selectedTournamentId }),
+    });
 
-      if (!res.ok) throw new Error("Reset failed");
-      reloadData();
-    } catch (err) {
-      console.error("❌ Reset tournament error:", err);
-    }
-  };
+    const text = await res.text(); // read raw response (works even if it's not JSON)
+    console.log("RESET status:", res.status);
+    console.log("RESET response:", text);
+
+    if (!res.ok) throw new Error(text || "Reset failed");
+
+    reloadData();
+  } catch (err) {
+    console.error("❌ Reset tournament error:", err);
+    alert("Reset failed. Check console for details.");
+  }
+};
 
   const handleDeleteTournament = async () => {
     if (!selectedTournamentId) return;
