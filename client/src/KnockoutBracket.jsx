@@ -1,9 +1,11 @@
 import './KnockoutBracket.css';
 
+
+
 /* =========================
    Reusable Fixture Card
 ========================= */
-function FixtureCard({ match, onDelete, onResultsUpdated, readOnly }) {
+function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly }) {
   const submitResult = (home, away) => {
     fetch(`/api/matches/${match.id}/result`, {
       method: 'POST',
@@ -14,20 +16,25 @@ function FixtureCard({ match, onDelete, onResultsUpdated, readOnly }) {
       })
     })
       .then(() => {
-        if (match.round === 'semi-final') {
-          return fetch('/api/knockout/generate-final', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bracket: match.bracket })
-          }).catch(() => {});
-        }
+  // If a semi-final was just completed, attempt to generate the final
+  if (match.round === 'semi-final') {
+    return fetch('/api/knockout/generate-final', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tournamentId,
+        bracket: match.bracket
       })
-      .finally(() => {
-        if (typeof onResultsUpdated === 'function') {
-          onResultsUpdated();
-        }
-      });
+    }).catch(() => {});
+  }
+})
+.finally(() => {
+  if (typeof onResultsUpdated === 'function') {
+    onResultsUpdated();
+  }
+});
   };
+
 
   return (
     <div className="fixture-card">
@@ -91,10 +98,11 @@ function PlaceholderCard({ label }) {
    Section (Cup / Plate)
 ========================= */
 function KnockoutSection({
-  title,
+   title,
   semis,
   finalMatch,
   placeholders,
+  tournamentId,
   onDelete,
   onResultsUpdated,
   readOnly
@@ -111,6 +119,7 @@ function KnockoutSection({
           {hasSemis ? (
             <FixtureCard
               match={semis[0]}
+              tournamentId={tournamentId}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
               readOnly={readOnly}
@@ -128,6 +137,7 @@ function KnockoutSection({
           {finalMatch ? (
             <FixtureCard
               match={finalMatch}
+              tournamentId={tournamentId}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
               readOnly={readOnly}
@@ -145,6 +155,7 @@ function KnockoutSection({
           {hasSemis ? (
             <FixtureCard
               match={semis[1]}
+              tournamentId={tournamentId}
               onDelete={onDelete}
               onResultsUpdated={onResultsUpdated}
               readOnly={readOnly}
@@ -163,6 +174,7 @@ function KnockoutSection({
 ========================= */
 export default function KnockoutBracket({
   matches = [],
+  tournamentId,
   onDelete,
   onResultsUpdated,
   readOnly = false
@@ -189,6 +201,7 @@ export default function KnockoutBracket({
         title="🏆 Cup Competition"
         semis={cupSemis}
         finalMatch={cupFinal}
+        tournamentId={tournamentId}
         placeholders={[
           'League A – 1st vs League B – 2nd',
           'League B – 1st vs League A – 2nd',
@@ -209,6 +222,7 @@ export default function KnockoutBracket({
       <KnockoutSection
         semis={plateSemis}
         finalMatch={plateFinal}
+        tournamentId={tournamentId}
         placeholders={[
           'League A – 3rd vs League B – 4th',
           'League B – 3rd vs League A – 4th',

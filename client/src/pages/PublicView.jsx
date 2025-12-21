@@ -97,7 +97,7 @@ export default function PublicView() {
       .then(setFixturesB)
       .catch(console.error);
 
-    // Knockouts
+    // Knockouts (semis + finals)
     Promise.all([
       fetch(
         `/api/matches?round=semi-final&tournamentId=${selectedTournamentId}`
@@ -106,47 +106,110 @@ export default function PublicView() {
         `/api/matches?round=final&tournamentId=${selectedTournamentId}`
       ).then(r => r.json())
     ])
-      .then(([semis, finals]) =>
-        setKnockouts([...semis, ...finals])
-      )
+      .then(([semis, finals]) => {
+        setKnockouts([...semis, ...finals]);
+      })
       .catch(console.error);
 
   }, [selectedTournamentId, leagueAInfo, leagueBInfo]);
 
+  /* =========================
+     Derive winners (robust)
+  ========================= */
+  const getFinalResult = (bracket) => {
+    const final = knockouts.find(
+      m =>
+        m.round === "final" &&
+        m.bracket === bracket &&
+        m.home_score !== null &&
+        m.away_score !== null
+    );
+
+    if (!final) return null;
+
+    const homeName =
+      final.home_team_name || final.home_team || `Team ${final.home_team_id}`;
+    const awayName =
+      final.away_team_name || final.away_team || `Team ${final.away_team_id}`;
+
+    const winner =
+      final.home_score > final.away_score ? homeName : awayName;
+
+    const runnerUp =
+      final.home_score > final.away_score ? awayName : homeName;
+
+    return { winner, runnerUp };
+  };
+
+  const cupResult = getFinalResult("cup");
+  const plateResult = getFinalResult("plate");
+
+  console.log("PUBLIC KNOCKOUTS:", knockouts);
+
+  /* =========================
+     Render
+  ========================= */
   return (
     <div className="public-view">
       <div className="public-container">
         <div className="public-dashboard">
 
+       {/* 🎉 Celebration Banner */}
+{(cupResult || plateResult) && (
+  <section
+    className="celebration-banner celebration-banner--public">
+      
+    <h2>🎉 Tournament Results 🎉</h2>
+
+    {cupResult && (
+      <div className="celebration-card cup">
+        <h3>🏆 Cup Competition</h3>
+        <p><strong>Winners:</strong> {cupResult.winner}</p>
+        <p><strong>Runners-up:</strong> {cupResult.runnerUp}</p>
+      </div>
+    )}
+
+    {plateResult && (
+      <div className="celebration-card plate">
+        <h3>🥈 Plate Competition</h3>
+        <p><strong>Winners:</strong> {plateResult.winner}</p>
+        <p><strong>Runners-up:</strong> {plateResult.runnerUp}</p>
+      </div>
+    )}
+  </section>
+)}
+
+
+          {/* Header */}
           <div className="public-header">
-  {selectedTournament ? (
-    <h2 className="tournament-title">
-      {selectedTournament.year} –{" "}
-      {selectedTournament.gender.charAt(0).toUpperCase() +
-        selectedTournament.gender.slice(1)}{" "}
-      {selectedTournament.age_group}
-    </h2>
-  ) : (
-    <h2 className="tournament-title">Select a tournament</h2>
-  )}
+            {selectedTournament ? (
+              <h2 className="tournament-title">
+                {selectedTournament.year} –{" "}
+                {selectedTournament.gender.charAt(0).toUpperCase() +
+                  selectedTournament.gender.slice(1)}{" "}
+                {selectedTournament.age_group}
+              </h2>
+            ) : (
+              <h2 className="tournament-title">Select a tournament</h2>
+            )}
 
-  <div className="public-tournament-selector">
-    <label htmlFor="tournament-select">Tournament</label>
-    <select
-      id="tournament-select"
-      value={selectedTournamentId || ""}
-      onChange={e => setSelectedTournamentId(Number(e.target.value))}
-    >
-      {tournaments.map(t => (
-        <option key={t.id} value={t.id}>
-          {t.year} – {t.gender} {t.age_group}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+            <div className="public-tournament-selector">
+              <label htmlFor="tournament-select">Tournament</label>
+              <select
+                id="tournament-select"
+                value={selectedTournamentId || ""}
+                onChange={e => setSelectedTournamentId(Number(e.target.value))}
+              >
+                {tournaments.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.year} – {t.gender} {t.age_group}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-
+          {/* Leagues */}
           <div className="public-leagues">
             <section className="league-section">
               <h2>League A</h2>
@@ -161,6 +224,7 @@ export default function PublicView() {
             </section>
           </div>
 
+          {/* Knockouts */}
           <section className="knockout-stage-wrapper">
             <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
             <KnockoutBracket matches={knockouts} readOnly />

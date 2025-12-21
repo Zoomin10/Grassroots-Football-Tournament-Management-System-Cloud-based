@@ -392,14 +392,14 @@ const generateFinal = async (bracket) => {
   </div>
 
   <KnockoutBracket
-      matches={knockouts}
+  matches={knockouts}
+  tournamentId={selectedTournamentId}
   onDelete={handleDeleteFixture}
-  onResultsUpdated={() => {
-    reloadData();
-    generateFinal("cup");
-    generateFinal("plate");
-  }}
-  />
+ onResultsUpdated={reloadData}
+  readOnly={false}
+/>
+
+
 </section>
 
     </div>
