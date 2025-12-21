@@ -16,10 +16,18 @@ export default function PublicView() {
   const [fixturesA, setFixturesA] = useState([]);
   const [fixturesB, setFixturesB] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
-
+  const [refreshTick, setRefreshTick] = useState(0);
   const selectedTournament = tournaments.find(
     t => t.id === selectedTournamentId
   );
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setRefreshTick(t => t + 1);
+  }, 20000); // 20 seconds
+
+  return () => clearInterval(interval);
+}, []);
 
   /* =========================
      Load tournaments
@@ -112,7 +120,7 @@ useEffect(() => {
       })
       .catch(console.error);
 
-  }, [selectedTournamentId, leagueAInfo, leagueBInfo]);
+  }, [selectedTournamentId, leagueAInfo, leagueBInfo, refreshTick]);
 
   /* =========================
      Derive winners (robust)
@@ -238,7 +246,9 @@ const formatTime = (timeStr) => {
   </div>
 </div>
 
-
+<p style={{ fontSize: "0.85rem", color: "#666", textAlign: "center" }}>
+  🔄 Scores update automatically
+</p>
           {/* Leagues */}
           <div className="public-leagues">
             <section className="league-section">
