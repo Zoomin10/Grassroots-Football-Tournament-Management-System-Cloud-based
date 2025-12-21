@@ -630,3 +630,35 @@ text-align: right;
   font-weight: 600;
   color: #003366;
 }
+/* =======================
+   Create Tournament – Field Widths
+   ======================= */
+
+.new-tournament-form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.new-tournament-form .admin-group {
+  display: grid;
+  grid-template-columns: 140px minmax(240px, 360px);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Inputs & selects inside the form */
+.new-tournament-form input,
+.new-tournament-form select {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Kickoff time (hour : minute) */
+.new-tournament-form .time-select {
+  max-width: 360px;
+}
+
+.new-tournament-form .admin-actions--form {
+max-width: 360px;
+margin-left: 140px;
+}

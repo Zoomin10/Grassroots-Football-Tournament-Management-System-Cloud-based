@@ -45,6 +45,8 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
     ? formatLeague(league)
     : [];
 
+    console.log("ADMIN selectedTournamentId:", selectedTournamentId);
+
   /* =========================
      LOAD TOURNAMENTS
   ========================= */
@@ -166,6 +168,8 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
       setTournaments(prev => [tournament, ...prev]);
       setSelectedTournamentId(tournament.id);
       setShowNewTournament(false);
+      reloadData();
+
     } catch (err) {
       console.error("❌ Create tournament error:", err);
     }
@@ -471,9 +475,70 @@ const generateFinal = async (bracket) => {
       )}
 
       {/* Dashboard */}
-      <div className="dashboard-wrapper">
-        {/* unchanged */}
+  <div className="dashboard-wrapper">
+  {/* LEFT PANEL — Teams */}
+  <div className="left-panel">
+    <TeamList
+      teams={teams}
+      onDelete={reloadData}
+    />
+
+    <AddTeam
+      tournamentId={selectedTournamentId}
+      leagues={leagues}
+      onAdd={reloadData}
+      disabled={!selectedTournamentId}
+    />
+  </div>
+
+  {/* RIGHT PANEL — League + Fixtures */}
+  <div className="league-column">
+    <div className="admin-card">
+      <div className="admin-card-header">
+        <h3>🏆 League</h3>
+
+        <div className="league-toggle">
+          {leagues.map(l => (
+            <button
+              key={l.id}
+              className={
+                l.id === activeLeagueId
+                  ? "league-btn active"
+                  : "league-btn"
+              }
+              onClick={() => setActiveLeagueId(l.id)}
+            >
+              {l.name}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <LeagueTable league={formattedLeague} />
+    </div>
+
+    <button
+      className="admin-button"
+      onClick={generateFixtures}
+      disabled={!activeLeagueId}
+    >
+      ⚽ Auto-generate League Fixtures
+    </button>
+
+    <AddFixture
+      leagueId={activeLeagueId}
+      tournamentId={selectedTournamentId}
+      onFixturesUpdated={reloadData}
+    />
+
+    <Fixtures
+      fixtures={fixtures}
+      onResultsUpdated={reloadData}
+      onDelete={handleDeleteFixture}
+    />
+  </div>
+</div>
+
 
       {/* Knockouts */}
       <section className="knockout-stage-wrapper">

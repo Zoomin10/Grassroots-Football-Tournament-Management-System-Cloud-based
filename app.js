@@ -83,8 +83,7 @@ console.log("🧪 GET /api/teams tournamentId:", tournamentId);
 // Get all tournaments
 app.get("/api/tournaments", async (req, res) => {
   try {
-    const result = await pool.query(
-      `
+    const result = await pool.query(`      
       SELECT *
       FROM tournaments
       ORDER BY created_at DESC
@@ -155,11 +154,19 @@ app.delete("/api/teams/:id", async (req, res) => {
 });
 
 
-// Create Tournament
 app.post('/api/tournaments', async (req, res) => {
-  const { year, gender, ageGroup } = req.body;
+  const { year, gender, age_group, date, kickoff_time, match_length } = req.body;
+
+  if (!year || !gender || !age_group) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      received: req.body
+    });
+  }
 
   try {
+    console.log("CREATE TOURNAMENT BODY:", req.body);
+
     // 1️⃣ Create tournament
     const tournamentResult = await pool.query(
       `
@@ -167,7 +174,7 @@ app.post('/api/tournaments', async (req, res) => {
       VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [year, gender, ageGroup]
+      [year, gender, age_group]
     );
 
     const tournament = tournamentResult.rows[0];
@@ -183,10 +190,12 @@ app.post('/api/tournaments', async (req, res) => {
       [tournament.id]
     );
 
+    // 3️⃣ Send response ONCE
     res.json(tournament);
+
   } catch (err) {
-    console.error('❌ Create tournament backend error:', err);
-    res.status(500).json({ error: 'Failed to create tournament' });
+    console.error("❌ Create tournament backend error:", err);
+    res.status(500).json({ error: "Failed to create tournament" });
   }
 });
 
