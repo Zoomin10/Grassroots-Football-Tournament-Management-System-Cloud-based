@@ -132,18 +132,10 @@ input[type="number"] {
   border-radius: 6px;
   font-size: 1rem;
 }
-
 button {
-  background-color: #007bff;
-  color: white;
-  padding: 2px 14px;
-  border: none;
-  border-radius: 6px;
+  font-family: inherit;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: 8px;
 }
-
 button:hover {
   background-color: #0056b3;
 }
@@ -306,9 +298,10 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   gap: 0.4rem;
 
-  width: 100%;
+  width: auto;
   padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
 
@@ -317,6 +310,10 @@ button:hover {
 }
 
 
+.admin-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
 .tournament-actions {
   max-width: 420px;
   margin: 0 auto 2rem;
@@ -418,20 +415,36 @@ button:hover {
 }
 
 .admin-group {
-  display: flex;
-  align-items: center;
-  
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;  
   gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .admin-group label {
   font-weight: 600;
   margin-right: 0.25rem;
+  color: #003366;
+text-align: right;
 }
 
+.admin-group input[type="date"] {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
 
-
-
+.admin-group input,
+.admin-group select {
+  height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: 1px solid #cfd9e6;
+  width: 100%;
+}
 /* Danger Zone */
 .danger-zone {
   border-top: 1px solid #eee;
@@ -544,5 +557,76 @@ button:hover {
   justify-content: center;
   margin: 1rem 0 1.5rem;
 }
+/* =======================
+   Admin Form Actions
+   ======================= */
 
 
+
+
+.admin-button.secondary:hover {
+  background: #dfe7f2;
+}
+
+/* Keep primary consistent */
+.admin-button.primary {
+  background: #1976d2;
+}
+
+.admin-button.primary:hover {
+  background: #155fa8;
+}
+/* =======================
+   Admin – Create Tournament Buttons
+   ======================= */
+
+.admin-actions.admin-actions--form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.admin-actions.admin-actions--form .admin-button {
+  height: 48px;
+  padding: 0 1.25rem;
+  min-width: 220px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+ display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* Cancel button */
+.admin-button.secondary {
+  background: #eef2f7;
+  color: #003366;
+  border: 2px solid #cfd9e6;
+}
+
+.admin-button.secondary:hover {
+  background: #e1e8f2;
+   border-color: #b8c6da;
+}
+.admin-actions.admin-actions--form .admin-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.time-select {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.time-select span {
+  font-weight: 600;
+  color: #003366;
+}

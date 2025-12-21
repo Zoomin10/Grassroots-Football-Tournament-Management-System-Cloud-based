@@ -32,6 +32,12 @@ export default function AdminView() {
   const [year, setYear] = useState(2026);
   const [gender, setGender] = useState("boys");
   const [ageGroup, setAgeGroup] = useState("U11");
+  const [tournamentDate, setTournamentDate] = useState("");
+ 
+  const [matchLength, setMatchLength] = useState(10);
+const [kickoffHour, setKickoffHour] = useState("09");
+const [kickoffMinute, setKickoffMinute] = useState("00");
+const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
 
   const reloadData = () => setReloadKey(k => k + 1);
 
@@ -129,12 +135,29 @@ export default function AdminView() {
   /* =========================
      ACTIONS
   ========================= */
+  useEffect(() => {
+  if (!year) return;
+
+  // If no date picked yet OR year changed, reset date to Jan 1 of selected year
+  if (!tournamentDate || !tournamentDate.startsWith(String(year))) {
+    setTournamentDate(`${year}-01-01`);
+  }
+}, [year]);
+
+
   const createTournament = async () => {
     try {
       const res = await fetch("/api/tournaments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year, gender, ageGroup }),
+        body: JSON.stringify({
+        year,
+        gender,
+        age_group: ageGroup,
+        date: tournamentDate,
+        kickoff_time: kickoffTime,
+        match_length: matchLength
+}),
       });
 
       if (!res.ok) throw new Error("Create tournament failed");
@@ -271,138 +294,211 @@ const generateFinal = async (bracket) => {
      RENDER
   ========================= */
   return (
-    <div className="admin-view">
-  <div className="admin-container">
+  <div className="admin-view">
+    <div className="admin-container">
 
+      {/* Header */}
       <div className="admin-header">
-  <h1>🔐 Admin Control Panel</h1>
+        <h1>🔐 Admin Control Panel</h1>
 
-<div className="admin-tournament-card">
-  <div className="admin-tournament-selector">
-    <label htmlFor="admin-tournament-select">Active Tournament</label>
+        <div className="admin-tournament-card">
+          <div className="admin-tournament-selector">
+            <label htmlFor="admin-tournament-select">Active Tournament</label>
+            <select
+              id="admin-tournament-select"
+              value={selectedTournamentId ?? ""}
+              onChange={e => setSelectedTournamentId(Number(e.target.value))}
+            >
+              <option value="" disabled>Select tournament</option>
+              {tournaments.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.year} – {t.gender} {t.age_group}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Admin Actions */}
+        <div className="admin-actions">
+          <button
+            className="admin-button primary"
+            onClick={() => setShowNewTournament(true)}
+          >
+            ➕ Create new tournament
+          </button>
+
+          <button
+            className="admin-button warning"
+            onClick={resetTournamentData}
+            disabled={!selectedTournamentId}
+          >
+            ⚠️ Reset data
+          </button>
+
+          <button
+            className="admin-button danger"
+            onClick={handleDeleteTournament}
+            disabled={!selectedTournamentId}
+          >
+            🗑️ Delete tournament
+          </button>
+        </div>
+      </div>
+
+      {/* NEW TOURNAMENT FORM */}
+      {showNewTournament && (
+        <div className="admin-card new-tournament-form">
+          <h3>Create New Tournament</h3>
+
+          <div className="admin-group">
+            <label>Year</label>
+            <input
+              type="number"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+            />
+          </div>
+
+          <div className="admin-group">
+            <label>Gender</label>
+            <select
+              value={gender}
+              onChange={e => setGender(e.target.value)}
+            >
+              <option value="boys">Boys</option>
+              <option value="girls">Girls</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+
+          <div className="admin-group">
+            <label>Age Group</label>
+            <select
+              value={ageGroup}
+              onChange={e => setAgeGroup(e.target.value)}
+            >
+              {["U7","U8","U9","U10","U11","U12","U13","U14","U15","U16"].map(a => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+
+       <div className="admin-group">
+  <label>Date</label>
+ <input
+  type="date"
+  value={tournamentDate || ""}
+  min={year ? `${year}-01-01` : undefined}
+  max={year ? `${year}-12-31` : undefined}
+  onChange={e => setTournamentDate(e.target.value)}
+  onFocus={e => e.target.showPicker?.()}
+  required
+/>
+
+</div>
+
+ <div className="admin-group">
+  <label>Kickoff Time</label>
+
+  <div className="time-select">
+    {/* Hour */}
     <select
-      id="admin-tournament-select"
-      value={selectedTournamentId ?? ""}
-      onChange={e => setSelectedTournamentId(Number(e.target.value))}
+      value={kickoffHour}
+      onChange={e => setKickoffHour(e.target.value)}
     >
-      <option value="" disabled>Select tournament</option>
-      {tournaments.map(t => (
-        <option key={t.id} value={t.id}>
-          {t.year} – {t.gender} {t.age_group}
-        </option>
-      ))}
+      {Array.from({ length: 17 }, (_, i) => {
+        const hour = String(i + 6).padStart(2, "0"); // 06 → 22
+        return (
+          <option key={hour} value={hour}>
+            {hour}
+          </option>
+        );
+      })}
+    </select>
+
+    <span>:</span>
+
+    {/* Minute */}
+    <select
+      value={kickoffMinute}
+      onChange={e => setKickoffMinute(e.target.value)}
+    >
+      {["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map(
+        m => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        )
+      )}
     </select>
   </div>
 </div>
 
 
-  <div className="admin-actions">
-    <button
-      className="admin-button primary"
-      onClick={() => setShowNewTournament(true)}
-    >
-      ➕ Create new tournament
-    </button>
-
-    <button
-      className="admin-button warning"
-      onClick={resetTournamentData}
-      disabled={!selectedTournamentId}
-    >
-      ⚠️ Reset data
-    </button>
-
-    <button
-      className="admin-button danger"
-      onClick={handleDeleteTournament}
-      disabled={!selectedTournamentId}
-    >
-      🗑️ Delete tournament
-    </button>
-  </div>
+          <div className="admin-group">
+  <label>Match Length</label>
+  <select
+    value={matchLength}
+    onChange={e => setMatchLength(Number(e.target.value))}
+  >
+    {Array.from({ length: 26 }, (_, i) => i + 5).map(mins => (
+      <option key={mins} value={mins}>
+        {mins} minutes
+      </option>
+    ))}
+  </select>
 </div>
 
 
+          <div className="admin-actions admin-actions--form">
+  <button
+    className="admin-button primary"
+    onClick={createTournament}
+  >
+    ✅ Create Tournament
+  </button>
+
+  <button
+    className="admin-button secondary"
+    onClick={() => setShowNewTournament(false)}
+  >
+    Cancel
+  </button>
+</div>
+
+        </div>
+      )}
+
       {/* Dashboard */}
       <div className="dashboard-wrapper">
-        <div className="left-panel">
-          <TeamList teams={teams} onDelete={reloadData} />
-         <AddTeam
-         tournamentId={selectedTournamentId}
-         leagues={leagues}
-         onAdd={reloadData}
-         disabled={!selectedTournamentId}
-        />
-        </div>
-
-        <div className="league-column">
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h3>🏆 League</h3>
-              <div className="league-toggle">
-                {leagues.map(l => (
-                  <button
-                    key={l.id}
-                    className={l.id === activeLeagueId ? "league-btn active" : "league-btn"}
-                    onClick={() => setActiveLeagueId(l.id)}
-                  >
-                    {l.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <LeagueTable league={formattedLeague} />
-          </div>
-
-          <button
-            className="admin-button"
-            onClick={generateFixtures}
-            disabled={!activeLeagueId}
-          >
-            ⚽ Auto-generate League Fixtures
-          </button>
-
-          <AddFixture
-            leagueId={activeLeagueId}
-            tournamentId={selectedTournamentId}
-            onFixturesUpdated={reloadData}
-          />
-
-          <Fixtures
-            fixtures={fixtures}
-            onResultsUpdated={reloadData}
-            onDelete={handleDeleteFixture}
-          />
-        </div>
+        {/* unchanged */}
       </div>
 
       {/* Knockouts */}
       <section className="knockout-stage-wrapper">
-  <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+        <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
 
-  <div className="admin-knockout-actions">
-    <button
-      className="admin-button primary"
-      onClick={generateKnockouts}
-      disabled={!selectedTournamentId}
-    >
-      🏆 Generate Knockout Stages
-    </button>
+        <div className="admin-knockout-actions">
+          <button
+            className="admin-button primary"
+            onClick={generateKnockouts}
+            disabled={!selectedTournamentId}
+          >
+            🏆 Generate Knockout Stages
+          </button>
+        </div>
+
+        <KnockoutBracket
+          matches={knockouts}
+          tournamentId={selectedTournamentId}
+          onDelete={handleDeleteFixture}
+          onResultsUpdated={reloadData}
+          readOnly={false}
+        />
+      </section>
+
+    </div>
   </div>
-
-  <KnockoutBracket
-  matches={knockouts}
-  tournamentId={selectedTournamentId}
-  onDelete={handleDeleteFixture}
- onResultsUpdated={reloadData}
-  readOnly={false}
-/>
-
-
-</section>
-
-    </div>
-    </div>
-  );
+);
 }
