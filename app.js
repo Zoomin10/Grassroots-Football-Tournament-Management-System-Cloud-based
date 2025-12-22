@@ -355,39 +355,62 @@ app.get("/api/matches", async (req, res) => {
 
 
 // POST league fixture
-app.post('/api/matches', async (req, res) => {
-  const { home_team_id, away_team_id, leagueId } = req.body;
+// POST league fixture
+app.post("/api/matches", async (req, res) => {
+  console.log("🟡 ADD MATCH BODY:", req.body);
 
-  if (!home_team_id || !away_team_id || !leagueId) {
-    return res.status(400).json({ error: 'Missing fields' });
+  const {
+    home_team_id,
+    away_team_id,
+    leagueId,
+    tournamentId
+  } = req.body;
+
+  if (!home_team_id || !away_team_id || !leagueId || !tournamentId) {
+    return res.status(400).json({
+      error: "Missing fields",
+      received: req.body
+    });
   }
 
   try {
+    // Ensure both teams exist and are in the same league
     const teams = await pool.query(
-      'SELECT id, league_id FROM teams WHERE id IN ($1, $2)',
+      `
+      SELECT id, league_id
+      FROM teams
+      WHERE id IN ($1, $2)
+      `,
       [home_team_id, away_team_id]
     );
 
     if (
       teams.rows.length !== 2 ||
-      teams.rows[0].league_id !== leagueId ||
-      teams.rows[1].league_id !== leagueId
+      teams.rows.some(t => t.league_id !== leagueId)
     ) {
-      return res.status(400).json({ error: 'Teams must be in same league' });
+      return res.status(400).json({
+        error: "Teams must be in the same league"
+      });
     }
 
     await pool.query(
       `
-      INSERT INTO matches (home_team_id, away_team_id, league_id, tournament_id, round)
+      INSERT INTO matches (
+        home_team_id,
+        away_team_id,
+        league_id,
+        tournament_id,
+        round
+      )
       VALUES ($1, $2, $3, $4, 'league')
       `,
-      [home_team_id, away_team_id, leagueId, tournament_id, round]
+      [home_team_id, away_team_id, leagueId, tournamentId]
     );
 
-    res.sendStatus(201);
-  } catch (err) {
-    console.error('❌ Add fixture error:', err);
-    res.status(500).json({ error: 'Failed to add fixture' });
+      res.sendStatus(201);
+ } catch (err) {
+    console.error("❌ Add fixture error:", err);
+    res.status(500).json({ error: "Failed to add fixture" });
   }
 });
 

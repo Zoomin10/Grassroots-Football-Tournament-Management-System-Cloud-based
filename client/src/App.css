@@ -249,6 +249,7 @@ button:hover {
   gap: 1rem;
   justify-content: space-between;
   align-items: center;
+  
 }
 
 .league-label {
@@ -661,4 +662,140 @@ text-align: right;
 .new-tournament-form .admin-actions--form {
 max-width: 360px;
 margin-left: 140px;
+}
+/* Fixtures card */
+.fixtures-card {
+  padding: 1.25rem;
+}
+
+.fixtures-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Divider */
+.fixtures-divider {
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 1px;
+  margin: 0.25rem 0;
+}
+/* Fixtures creation card */
+.fixtures-create-card {
+  margin-top: 1.25rem;
+  max-width: 85%;
+ margin-left: 40px;
+}
+
+.fixtures-create-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Make both buttons visually equal */
+.fixtures-create-actions .admin-button {
+  width: 100%;
+}
+/* =======================
+   Fixtures Creation Cleanup
+   ======================= */
+
+.fixtures-manual-wrapper .add-fixture-form {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.fixtures-manual-wrapper h3,
+.fixtures-manual-wrapper .fixture-league-note {
+  display: none;
+}
+
+/* Make manual form controls match admin buttons */
+.fixtures-manual-wrapper button {
+  width: 100%;
+}
+
+/* Space selects nicely */
+.fixtures-manual-wrapper select {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+/* =======================
+   Fixtures Creation Card
+   ======================= */
+
+.fixtures-create-card {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #dde3ec;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+/* Actions area */
+.fixtures-create-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Buttons should NOT be full width */
+.fixtures-btn {
+  width: auto;
+  min-width: 260px;
+  max-width: 360px;
+}
+
+/* OR separator */
+.fixtures-separator {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Manual fixture form wrapper */
+.fixtures-manual-wrapper {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #dde3ec;
+}
+.fixtures-create-actions::before {
+  content: "";
+  width: 100%;
+  border-top: 1px dashed #e0e6ef;
+  margin-bottom: 0.75rem;
+}
+.fixtures-create-header.centered {
+  justify-content: center;
+  text-align: center;
+}
+
+.fixtures-create-header.centered h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+.add-fixture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.add-fixture-form-inner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }

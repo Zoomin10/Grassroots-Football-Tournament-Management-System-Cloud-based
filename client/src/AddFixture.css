@@ -1,7 +1,7 @@
 .add-fixture-form {
   background-color: #f8f9fa;
   padding: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
@@ -13,10 +13,8 @@
   color: #2b3e5e;
   font-weight: 600;
   margin-top: 0;
-  margin-bottom: 12px;
-
-  
-  text-align: left;
+  margin-bottom: 12px;  
+  text-align: center;
 }
  
 .add-fixture-form form {
@@ -31,7 +29,7 @@
 .add-fixture-form select,
 .add-fixture-form button {
   padding: 10px;
-  font-size: 1rem;
+  
   border-radius: 6px;
   border: 1px solid #ccc;
 }
@@ -43,7 +41,7 @@
   cursor: pointer;
    width: fit-content;
   transition: background-color 0.2s ease;
-}
+  
 
 .add-fixture-form button:hover {
   background-color: #0056b3;
@@ -52,4 +50,57 @@
   font-size: 0.85rem;
   color: #666;
   margin-bottom: 0.5rem;
+}
+/* Shared fixture buttons */
+.fixtures-btn {
+  width: auto;
+  min-width: 260px;
+  max-width: 360px;
+  
+}
+
+/* Center the AddFixture button */
+.add-fixture-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Space the form nicely */
+.add-fixture-form form {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 0.75rem;
+}
+
+/* Prevent selects from stretching awkwardly */
+.add-fixture-form select {
+  width: 100%;
+}
+.fixtures-create-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+ 
+}
+
+.fixtures-league-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.add-fixture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+ }
+
+.add-fixture-form-inner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }

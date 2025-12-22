@@ -26,74 +26,75 @@ export default function AddFixture({
       });
   }, [leagueId, tournamentId]);
 
-  const handleAddFixture = async (e) => {
-    e.preventDefault();
+ const handleAddFixture = async (e) => {
+  e.preventDefault();
 
-    if (!tournamentId) return;
+  if (!tournamentId || !leagueId || !homeTeam || !awayTeam) {
+    console.error("❌ Missing data", {
+      tournamentId,
+      leagueId,
+      homeTeam,
+      awayTeam
+    });
+    return;
+  }
 
-    if (homeTeam === awayTeam) {
-      alert("A team cannot play against itself.");
-      return;
+  if (homeTeam === awayTeam) {
+    alert("Home and away team must be different.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/matches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tournamentId,                 // ✅ camelCase
+        leagueId,                     // ✅ camelCase
+        home_team_id: Number(homeTeam),
+        away_team_id: Number(awayTeam)
+      })
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("❌ Add fixture backend response:", res.status, text);
+      throw new Error("Failed to add fixture");
     }
 
-    try {
-      const res = await fetch("/api/matches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          homeTeamId: homeTeam,
-          awayTeamId: awayTeam,
-          leagueId,
-          tournamentId,
-        }),
-      });
+    setHomeTeam("");
+    setAwayTeam("");
+    setShowForm(false);
+    onFixturesUpdated?.();
+  } catch (err) {
+    console.error("❌ Add fixture error:", err);
+  }
+};
 
-      if (!res.ok) throw new Error("Failed to add fixture");
-
-      setHomeTeam("");
-      setAwayTeam("");
-
-      if (typeof onFixturesUpdated === "function") {
-        onFixturesUpdated();
-      }
-    } catch (err) {
-      console.error("❌ Add fixture error:", err);
-      alert("Failed to add fixture");
-    }
-  };
 
   const leagueTeams = teams.filter(t => t.league_id === leagueId);
 
   return (
-  <div className="add-fixture-form">
-    <p className="fixture-league-note">
-      Manually Creating Fixture for{" "}
-      <strong>{leagueId === 1 ? "League A" : "League B"}</strong>
-    </p>
-
-    <h3>Manually Add Fixture</h3>
-
+ <div className="add-fixture">
     {/* Toggle button */}
     <button
-      className="admin-button"
+      className="admin-button primary"
       onClick={() => setShowForm(prev => !prev)}
     >
-      ➕ Add Fixture
+     🔧 Add Fixture Manually
     </button>
 
-    {/* Warning ONLY when user tries */}
     {showForm && leagueTeams.length < 2 && (
       <p className="fixture-hint">
         Add at least two teams to this league before creating fixtures.
       </p>
     )}
 
-    {/* ✅ Form only renders when usable */}
     {showForm && leagueTeams.length >= 2 && (
-      <form onSubmit={handleAddFixture}>
+      <form onSubmit={handleAddFixture} className="add-fixture-form-inner">
         <select
           value={homeTeam}
-          onChange={(e) => setHomeTeam(e.target.value)}
+          onChange={e => setHomeTeam(e.target.value)}
           required
         >
           <option value="">Select Home Team</option>
@@ -106,7 +107,7 @@ export default function AddFixture({
 
         <select
           value={awayTeam}
-          onChange={(e) => setAwayTeam(e.target.value)}
+          onChange={e => setAwayTeam(e.target.value)}
           required
         >
           <option value="">Select Away Team</option>

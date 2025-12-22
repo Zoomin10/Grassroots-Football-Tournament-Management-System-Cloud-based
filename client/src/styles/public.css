@@ -33,15 +33,21 @@
 .league-section > h2 {
   text-align: center;
   margin-bottom: 0.75rem;
+ 
+  
+
 }
 .league-section .fixtures {
   display: flex;
   flex-direction: column;
   align-items: center;
+  
 }
 .league-section .fixture-card {
   max-width: 420px;
   width: 100%;
+  border-radius: 8px;
+  
 }
 
 .public-container {
@@ -53,10 +59,12 @@
 .league-table-wrapper {
   display: flex;
   justify-content: center;
+   
 }
 .league-table-wrapper > * {
   width: 100%;
   max-width: 420px;
+ 
 }
 
 /* League table */
@@ -65,12 +73,14 @@
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 0.9rem;
+  margin-left: 40px;
 }
 
 .league-table th,
 .league-table td {
   padding: 8px;
   text-align: center;
+  
 }
 
 .league-table th {
@@ -83,11 +93,12 @@
   gap: 2rem;
   margin: 0 auto;          /* centers the grid */
   align-items: start;
+
 }
 
 .league-table tr:nth-child(even) {
   background-color: #f2f2f2;
-}
+}  
 
 .knockout-stage-wrapper {
   background-color: #f2f2f2;
@@ -160,7 +171,7 @@
   margin: 1.5rem auto 2.5rem;
   padding: 1.5rem 2rem;
   max-width: 520px;
-  background: #f6f8fb;
+  background: #99b4e2;
   border-radius: 14px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }

@@ -307,6 +307,9 @@ const generateFinal = async (bracket) => {
   }
 };
 
+const activeLeague = leagues.find(l => l.id === activeLeagueId);
+const activeLeagueName = activeLeague?.name ?? "";
+
   /* =========================
      RENDER
   ========================= */
@@ -529,13 +532,25 @@ const generateFinal = async (bracket) => {
 
       <LeagueTable league={formattedLeague} />
     </div>
+{activeLeagueId && (
+  <div className="admin-card fixtures-create-card">
+ <div className="admin-card-header fixtures-create-header centered">
+  <h3>
+    ⚽ Fixtures Creation
+    {activeLeagueName && (
+      <span className="fixtures-league-label">
+        — {activeLeagueName}
+      </span>
+    )}
+  </h3>
+</div>
 
+  <div className="fixtures-create-actions">
     <button
-      className="admin-button"
+      className="admin-button primary fixtures-btn"
       onClick={generateFixtures}
-      disabled={!activeLeagueId}
     >
-      ⚽ Auto-generate League Fixtures
+        🔁 Auto-generate Fixtures (Round Robin)
     </button>
 
     <AddFixture
@@ -543,6 +558,9 @@ const generateFinal = async (bracket) => {
       tournamentId={selectedTournamentId}
       onFixturesUpdated={reloadData}
     />
+  </div>
+</div>
+)}
 
     <Fixtures
       fixtures={fixtures}
