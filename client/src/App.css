@@ -305,7 +305,7 @@ button:hover {
   width: auto;
   padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
-
+color: #ffffff;
   border-radius: 6px;
   cursor: pointer;
 }

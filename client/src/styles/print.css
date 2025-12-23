@@ -1,0 +1,44 @@
+@media print {
+  /* Reset background + colours */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px;
+  }
+
+  /* Hide anything interactive */
+  button,
+  select,
+  input,
+  .admin-actions,
+  .admin-header,
+  .league-toggle,
+  .sponsor-footer {
+    display: none !important;
+  }
+
+  /* Avoid awkward page breaks */
+  table,
+  .league-table,
+  .admin-card,
+  .fixtures-card {
+    page-break-inside: avoid;
+  }
+
+  /* Force clean section breaks */
+  .knockout-stage-wrapper {
+    page-break-before: always;
+  }
+
+  h1, h2, h3 {
+    color: black !important;
+  }
+}
+@media print {
+  .public-tournament-selector,
+  .public-header select,
+  .public-header label,
+  .public-header p {
+    display: none !important;
+  }
+}

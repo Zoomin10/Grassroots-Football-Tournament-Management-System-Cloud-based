@@ -348,6 +348,18 @@ const activeLeagueName = activeLeague?.name ?? "";
             ➕ Create new tournament
           </button>
 
+                <button
+  className="admin-button secondary"
+  onClick={() => {
+    if (!selectedTournamentId) return;
+    window.open(`/public?tournamentId=${selectedTournamentId}&print=true`, "_blank");
+  }}
+  disabled={!selectedTournamentId}
+>
+  🖨️ Print Public View
+  
+</button>
+
           <button
             className="admin-button warning"
             onClick={resetTournamentData}

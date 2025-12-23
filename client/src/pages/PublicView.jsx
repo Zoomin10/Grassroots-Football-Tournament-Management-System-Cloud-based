@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { formatLeague } from "../utils/formatLeague";
 import LeagueTable from "../LeagueTable";
 import Fixtures from "../Fixtures";
 import KnockoutBracket from "../KnockoutBracket";
 import "../styles/public.css";
+import "../styles/print.css";
+
 
 export default function PublicView() {
   const [tournaments, setTournaments] = useState([]);
@@ -12,6 +15,11 @@ export default function PublicView() {
   const [leagues, setLeagues] = useState([]);
   const [leagueA, setLeagueA] = useState([]);
   const [leagueB, setLeagueB] = useState([]);
+  const params = new URLSearchParams(window.location.search);
+  const isPrintMode = params.get("print") === "true";
+
+
+  const hasPrinted = useRef(false);
 
   const [fixturesA, setFixturesA] = useState([]);
   const [fixturesB, setFixturesB] = useState([]);
@@ -21,13 +29,35 @@ export default function PublicView() {
     t => t.id === selectedTournamentId
   );
 
-  useEffect(() => {
+  const tournamentIdFromUrl = params.get("tournamentId")
+  ? Number(params.get("tournamentId"))
+  : null;
+
+useEffect(() => {
+  if (isPrintMode) return;
+
   const interval = setInterval(() => {
     setRefreshTick(t => t + 1);
-  }, 20000); // 20 seconds
+  }, 60000);
 
   return () => clearInterval(interval);
-}, []);
+}, [isPrintMode]);
+
+useEffect(() => {
+  if (!isPrintMode) return;
+  if (!selectedTournamentId) return;
+  if (hasPrinted.current) return;
+
+  hasPrinted.current = true;
+
+  // Give React + layout time to settle
+  const timeout = setTimeout(() => {
+    window.print();
+  }, 800);
+
+  return () => clearTimeout(timeout);
+}, [isPrintMode, selectedTournamentId]);
+
 
   /* =========================
      Load tournaments
@@ -38,13 +68,17 @@ useEffect(() => {
     .then(data => {
       setTournaments(data);
 
-      // ✅ auto-select first tournament
-      if (data.length && !selectedTournamentId) {
-        setSelectedTournamentId(data[0].id);
+      if (!selectedTournamentId) {
+        if (tournamentIdFromUrl) {
+          setSelectedTournamentId(tournamentIdFromUrl);
+        } else if (data.length) {
+          setSelectedTournamentId(data[0].id);
+        }
       }
     })
     .catch(err => console.error("❌ Failed to load tournaments", err));
 }, []);
+
   /* =========================
      Load leagues for tournament
   ========================= */
