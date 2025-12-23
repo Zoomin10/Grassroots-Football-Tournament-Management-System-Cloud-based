@@ -10,6 +10,8 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+
 // ----------------- DB -----------------
 const pool = new Pool({
   user: 'postgres',
