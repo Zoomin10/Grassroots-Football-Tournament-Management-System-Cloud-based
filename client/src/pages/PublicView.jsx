@@ -248,17 +248,21 @@ const formatTime = (timeStr) => {
       </h2>
 
 
-      {(selectedTournament.date || selectedTournament.kickoff_time) && (
-        <div className="tournament-meta">
-          {selectedTournament.date && (
-            <span>📅 {formatDate(selectedTournament.date)}</span>
-          )}
-          {selectedTournament.kickoff_time && (
-            <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
-          )}
-        </div>
-        
-      )}
+      {(selectedTournament.date ||
+  selectedTournament.kickoff_time ||
+  selectedTournament.venue) && (
+  <div className="tournament-meta">
+    {selectedTournament.date && (
+      <span>📅 {formatDate(selectedTournament.date)}</span>
+    )}
+    {selectedTournament.kickoff_time && (
+      <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
+    )}
+    {selectedTournament.venue && (
+      <span>📍 {selectedTournament.venue}</span>
+    )}
+  </div>
+)}
     </>
   ) : (
     <h2 className="tournament-title">Select a tournament</h2>

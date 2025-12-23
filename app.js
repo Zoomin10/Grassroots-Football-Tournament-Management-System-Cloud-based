@@ -19,6 +19,14 @@ const pool = new Pool({
   port: 5432,
 });
 
+const VENUES = [
+  "Wichelstowe Sports Hub",
+  "Swindon Town Foundation Park",
+  "The Deanery School",
+  "The Ridgeway Leisure Center",
+];
+
+
 // ----------------- MIDDLEWARE -----------------
 app.use(cors());
 app.use(express.json());
@@ -106,7 +114,8 @@ app.post("/api/tournaments", async (req, res) => {
     age_group,
     date,
     kickoff_time,
-    match_length
+    match_length,
+    venue
   } = req.body;
 
   if (!year || !gender || !age_group) {
@@ -125,12 +134,13 @@ app.post("/api/tournaments", async (req, res) => {
         age_group,
         date,
         kickoff_time,
-        match_length
+        match_length,
+        venue
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
       `,
-      [year, gender, age_group, date, kickoff_time, match_length]
+      [year, gender, age_group, date, kickoff_time, match_length, venue]
     );
 
     const tournament = result.rows[0];

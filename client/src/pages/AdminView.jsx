@@ -38,6 +38,9 @@ export default function AdminView() {
 const [kickoffHour, setKickoffHour] = useState("09");
 const [kickoffMinute, setKickoffMinute] = useState("00");
 const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
+const selectedTournament = tournaments.find(
+  t => t.id === selectedTournamentId
+);
 
   const reloadData = () => setReloadKey(k => k + 1);
 
@@ -46,6 +49,13 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
     : [];
 
     console.log("ADMIN selectedTournamentId:", selectedTournamentId);
+const [venue, setVenue] = useState("");
+const VENUES = [
+  "Wichelstowe Sports Hub",
+  "Swindon Town Foundation Park",
+  "The Deanery School",
+  "The Ridgeway Leisure Center",
+];
 
   /* =========================
      LOAD TOURNAMENTS
@@ -165,7 +175,8 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
         age_group: ageGroup,
         date: tournamentDate,
         kickoff_time: kickoffTime,
-        match_length: matchLength
+        match_length: matchLength,
+        venue
 }),
       });
 
@@ -328,30 +339,51 @@ const activeLeagueName = activeLeague?.name ?? "";
      RENDER
   ========================= */
   return (
-  <div className="admin-view">
-    <div className="admin-container">
+<div className="admin-view">
+  <div className="admin-container">
 
-      {/* Header */}
-      <div className="admin-header">
-        <h1>🔐 Admin Control Panel</h1>
+    {/* Header */}
+    <div className="admin-header">
+      <h1>🔐 Admin Control Panel</h1>
+<div className="admin-tournament-card">
+  <div className="admin-tournament-content">
 
-        <div className="admin-tournament-card">
-          <div className="admin-tournament-selector">
-            <label htmlFor="admin-tournament-select">Active Tournament</label>
-            <select
-              id="admin-tournament-select"
-              value={selectedTournamentId ?? ""}
-              onChange={e => setSelectedTournamentId(Number(e.target.value))}
-            >
-              <option value="" disabled>Select tournament</option>
-              {tournaments.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.year} – {t.gender} {t.age_group}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+    <div className="admin-tournament-selector">
+      <label htmlFor="admin-tournament-select">Active Tournament</label>
+      <select
+        id="admin-tournament-select"
+        value={selectedTournamentId ?? ""}
+        onChange={e => setSelectedTournamentId(Number(e.target.value))}
+      >
+        <option value="" disabled>Select tournament</option>
+        {tournaments.map(t => (
+          <option key={t.id} value={t.id}>
+            {t.year} – {t.gender} {t.age_group}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {selectedTournament && (
+      <div className="admin-tournament-meta">
+        {selectedTournament.date && (
+          <span>
+            📅 {new Date(selectedTournament.date).toLocaleDateString("en-GB")}
+          </span>
+        )}
+        {selectedTournament.kickoff_time && (
+          <span>
+            ⏰ Kickoff {selectedTournament.kickoff_time.slice(0, 5)}
+          </span>
+        )}
+        {selectedTournament.venue && (
+          <span>📍 {selectedTournament.venue}</span>
+        )}
+      </div>
+    )}
+
+  </div>
+</div>
 
         {/* Admin Actions */}
         <div className="admin-actions">
@@ -495,7 +527,20 @@ const activeLeagueName = activeLeague?.name ?? "";
     ))}
   </select>
 </div>
-
+<div className="admin-group">
+  <label>Venue</label>
+  <select
+    value={venue}
+    onChange={e => setVenue(e.target.value)}
+  >
+    <option value="">Select venue</option>
+    {VENUES.map(v => (
+      <option key={v} value={v}>
+        {v}
+      </option>
+    ))}
+  </select>
+</div>
 
           <div className="admin-actions admin-actions--form">
   <button
