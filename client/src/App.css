@@ -566,7 +566,7 @@ text-align: right;
 
 
 .admin-button.secondary:hover {
-  background: #dfe7f2;
+   background: #155fa8;
 }
 
 /* Keep primary consistent */
@@ -606,13 +606,13 @@ text-align: right;
 
 /* Cancel button */
 .admin-button.secondary {
-  background: #eef2f7;
-  color: #003366;
+  background: #1976d2;
+  color: #ffffff;
   border: 2px solid #cfd9e6;
 }
 
 .admin-button.secondary:hover {
-  background: #e1e8f2;
+   background: #155fa8;
    border-color: #b8c6da;
 }
 .admin-actions.admin-actions--form .admin-button:hover {
