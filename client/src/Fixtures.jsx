@@ -30,67 +30,73 @@ export default function Fixtures({
       });
   };
 
-  return (
-    <div className="fixtures-container">
-      <h2>Results / Fixtures</h2>
+return (
+  <div className="fixtures-container">
+    <h2>Fixtures / Results</h2>
 
-      <ul className="fixture-list">
-        {fixtures.map(fx => (
-          <li key={fx.id} className="fixture-card">
-            <div className="fixture-content">
+    <ul className="fixture-list">
+      {fixtures.map(fx => (
+        <li key={fx.id} className="fixture-card">
+          <div className="fixture-content">
 
-              {/* Team vs Team */}
-              <div className="fixture-line fixture-teams-balanced">
-                <span className="fixture-team home">{fx.home_team}</span>
-                <span className="vs">vs</span>
-                <span className="fixture-team away">{fx.away_team}</span>
+            {/* Team vs Team */}
+            <div className="fixture-line fixture-teams-balanced">
+              <span className="fixture-team home">{fx.home_team}</span>
+              <span className="vs">vs</span>
+              <span className="fixture-team away">{fx.away_team}</span>
+            </div>
+
+            {/* Score / TBD / Actions */}
+            {fx.played ? (
+              <div className="fixture-line fixture-score-centered">
+                {fx.home_score} - {fx.away_score}
               </div>
-
-              {/* Score or Submit Form */}
-              {fx.played ? (
-                <div className="fixture-line fixture-score-centered">
-                  {fx.home_score} - {fx.away_score}
-                  </div>
-                  ) : readOnly ? (
-                 <div className="fixture-line fixture-score-centered">TBD</div>
-                
-              ) : (
+            ) : readOnly ? (
+              <div className="fixture-line fixture-score-centered">
+                TBD
+              </div>
+            ) : (
+              <div className="fixture-actions">
                 <form
                   className="fixture-score-form"
                   onSubmit={e => {
                     e.preventDefault();
-                    handleSubmitResult(
+                    submitResult(
                       fx.id,
                       e.target.home.value,
                       e.target.away.value
                     );
                   }}
                 >
-                  <input name="home" type="number" min="0" placeholder="Home" required />
-                  <span>-</span>
-                  <input name="away" type="number" min="0" placeholder="Away" required />
-                  <button type="submit">Submit</button>
+                  <div className="fixture-score-inputs">
+                    <input name="home" type="number" min="0" required />
+                    <span>-</span>
+                    <input name="away" type="number" min="0" required />
+                  </div>
+
+                  <div className="fixture-action-buttons">
+                    <button type="submit" className="fixture-submit-btn">
+                      Submit
+                    </button>
+
+                    {typeof onDelete === "function" && (
+                      <button
+                        type="button"
+                        className="fixture-delete-btn"
+                        onClick={() => onDelete(fx.id)}
+                      >
+                        🗑️ Delete
+                      </button>
+                    )}
+                  </div>
                 </form>
-              )}
+              </div>
+            )}
 
-              {/* Delete Button */}
- <button
-  type="button"
-  className="delete-btn"
-  onClick={() => {
-    console.log('🔥 DELETE CLICKED', fx.id);
-    if (typeof onDelete === 'function') {
-      onDelete(fx.id);
-    }
-  }}
->
-  🗑️
-</button>
-
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 }

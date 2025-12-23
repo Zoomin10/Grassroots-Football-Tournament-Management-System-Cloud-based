@@ -437,25 +437,38 @@ app.post('/api/matches/:id/result', async (req, res) => {
   }
 });
 
-// DELETE knockout fixture (admin)
-app.delete('/api/matches/:id', async (req, res) => {
+// DELETE fixture (admin)
+app.delete("/api/matches/:id", async (req, res) => {
+  const rawId = req.params.id;
+  const id = parseInt(rawId, 10);
+
+
+
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ error: "Invalid match id" });
+  }
+
   try {
-    await pool.query(
-      `
-      DELETE FROM matches
-      WHERE id = $1
-        AND round IN ('semi-final', 'final')
-      `,
-      [req.params.id]
+    const result = await pool.query(
+      "DELETE FROM matches WHERE id = $1 RETURNING id",
+      [id]
     );
+
+    console.log("🧹 DELETE result:", result.rows);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Match not found" });
+    }
 
     res.sendStatus(204);
   } catch (err) {
-    console.error('❌ Delete fixture error:', err);
-    res.status(500).json({ error: 'Delete failed' });
+    console.error("❌ Delete match failed:", err);
+    res.status(500).json({ error: "Delete failed" });
   }
 });
 
+
+  
 // ======================================================
 // ================== LEAGUE TABLE =======================
 // ======================================================

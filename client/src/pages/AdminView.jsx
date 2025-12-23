@@ -205,14 +205,28 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
   };
 
   const handleDeleteFixture = async (id) => {
-    try {
-      const res = await fetch(`/api/matches/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
-      reloadData();
-    } catch (err) {
-      console.error("❌ Delete fixture error:", err);
+  const ok = window.confirm(
+    "Are you sure you want to delete this fixture?\n\nThis cannot be undone."
+  );
+
+  if (!ok) return;
+
+  try {
+    const res = await fetch(`/api/matches/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      throw new Error("Delete failed");
     }
-  };
+
+    reloadData();
+  } catch (err) {
+    console.error("❌ Delete fixture error:", err);
+    alert("Failed to delete fixture. See console for details.");
+  }
+};
+
 
   const resetTournamentData = async () => {
   if (!selectedTournamentId) return;
@@ -357,7 +371,7 @@ const activeLeagueName = activeLeague?.name ?? "";
   disabled={!selectedTournamentId}
 >
   🖨️ Print Public View
-  
+
 </button>
 
           <button

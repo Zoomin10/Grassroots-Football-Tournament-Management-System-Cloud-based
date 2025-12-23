@@ -91,9 +91,8 @@
 /* Score form (admin mode) */
 .fixture-score-form {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;   /* ✅ THIS IS THE KEY */
+  align-items: stretch;
 }
 
 .fixture-score-form input {
@@ -108,19 +107,68 @@
   cursor: pointer;
 }
 
-/* Delete button */
-.delete-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
 
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 14px;
-  cursor: pointer;
+.fixture-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.fixture-score-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.delete-btn:hover {
-  color: red;
+.fixture-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.fixture-submit-btn {
+  justify-self: center;
+  margin-left: 100px;
+  min-width: 120px;
+   padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.fixture-submit-btn:hover {
+  background: #155fa8;
+}
+
+.fixture-delete-btn {
+  justify-self: end;
+  min-width: 80px;
+  padding: 6px 10px;
+  font-size: 13px;
+
+  background: #f3f3f3;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.fixture-delete-btn:hover {
+  background: #ffe5e5;
+  color: #b00020;
+}
+@media (max-width: 420px) {
+  .fixture-delete-btn {
+    min-width: auto;
+    padding: 6px;
+  }
+
+  .fixture-delete-btn span {
+    display: none;
+  }
 }
