@@ -41,6 +41,10 @@ const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
 const selectedTournament = tournaments.find(
   t => t.id === selectedTournamentId
 );
+ const PITCHES = ["Pitch 1", "Pitch 2", "Pitch 3", "Pitch 4"];
+
+const [pitchLeagueA, setPitchLeagueA] = useState("");
+const [pitchLeagueB, setPitchLeagueB] = useState("");
 
   const reloadData = () => setReloadKey(k => k + 1);
 
@@ -176,7 +180,9 @@ const VENUES = [
         date: tournamentDate,
         kickoff_time: kickoffTime,
         match_length: matchLength,
-        venue
+        venue,
+        pitchLeagueA,
+        pitchLeagueB
 }),
       });
 
@@ -345,7 +351,7 @@ const activeLeagueName = activeLeague?.name ?? "";
     {/* Header */}
     <div className="admin-header">
       <h1>🔐 Admin Control Panel</h1>
-<div className="admin-tournament-card">
+<div className="tournament-actions">
   <div className="admin-tournament-content">
 
     <div className="admin-tournament-selector">
@@ -363,24 +369,28 @@ const activeLeagueName = activeLeague?.name ?? "";
         ))}
       </select>
     </div>
+{selectedTournament && (
+  <div className="admin-tournament-info">
+    <div className="admin-tournament-meta">
+      {selectedTournament.date && (
+        <span>📅 {new Date(selectedTournament.date).toLocaleDateString("en-GB")}</span>
+      )}
+      {selectedTournament.kickoff_time && (
+        <span>⏰ Kickoff {selectedTournament.kickoff_time.slice(0, 5)}</span>
+      )}
+      {selectedTournament.venue && (
+        <span>📍 {selectedTournament.venue}</span>
+      )}
+      {selectedTournament.pitch_league_a && (
+        <span>🟦 League A: {selectedTournament.pitch_league_a}</span>
+      )}
+      {selectedTournament.pitch_league_b && (
+        <span>⬜ League B {selectedTournament.pitch_league_b}</span>
+      )}
+    </div>
+  </div>
+)}
 
-    {selectedTournament && (
-      <div className="admin-tournament-meta">
-        {selectedTournament.date && (
-          <span>
-            📅 {new Date(selectedTournament.date).toLocaleDateString("en-GB")}
-          </span>
-        )}
-        {selectedTournament.kickoff_time && (
-          <span>
-            ⏰ Kickoff {selectedTournament.kickoff_time.slice(0, 5)}
-          </span>
-        )}
-        {selectedTournament.venue && (
-          <span>📍 {selectedTournament.venue}</span>
-        )}
-      </div>
-    )}
 
   </div>
 </div>
@@ -538,6 +548,31 @@ const activeLeagueName = activeLeague?.name ?? "";
       <option key={v} value={v}>
         {v}
       </option>
+    ))}
+  </select>
+</div>
+<div className="admin-group">
+  <label>Pitch Allocation – League A</label>
+  <select
+    value={pitchLeagueA}
+    onChange={e => setPitchLeagueA(e.target.value)}
+  >
+    <option value="">Select pitch</option>
+    {PITCHES.map(p => (
+      <option key={p} value={p}>{p}</option>
+    ))}
+  </select>
+</div>
+
+<div className="admin-group">
+  <label>Pitch Allocation – League B</label>
+  <select
+    value={pitchLeagueB}
+    onChange={e => setPitchLeagueB(e.target.value)}
+  >
+    <option value="">Select pitch</option>
+    {PITCHES.map(p => (
+      <option key={p} value={p}>{p}</option>
     ))}
   </select>
 </div>

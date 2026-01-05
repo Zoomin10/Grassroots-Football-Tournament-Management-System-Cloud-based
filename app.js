@@ -117,7 +117,10 @@ app.post("/api/tournaments", async (req, res) => {
     date,
     kickoff_time,
     match_length,
-    venue
+    venue,
+    pitchLeagueA,
+    pitchLeagueB
+
   } = req.body;
 
   if (!year || !gender || !age_group) {
@@ -137,12 +140,14 @@ app.post("/api/tournaments", async (req, res) => {
         date,
         kickoff_time,
         match_length,
-        venue
+        venue,
+        pitch_league_a, pitch_league_b
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
       `,
-      [year, gender, age_group, date, kickoff_time, match_length, venue]
+      [year, gender, age_group, date, kickoff_time, match_length, venue,  pitchLeagueA,
+      pitchLeagueB]
     );
 
     const tournament = result.rows[0];

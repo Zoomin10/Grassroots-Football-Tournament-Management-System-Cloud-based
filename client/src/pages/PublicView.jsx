@@ -206,110 +206,119 @@ const formatTime = (timeStr) => {
      Render
   ========================= */
   return (
-    <div className="public-view">
-      <div className="public-container">
-        <div className="public-dashboard">
+  <div className="public-view">
+    <div className="public-container">
+      <div className="public-dashboard">
 
-       {/* 🎉 Celebration Banner */}
-{(cupResult || plateResult) && (
-  <section
-    className="celebration-banner celebration-banner--public">
-      
-    <h2>🎉 Tournament Results 🎉</h2>
+        {/* 🎉 Celebration Banner */}
+        {(cupResult || plateResult) && (
+          <section className="celebration-banner celebration-banner--public">
+            <h2>🎉 Tournament Results 🎉</h2>
 
-    {cupResult && (
-      <div className="celebration-card cup">
-        <h3>🏆 Cup Competition</h3>
-        <p><strong>Winners:</strong> {cupResult.winner}</p>
-        <p><strong>Runners-up:</strong> {cupResult.runnerUp}</p>
-      </div>
-    )}
+            {cupResult && (
+              <div className="celebration-card cup">
+                <h3>🏆 Cup Competition</h3>
+                <p><strong>Winners:</strong> {cupResult.winner}</p>
+                <p><strong>Runners-up:</strong> {cupResult.runnerUp}</p>
+              </div>
+            )}
 
-    {plateResult && (
-      <div className="celebration-card plate">
-        <h3>🥈 Plate Competition</h3>
-        <p><strong>Winners:</strong> {plateResult.winner}</p>
-        <p><strong>Runners-up:</strong> {plateResult.runnerUp}</p>
-      </div>
-    )}
-  </section>
-)}
+            {plateResult && (
+              <div className="celebration-card plate">
+                <h3>🥈 Plate Competition</h3>
+                <p><strong>Winners:</strong> {plateResult.winner}</p>
+                <p><strong>Runners-up:</strong> {plateResult.runnerUp}</p>
+              </div>
+            )}
+          </section>
+        )}
 
+        {/* Header */}
+        <div className="public-header">
+          {selectedTournament ? (
+            <>
+              <h2 className="tournament-title">
+                {selectedTournament.year} –{" "}
+                {selectedTournament.gender.charAt(0).toUpperCase() +
+                  selectedTournament.gender.slice(1)}{" "}
+                {selectedTournament.age_group}
+              </h2>
 
-          {/* Header */}
-          <div className="public-header">
-  {selectedTournament ? (
-    <>
-      <h2 className="tournament-title">
-        {selectedTournament.year} –{" "}
-        {selectedTournament.gender.charAt(0).toUpperCase() +
-          selectedTournament.gender.slice(1)}{" "}
-        {selectedTournament.age_group}
-      </h2>
+              {(selectedTournament.date ||
+                selectedTournament.kickoff_time ||
+                selectedTournament.venue) && (
+                <div className="tournament-meta">
+                  {selectedTournament.date && (
+                    <span>📅 {formatDate(selectedTournament.date)}</span>
+                  )}
+                  {selectedTournament.kickoff_time && (
+                    <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
+                  )}
+                  {selectedTournament.venue && (
+                    <span>📍 {selectedTournament.venue}</span>
+                  )}
+                </div>
+              )}
 
+              {(selectedTournament.pitch_league_a ||
+                selectedTournament.pitch_league_b) && (
+                <div className="tournament-meta">
+                  {selectedTournament.pitch_league_a && (
+                    <span>🟦 League A – {selectedTournament.pitch_league_a}</span>
+                  )}
+                  {selectedTournament.pitch_league_b && (
+                    <span>⬜ League B  – {selectedTournament.pitch_league_b}</span>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <h2 className="tournament-title">Select a tournament</h2>
+          )}
 
-      {(selectedTournament.date ||
-  selectedTournament.kickoff_time ||
-  selectedTournament.venue) && (
-  <div className="tournament-meta">
-    {selectedTournament.date && (
-      <span>📅 {formatDate(selectedTournament.date)}</span>
-    )}
-    {selectedTournament.kickoff_time && (
-      <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
-    )}
-    {selectedTournament.venue && (
-      <span>📍 {selectedTournament.venue}</span>
-    )}
-  </div>
-)}
-    </>
-  ) : (
-    <h2 className="tournament-title">Select a tournament</h2>
-  )}
-
-  <div className="public-tournament-selector">
-    <label htmlFor="tournament-select">Tournament</label>
-    <select
-      id="tournament-select"
-      value={selectedTournamentId || ""}
-      onChange={e => setSelectedTournamentId(Number(e.target.value))}
-    >
-      {tournaments.map(t => (
-        <option key={t.id} value={t.id}>
-          {t.year} – {t.gender} {t.age_group}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
-
-<p style={{ fontSize: "0.85rem", color: "#666", textAlign: "center" }}>
-  🔄 Scores update automatically
-</p>
-          {/* Leagues */}
-          <div className="public-leagues">
-            <section className="league-section">
-              <h2>League A</h2>
-              <LeagueTable league={leagueA} />
-              <Fixtures fixtures={fixturesA} readOnly />
-            </section>
-
-            <section className="league-section">
-              <h2>League B</h2>
-              <LeagueTable league={leagueB} />
-              <Fixtures fixtures={fixturesB} readOnly />
-            </section>
+          <div className="public-tournament-selector">
+            <label htmlFor="tournament-select">Tournament</label>
+            <select
+              id="tournament-select"
+              value={selectedTournamentId || ""}
+              onChange={e => setSelectedTournamentId(Number(e.target.value))}
+            >
+              {tournaments.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.year} – {t.gender} {t.age_group}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
 
-          {/* Knockouts */}
-          <section className="knockout-stage-wrapper">
-            <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
-            <KnockoutBracket matches={knockouts} readOnly />
+        <p style={{ fontSize: "0.85rem", color: "#666", textAlign: "center" }}>
+          🔄 Scores update automatically
+        </p>
+
+        {/* Leagues */}
+        <div className="public-leagues">
+          <section className="league-section">
+            <h2>League A</h2>
+            <LeagueTable league={leagueA} />
+            <Fixtures fixtures={fixturesA} readOnly />
           </section>
 
+          <section className="league-section">
+            <h2>League B</h2>
+            <LeagueTable league={leagueB} />
+            <Fixtures fixtures={fixturesB} readOnly />
+          </section>
         </div>
+
+        {/* Knockouts */}
+        <section className="knockout-stage-wrapper">
+          <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+          <KnockoutBracket matches={knockouts} readOnly />
+        </section>
+
       </div>
     </div>
-  );
+  </div>
+);
 }
