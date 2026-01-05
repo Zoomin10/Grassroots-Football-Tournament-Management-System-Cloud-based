@@ -225,50 +225,8 @@ app.delete("/api/teams/:id", async (req, res) => {
 });
 
 
-app.post('/api/tournaments', async (req, res) => {
-  const { year, gender, age_group, date, kickoff_time, match_length } = req.body;
 
-  if (!year || !gender || !age_group) {
-    return res.status(400).json({
-      error: "Missing required fields",
-      received: req.body
-    });
-  }
 
-  try {
-    console.log("CREATE TOURNAMENT BODY:", req.body);
-
-    // 1️⃣ Create tournament
-    const tournamentResult = await pool.query(
-      `
-      INSERT INTO tournaments (year, gender, age_group)
-      VALUES ($1, $2, $3)
-      RETURNING *
-      `,
-      [year, gender, age_group]
-    );
-
-    const tournament = tournamentResult.rows[0];
-
-    // 2️⃣ Create leagues for this tournament
-    await pool.query(
-      `
-      INSERT INTO leagues (name, tournament_id)
-      VALUES
-        ('League A', $1),
-        ('League B', $1)
-      `,
-      [tournament.id]
-    );
-
-    // 3️⃣ Send response ONCE
-    res.json(tournament);
-
-  } catch (err) {
-    console.error("❌ Create tournament backend error:", err);
-    res.status(500).json({ error: "Failed to create tournament" });
-  }
-});
 
 
 // ==================== MATCHES ==========================
@@ -441,7 +399,8 @@ app.post('/api/matches/:id/result', async (req, res) => {
       UPDATE matches
       SET home_score = $1,
           away_score = $2,
-          played = true
+          played = true,
+           updated_at = NOW()
       WHERE id = $3
       `,
       [home_score, away_score, req.params.id]
@@ -453,6 +412,41 @@ app.post('/api/matches/:id/result', async (req, res) => {
     res.status(500).json({ error: 'Failed to submit result' });
   }
 });
+
+// TV latest results
+app.get("/api/matches/latest", async (req, res) => {
+  const limit = Number(req.query.limit) || 12;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT
+        m.id,
+        m.home_score,
+        m.away_score,
+        m.updated_at,
+        ht.team AS home_team,
+        at.team AS away_team,
+        t.gender,
+        t.age_group
+      FROM matches m
+      JOIN teams ht ON m.home_team_id = ht.id
+      JOIN teams at ON m.away_team_id = at.id
+      JOIN tournaments t ON m.tournament_id = t.id
+      WHERE m.played = true
+      ORDER BY m.updated_at DESC
+      LIMIT $1
+      `,
+      [limit]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Latest scores error:", err);
+    res.status(500).json({ error: "Failed to fetch latest scores" });
+  }
+});
+
 
 // DELETE fixture (admin)
 app.delete("/api/matches/:id", async (req, res) => {

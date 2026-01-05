@@ -61,7 +61,7 @@ return (
                   className="fixture-score-form"
                   onSubmit={e => {
                     e.preventDefault();
-                    submitResult(
+                    handleSubmitResult(
                       fx.id,
                       e.target.home.value,
                       e.target.away.value

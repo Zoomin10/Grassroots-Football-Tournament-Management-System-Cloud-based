@@ -454,9 +454,9 @@ const activeLeagueName = activeLeague?.name ?? "";
               value={gender}
               onChange={e => setGender(e.target.value)}
             >
-              <option value="boys">Boys</option>
-              <option value="girls">Girls</option>
-              <option value="mixed">Mixed</option>
+              <option value="Boys">Boys</option>
+              <option value="Girls">Girls</option>
+              <option value="Mixed">Mixed</option>
             </select>
           </div>
 

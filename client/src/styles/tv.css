@@ -1,0 +1,316 @@
+
+/* Wraps header + route content + footer */
+.tv-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0b0f14;
+  color: #ffffff;
+}
+
+/* Makes the routed page take the remaining height between header/footer */
+.tv-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.tv-content > * {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Main content */
+.tv-main {
+  flex: 1;
+  min-height: 0; /* IMPORTANT for scrolling inside panels */
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+  padding: 18px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* Header overrides */
+.tv-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+   justify-content: center;   /* 👈 this centers the title box */
+  align-items: center;
+  gap: 18px;
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.tv-logo {
+  height: 64px;
+  width: auto;
+}
+
+.tv-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  color: #741b56;
+  background-color: #ffffff;
+}
+
+.tv-title-line {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+   color: #003366;
+  background-color: #ffffff;
+}
+
+/* TV title white container */
+.tv-title-box {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  justify-self: center;
+  gap: 14px;
+
+  background: #ffffff;
+  color: #003366;
+
+  padding: 10px 18px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Ensure text inside is dark */
+.tv-title-box .tv-title-line {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: #003366;;
+}
+
+/* Logo inside white box */
+.tv-title-box .tv-logo {
+  height: 64px;
+  width: auto;
+}
+
+/* clock on the right */
+.tv-clock {
+  grid-column: 3;
+  justify-self: end;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 1px;
+
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.tv-panel {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tv-panel-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.tv-panel-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.tv-panel-subtitle {
+  margin-top: 6px;
+  font-size: 28px;
+  opacity: 0.85;
+  color: #ecf014;
+}
+
+.tv-panel-body {
+  padding: 18px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.tv-loading,
+.tv-empty {
+  font-size: 22px;
+  opacity: 0.85;
+}
+
+/* League placeholders (swap with your real tables next) */
+.tv-league-block {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 14px;
+}
+
+.tv-league-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.tv-league-placeholder {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.tv-rotate-hint {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+/* Scores feed */
+.tv-score-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.tv-score-item {
+  padding: 14px 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  background: rgba(0,0,0,0.18);
+}
+
+.tv-score-item--new {
+  border: 2px solid rgba(255,255,255,0.35);
+}
+
+.tv-score-line {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.tv-score-time {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Footer overrides */
+.tv-sponsor-footer {
+  padding: 14px 22px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+}
+.tv-sponsor-text {
+  font-size: 18px;
+  font-weight: 700;
+  opacity: 0.9;
+  text-align: center;
+  white-space: normal; /* allow wrapping */
+}
+
+.tv-sponsor-logos {
+  display: flex;
+  justify-content: center;   /* center the row */
+  align-items: center;
+  flex-wrap: wrap;           /* wrap if needed */
+  gap: 120px;
+  width: 100%;
+}
+.tv-sponsor-logos img {
+  height: 86px;              /* bigger logos */
+  width: auto;
+  display: block;            /* removes baseline gap */
+  opacity: 0.95;
+}
+
+/* Optional: make it adapt nicely on smaller screens too */
+@media (max-width: 1100px) {
+  .tv-main {
+    grid-template-columns: 1fr;
+  }
+}
+.tv-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;              /* key: prevents column wobble */
+  font-size: 18px;
+}
+.tv-table th,
+.tv-table td {
+  opacity: 0.9;
+  font-weight: 800;
+  padding: 6px 10px;
+  width: 52%;
+   line-height: 1.2;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+/* Team column: left aligned, takes most width */
+.tv-table th.tv-col-team,
+.tv-table td.tv-col-team {
+  text-align: left;
+  width: 45%;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;          /* tidy long team names */
+}
+/* Numeric columns: right aligned, fixed width */
+.tv-table th:not(.tv-col-team),
+.tv-table td:not(.tv-col-team) {
+  text-align: right;
+  width: 8%;
+  font-variant-numeric: tabular-nums; /* makes digits line up nicely */
+}
+.tv-col-team {
+  text-align: left;
+  font-weight: 800;
+}
+
+.tv-col-pts {
+  font-weight: 900;
+}
+.tv-table td:nth-child(5) {
+  font-weight: 700;
+}
+
+/* Team cell layout */
+.tv-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Team logo */
+.tv-team-logo {
+  height: 32px;          /* good size for TV */
+  width: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Team name */
+.tv-team-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
