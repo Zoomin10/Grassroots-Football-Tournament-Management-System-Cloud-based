@@ -425,6 +425,8 @@ app.get("/api/matches/latest", async (req, res) => {
         m.home_score,
         m.away_score,
         m.updated_at,
+        m.round,
+        m.bracket,
         ht.team AS home_team,
         at.team AS away_team,
         t.gender,
