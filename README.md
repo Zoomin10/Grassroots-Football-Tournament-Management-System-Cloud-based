@@ -1,28 +1,28 @@
 # Wroughton Youth FC – Tournament Management System
 
-A web-based application for managing youth football tournaments, fixtures, league tables, knockouts, and **live TV displays** for matchdays.
+A web-based application for managing youth football tournaments, fixtures, league tables, knockouts, and for tournament matchdays.
 
-Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet, public viewers on phones, and a dedicated TV mode for spectators.
+Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, and a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators.
 
 ---
 
 ## ✨ Features
 
 ### Core
-- Tournament creation (year, gender, age group)
+- Tournament creation (year, gender, age group, date, location, pitch allocation)
 - League A / League B structure
-- Team management
-- Round-robin fixture generation
+- Team allocation to leagues
+- Round-robin fixture generation, or manual fixture creation
 - Result submission
-- Automatic league tables
+- Automatic league tables adjustments based on results
 
 ### Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
-- Auto-rotating tournaments
-- Latest 6 scores (auto-updating)
+- Auto-rotating tournaments (15 seconds rotation)
+- Latest 6 scores (auto-updating) 0 based on most recent time-stamp
 - Club logos in league tables
-- Digital clock
-- Sponsor footer
+- Digital clock showing real time
+- Sponsors footer section always on display
 - Designed for **no scrolling** on large screens
 
 ### Knockouts
