@@ -1,282 +1,187 @@
-# Wroughton Youth Football Club - Summer Tournament App
+# Wroughton Youth FC – Tournament Management System
 
-A full-stack web application for managing youth football tournaments, replacing paper schedules and WhatsApp updates with a live admin dashboard and public-facing results view.
+A web-based application for managing youth football tournaments, fixtures, league tables, knockouts, and **live TV displays** for matchdays.
 
-Built for Wroughton Youth Football Club (WYFC)
-
-WYFC Summer Tournament App
-Copyright 2025 Wroughton Youth Football Club
-
-This product includes software developed by Wroughton Youth Football Club (WYFC)
-## 📄 License
-Apache License 2.0 © 2025 Wroughton Youth Football Club
-https://www.apache.org/licenses/LICENSE-2.0
----
-
-## 📌 Features
-
-### Admin Control Panel
-- Create and manage tournaments
-- Define **Year, Gender, Age Group, Date, Kickoff Time, Match Length, Venue**
-- Add teams and assign to leagues
-- Auto-generate **round-robin league fixtures**
-- Enter results and update league tables
-- Generate **Cup & Plate knockout stages**
-- Delete fixtures, teams, or tournaments
-- Print-ready public view
-
-### Public View
-- Read-only tournament display
-- Live league tables and fixtures
-- Knockout brackets
-- Tournament winners banner
-- Auto-refresh (polling)
-- Optimised print mode for spectators
+Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet, public viewers on phones, and a dedicated TV mode for spectators.
 
 ---
 
-## 🧱 Software Architecture
+## ✨ Features
 
-### High-level architecture
-┌────────────┐ REST API ┌──────────────┐
-│ Frontend │ ───────────────▶ │ Backend │
-│ React │ │ Express.js │
-│ (Vite) │ ◀─────────────── │ │
-└────────────┘ JSON └──────────────┘
-│
-▼
-┌──────────────┐
-│ PostgreSQL │
-│ Database │
-└──────────────┘
+### Core
+- Tournament creation (year, gender, age group)
+- League A / League B structure
+- Team management
+- Round-robin fixture generation
+- Result submission
+- Automatic league tables
 
-yaml
-Copy code
+### Live TV View (`/tv`)
+- Two-panel layout (Leagues + Latest Scores)
+- Auto-rotating tournaments
+- Latest 6 scores (auto-updating)
+- Club logos in league tables
+- Digital clock
+- Sponsor footer
+- Designed for **no scrolling** on large screens
 
-- **Frontend**: React + Vite (AdminView, PublicView)
-- **Backend**: Node.js + Express REST API
-- **Database**: PostgreSQL
+### Knockouts
+- Cup & Plate semi-finals
+- Manual final generation once semis complete
 
 ---
 
-## 📂 Repository
+## 🧭 Application Routes
 
-**GitHub**  
-👉 https://github.com/Zoomin10/WYFC-summer-tournament-app
+| Route | Purpose |
+|------|--------|
+| `/` | Public view (fixtures & results) |
+| `/admin` | Admin view (manage tournaments, teams, fixtures, results) |
+| `/tv` | Large screen / TV live view |
+
+---
+
+## 🏗️ Architecture Overview
+
+```text
+Browser (Public / Admin / TV)
+        │
+        ▼
+Node.js + Express (REST API)
+        │
+        ▼
+PostgreSQL Database
+```
+
+The frontend is a React SPA that communicates with a REST API. The TV view polls the backend at short intervals to keep displays up to date.
 
 ---
 
 ## 📁 Project Structure
 
-### Frontend (Vite + React)
-src/
-├── pages/
-│ ├── AdminView.jsx
-│ └── PublicView.jsx
-│
-├── components/
-│ ├── TeamList.jsx
-│ ├── AddTeam.jsx
-│ ├── AddFixture.jsx
-│ ├── Fixtures.jsx
-│ ├── LeagueTable.jsx
-│ └── KnockoutBracket.jsx
-│
-├── utils/
-│ └── formatLeague.js
-│
-├── styles/
-│ ├── public.css
-│ ├── fixtures.css
-│ └── print.css
-│
-├── App.jsx
-└── main.jsx
+```
+client/
+  src/
+    pages/
+    components/
+    styles/
+    utils/
+    App.jsx
 
-shell
-Copy code
-
-### Backend (Express)
-backend/
-├── app.js
-├── package.json
-├── .env
-└── public/
-
-yaml
-Copy code
+server/
+  app.js
+  routes/
+  db/
+```
 
 ---
 
-## 🛠️ Installation & Setup
+## 🗄️ Database (Summary)
+
+Core tables:
+- `tournaments`
+- `leagues`
+- `teams`
+- `matches`
+
+League tables are calculated dynamically from played matches.
+
+Tie-break rules:
+1. Points
+2. Goal Difference (GD)
+3. Goals For (GF)
+
+---
+
+## 🔌 API Highlights
+
+Examples:
+
+- `GET /api/tournaments`
+- `POST /api/league/generate-fixtures`
+- `POST /api/matches/:id/result`
+- `GET /api/matches/latest?limit=6`
+
+(See full API list in architecture documentation.)
+
+---
+
+## 🚀 Installation
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- PostgreSQL
-- npm
-- pgAdmin or `psql`
+- Node.js 18+
+- PostgreSQL 14+
+
+### Backend
+```bash
+cd server
+npm install
+npm start
+```
+
+### Frontend
+```bash
+cd client
+npm install
+npm run dev
+```
 
 ---
 
-## 🔐 Database Setup (PostgreSQL)
+## 🖥️ Matchday Deployment (Recommended)
 
-### Create / use database
-```sql
-CREATE DATABASE users;
-Tables
-tournaments
-sql
-Copy code
-CREATE TABLE tournaments (
-  id SERIAL PRIMARY KEY,
-  year INTEGER NOT NULL,
-  gender TEXT NOT NULL,
-  age_group TEXT NOT NULL,
-  date DATE,
-  kickoff_time TIME,
-  match_length INTEGER,
-  venue TEXT,
-  created_at TIMESTAMP DEFAULT now()
-);
-leagues
-sql
-Copy code
-CREATE TABLE leagues (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE
-);
-teams
-sql
-Copy code
-CREATE TABLE teams (
-  id SERIAL PRIMARY KEY,
-  team TEXT,
-  league_id INTEGER REFERENCES leagues(id),
-  tournament_id INTEGER REFERENCES tournaments(id)
-);
-matches
-sql
-Copy code
-CREATE TABLE matches (
-  id SERIAL PRIMARY KEY,
-  home_team_id INTEGER REFERENCES teams(id),
-  away_team_id INTEGER REFERENCES teams(id),
-  league_id INTEGER REFERENCES leagues(id),
-  tournament_id INTEGER REFERENCES tournaments(id),
-  round TEXT,
-  home_score INTEGER,
-  away_score INTEGER,
-  played BOOLEAN DEFAULT false
-);
-🔐 Environment Variables (Backend)
-.env (backend root)
-env
-Copy code
-DB_USER=postgres
-DB_PASSWORD=your_password_here
-DB_HOST=localhost
-DB_NAME=users
-DB_PORT=5432
-PORT=3000
-⚠️ Ensure .env is in .gitignore.
+**LAN-based deployment** (no internet required):
 
-🚀 Running the App (Local Dev)
-Backend
-bash
-Copy code
-cd backend
-npm install
-node app.js
-Runs on: http://localhost:3000
+1. Run server on a laptop or mini PC
+2. Connect all devices to the same Wi-Fi
+3. Open:
+   - Admin: `http://<LAN-IP>:3000/admin`
+   - TV: `http://<LAN-IP>:3000/tv`
+4. Put TV browser in fullscreen / kiosk mode
 
-Frontend
-bash
-Copy code
-cd frontend
-npm install
-npm run dev
-Runs on: http://localhost:5173
+---
 
-🔁 API Routes
-Tournaments
-GET /api/tournaments
+## 🧩 Team Logos
 
-POST /api/tournaments
+- Stored in `/public/logos/`
+- Filenames are derived automatically from team names
+- Default fallback: `/logos/default.png`
 
-DELETE /api/tournaments/:id
+Example:
+```
+Wroughton Youth FC → /logos/wroughtonyouthfc.png
+```
 
-Leagues
-GET /api/leagues?tournamentId=
+---
 
-Teams
-GET /api/teams?tournamentId=
+## ⚠️ Important Notes
 
-POST /api/teams
+- Admin routes are **not authenticated** (LAN-trusted usage)
+- `/api/admin/reset-matches` deletes **all matches** (use with care)
+- Knockout seeding is currently based on team insertion order
 
-DELETE /api/teams/:id
+---
 
-Matches / Fixtures
-GET /api/matches
+## 🛣️ Roadmap
 
-POST /api/matches
+- Standings-based knockout seeding
+- WebSocket live updates
+- Admin authentication
+- Historical tournament archive
+- Print-friendly public views
 
-DELETE /api/matches/:id
+---
 
-Admin / Automation
-POST /api/league/generate-fixtures
+## 📄 License / Ownership
 
-POST /api/knockout/regenerate
+Developed for **Wroughton Youth FC**.
 
-POST /api/knockout/generate-final
+Internal club use unless otherwise agreed.
 
-POST /api/admin/reset-tournament
+---
 
-🖨️ Print Mode
-Public view supports print mode:
+## 🙌 Credits
 
-arduino
-Copy code
-/public?tournamentId=XX&print=true
-Auto-triggers window.print()
+Built to support volunteers, referees, and spectators on matchday.
+Designed for clarity, speed, and reliability.
 
-Disables auto-refresh
-
-Optimised layout via print.css
-
-AdminView includes a Print Public View button.
-
-⚠️ Known Constraints
-Tournament creation must also create League A & League B
-
-Knockouts require completed league fixtures
-
-PublicView uses polling (60s refresh), not websockets
-
-CSS files can overlap — layout bugs may be style conflicts
-
-Frontend (5173) and Backend (3000) are separate servers
-
-🔒 Security Notes
-Do not commit database credentials
-
-Consider creating a dedicated DB user instead of postgres
-
-Use .env files in all environments
-
-🧭 Future Enhancements
-Inline editing of tournament metadata
-
-Role-based admin access
-
-Venue → Google Maps links
-
-WebSocket live updates
-
-Tournament archiving
-
-Mobile-first admin layout
-
-👤 Author
-Built and maintained by WYFC
-GitHub: https://github.com/Zoomin10

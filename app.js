@@ -611,211 +611,211 @@ app.post('/api/knockout/regenerate', async (req, res) => {
       [tournamentId]
     );
 
-    // 2️⃣ Fetch real leagues for this tournament
-    const leaguesRes = await pool.query(
-      `
-      SELECT id, name
-      FROM leagues
-      WHERE tournament_id = $1
-      `,
-      [tournamentId]
-    );
+      // 2️⃣ Fetch real leagues for this tournament
+      const leaguesRes = await pool.query(
+        `
+        SELECT id, name
+        FROM leagues
+        WHERE tournament_id = $1
+        `,
+        [tournamentId]
+      );
 
-    const leagueA = leaguesRes.rows.find(l => l.name === 'League A');
-    const leagueB = leaguesRes.rows.find(l => l.name === 'League B');
+      const leagueA = leaguesRes.rows.find(l => l.name === 'League A');
+      const leagueB = leaguesRes.rows.find(l => l.name === 'League B');
 
-    if (!leagueA || !leagueB) {
-      return res.status(400).json({ error: 'Leagues not found for tournament' });
+      if (!leagueA || !leagueB) {
+        return res.status(400).json({ error: 'Leagues not found for tournament' });
+      }
+
+      // 3️⃣ Fetch top 4 teams per league
+      const [A, B] = await Promise.all([
+        pool.query(
+          `
+          SELECT id
+          FROM teams
+          WHERE league_id = $1 AND tournament_id = $2
+          ORDER BY id
+          LIMIT 4
+          `,
+          [leagueA.id, tournamentId]
+        ),
+        pool.query(
+          `
+          SELECT id
+          FROM teams
+          WHERE league_id = $1 AND tournament_id = $2
+          ORDER BY id
+          LIMIT 4
+          `,
+          [leagueB.id, tournamentId]
+        )
+      ]);
+
+      if (A.rows.length < 4 || B.rows.length < 4) {
+        return res.status(400).json({ error: 'Not enough teams' });
+      }
+
+      // 4️⃣ Create Cup + Plate semi-finals
+      const fixtures = [
+        { home: A.rows[0].id, away: B.rows[1].id, bracket: 'cup' },
+        { home: B.rows[0].id, away: A.rows[1].id, bracket: 'cup' },
+        { home: A.rows[2].id, away: B.rows[3].id, bracket: 'plate' },
+        { home: B.rows[2].id, away: A.rows[3].id, bracket: 'plate' },
+      ];
+
+      for (const f of fixtures) {
+        await pool.query(
+          `
+          INSERT INTO matches
+            (home_team_id, away_team_id, round, bracket, tournament_id)
+          VALUES
+            ($1, $2, 'semi-final', $3, $4)
+          `,
+          [f.home, f.away, f.bracket, tournamentId]
+        );
+      }
+
+      res.json({ message: 'Knockout semi-finals regenerated' });
+    } catch (err) {
+      console.error('❌ Regenerate error:', err);
+      res.status(500).json({ error: 'Failed to regenerate knockouts' });
+    }
+  });
+
+  // AUTO-GENERATE FINAL (Cup or Plate, TOURNAMENT-SAFE)
+  app.post('/api/knockout/generate-final', async (req, res) => {
+    const { tournamentId, bracket } = req.body;
+
+    if (!tournamentId || !bracket) {
+      return res.status(400).json({ error: 'tournamentId and bracket required' });
     }
 
-    // 3️⃣ Fetch top 4 teams per league
-    const [A, B] = await Promise.all([
-      pool.query(
+    try {
+      const semis = await pool.query(
+        `
+        SELECT *
+        FROM matches
+        WHERE tournament_id = $1
+          AND round = 'semi-final'
+          AND bracket = $2
+          AND played = true
+        `,
+        [tournamentId, bracket]
+      );
+
+      if (semis.rows.length !== 2) {
+        return res.status(400).json({ error: 'Both semis not complete' });
+      }
+
+      const existingFinal = await pool.query(
         `
         SELECT id
-        FROM teams
-        WHERE league_id = $1 AND tournament_id = $2
-        ORDER BY id
-        LIMIT 4
+        FROM matches
+        WHERE tournament_id = $1
+          AND round = 'final'
+          AND bracket = $2
         `,
-        [leagueA.id, tournamentId]
-      ),
-      pool.query(
-        `
-        SELECT id
-        FROM teams
-        WHERE league_id = $1 AND tournament_id = $2
-        ORDER BY id
-        LIMIT 4
-        `,
-        [leagueB.id, tournamentId]
-      )
-    ]);
+        [tournamentId, bracket]
+      );
 
-    if (A.rows.length < 4 || B.rows.length < 4) {
-      return res.status(400).json({ error: 'Not enough teams' });
-    }
+      if (existingFinal.rows.length) {
+        return res.json({ message: 'Final already exists' });
+      }
 
-    // 4️⃣ Create Cup + Plate semi-finals
-    const fixtures = [
-      { home: A.rows[0].id, away: B.rows[1].id, bracket: 'cup' },
-      { home: B.rows[0].id, away: A.rows[1].id, bracket: 'cup' },
-      { home: A.rows[2].id, away: B.rows[3].id, bracket: 'plate' },
-      { home: B.rows[2].id, away: A.rows[3].id, bracket: 'plate' },
-    ];
+      const winners = semis.rows.map(m =>
+        m.home_score > m.away_score ? m.home_team_id : m.away_team_id
+      );
 
-    for (const f of fixtures) {
       await pool.query(
         `
         INSERT INTO matches
           (home_team_id, away_team_id, round, bracket, tournament_id)
         VALUES
-          ($1, $2, 'semi-final', $3, $4)
+          ($1, $2, 'final', $3, $4)
         `,
-        [f.home, f.away, f.bracket, tournamentId]
+        [winners[0], winners[1], bracket, tournamentId]
       );
+
+      res.json({ message: `${bracket} final created` });
+    } catch (err) {
+      console.error('❌ Final generation error:', err);
+      res.status(500).json({ error: 'Failed to generate final' });
+    }
+  });
+
+  // ======================================================
+  // ================== ADMIN ==============================
+  // ======================================================
+  app.post("/api/admin/reset-tournament", async (req, res) => {
+    const { tournamentId } = req.body;
+
+    if (!tournamentId) {
+      return res.status(400).json({ error: "tournamentId required" });
     }
 
-    res.json({ message: 'Knockout semi-finals regenerated' });
-  } catch (err) {
-    console.error('❌ Regenerate error:', err);
-    res.status(500).json({ error: 'Failed to regenerate knockouts' });
-  }
-});
+    try {
+      // Delete ALL matches for this tournament (league + knockouts)
+      await pool.query(
+        "DELETE FROM matches WHERE tournament_id = $1",
+        [tournamentId]
+      );
 
-// AUTO-GENERATE FINAL (Cup or Plate, TOURNAMENT-SAFE)
-app.post('/api/knockout/generate-final', async (req, res) => {
-  const { tournamentId, bracket } = req.body;
-
-  if (!tournamentId || !bracket) {
-    return res.status(400).json({ error: 'tournamentId and bracket required' });
-  }
-
-  try {
-    const semis = await pool.query(
-      `
-      SELECT *
-      FROM matches
-      WHERE tournament_id = $1
-        AND round = 'semi-final'
-        AND bracket = $2
-        AND played = true
-      `,
-      [tournamentId, bracket]
-    );
-
-    if (semis.rows.length !== 2) {
-      return res.status(400).json({ error: 'Both semis not complete' });
+      res.json({ message: "Tournament reset" });
+    } catch (err) {
+      console.error("❌ Reset tournament error:", err);
+      res.status(500).json({ error: "Failed to reset tournament" });
     }
+  });
 
-    const existingFinal = await pool.query(
-      `
-      SELECT id
-      FROM matches
-      WHERE tournament_id = $1
-        AND round = 'final'
-        AND bracket = $2
-      `,
-      [tournamentId, bracket]
-    );
-
-    if (existingFinal.rows.length) {
-      return res.json({ message: 'Final already exists' });
+  app.post('/api/admin/reset-matches', async (req, res) => {
+    try {
+      await pool.query('DELETE FROM matches');
+      res.json({ message: 'All matches cleared' });
+    } catch (err) {
+      console.error('❌ Reset error:', err);
+      res.status(500).json({ error: 'Failed to reset matches' });
     }
+  });
 
-    const winners = semis.rows.map(m =>
-      m.home_score > m.away_score ? m.home_team_id : m.away_team_id
-    );
+  app.delete("/api/tournaments/:id", async (req, res) => {
+    const tournamentId = req.params.id;
+    const client = await pool.connect();
 
-    await pool.query(
-      `
-      INSERT INTO matches
-        (home_team_id, away_team_id, round, bracket, tournament_id)
-      VALUES
-        ($1, $2, 'final', $3, $4)
-      `,
-      [winners[0], winners[1], bracket, tournamentId]
-    );
+    try {
+      await client.query("BEGIN");
 
-    res.json({ message: `${bracket} final created` });
-  } catch (err) {
-    console.error('❌ Final generation error:', err);
-    res.status(500).json({ error: 'Failed to generate final' });
-  }
-});
+      // Matches
+      await client.query(
+        "DELETE FROM matches WHERE tournament_id = $1",
+        [tournamentId]
+      );
 
-// ======================================================
-// ================== ADMIN ==============================
-// ======================================================
-app.post("/api/admin/reset-tournament", async (req, res) => {
-  const { tournamentId } = req.body;
+      // Teams
+      await client.query(
+        "DELETE FROM teams WHERE tournament_id = $1",
+        [tournamentId]
+      );
 
-  if (!tournamentId) {
-    return res.status(400).json({ error: "tournamentId required" });
-  }
+      // Tournament
+      await client.query(
+        "DELETE FROM tournaments WHERE id = $1",
+        [tournamentId]
+      );
 
-  try {
-    // Delete ALL matches for this tournament (league + knockouts)
-    await pool.query(
-      "DELETE FROM matches WHERE tournament_id = $1",
-      [tournamentId]
-    );
-
-    res.json({ message: "Tournament reset" });
-  } catch (err) {
-    console.error("❌ Reset tournament error:", err);
-    res.status(500).json({ error: "Failed to reset tournament" });
-  }
-});
-
-app.post('/api/admin/reset-matches', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM matches');
-    res.json({ message: 'All matches cleared' });
-  } catch (err) {
-    console.error('❌ Reset error:', err);
-    res.status(500).json({ error: 'Failed to reset matches' });
-  }
-});
-
-app.delete("/api/tournaments/:id", async (req, res) => {
-  const tournamentId = req.params.id;
-  const client = await pool.connect();
-
-  try {
-    await client.query("BEGIN");
-
-    // Matches
-    await client.query(
-      "DELETE FROM matches WHERE tournament_id = $1",
-      [tournamentId]
-    );
-
-    // Teams
-    await client.query(
-      "DELETE FROM teams WHERE tournament_id = $1",
-      [tournamentId]
-    );
-
-    // Tournament
-    await client.query(
-      "DELETE FROM tournaments WHERE id = $1",
-      [tournamentId]
-    );
-
-    await client.query("COMMIT");
-    res.sendStatus(204);
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error("❌ Delete tournament error:", err);
-    res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
-  }
-});
+      await client.query("COMMIT");
+      res.sendStatus(204);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error("❌ Delete tournament error:", err);
+      res.status(500).json({ error: err.message });
+    } finally {
+      client.release();
+    }
+  });
 
 
-// ----------------- SERVER START -----------------
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+  // ----------------- SERVER START -----------------
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
