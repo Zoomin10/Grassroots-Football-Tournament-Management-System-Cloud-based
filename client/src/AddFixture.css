@@ -26,7 +26,7 @@
   gap: 10px;
 }
 
-.add-fixture-form select,
+
 .add-fixture-form button {
   padding: 10px;
   
@@ -41,7 +41,7 @@
   cursor: pointer;
    width: fit-content;
   transition: background-color 0.2s ease;
-  
+}
 
 .add-fixture-form button:hover {
   background-color: #0056b3;

@@ -14,11 +14,8 @@ const PORT = process.env.PORT || 3000;
 
 // ----------------- DB -----------------
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'users',
-  password: 'password',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 const VENUES = [
@@ -818,6 +815,15 @@ app.post('/api/knockout/regenerate', async (req, res) => {
 
 
   // ----------------- SERVER START -----------------
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
+  // ----------------- FRONTEND (Vite build) -----------------
+const clientDistPath = path.join(__dirname, "client", "dist");
+app.use(express.static(clientDistPath));
+
+// SPA fallback (Express 5 safe) — do NOT catch /api
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(clientDistPath, "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

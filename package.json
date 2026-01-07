@@ -1,7 +1,13 @@
 {
+  "name": "grassroots-football-tournament-management-system-cloud",
+  "private": true,
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "pg": "^8.16.3"
+  },
+  "scripts": {
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "start": "node app.js"
   }
 }
