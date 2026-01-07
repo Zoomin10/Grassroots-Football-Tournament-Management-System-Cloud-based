@@ -11,7 +11,9 @@
     "start": "node app.js",
     "db:reset": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f db/reset.sql",
     "db:seed": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f db/seed.sql",
-
     "db:rebuild": "npm run db:reset && npm run db:seed"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }
