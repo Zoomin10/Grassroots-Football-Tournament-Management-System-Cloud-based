@@ -7,6 +7,7 @@ const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 6;
 
 
+
 function getWinnerFromFinal(match) {
   if (!match || !match.played) return null;
 
@@ -140,7 +141,8 @@ export default function LargeScreenView() {
 
   const [latestScores, setLatestScores] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | ready | error
-
+const [isFading, setIsFading] = useState(false);
+const FADE_MS = 800;
   const rotateTimer = useRef(null);
   const tournamentsPoll = useRef(null);
   const scoresPoll = useRef(null);
@@ -235,20 +237,26 @@ async function fetchFinalWinners(tournamentId) {
   }, []);
 
   // Rotate tournaments
-  useEffect(() => {
+ useEffect(() => {
+  if (rotateTimer.current) clearInterval(rotateTimer.current);
+
+  rotateTimer.current = setInterval(() => {
+    if (!tournaments.length) return;
+
+    // Fade OUT
+    setIsFading(true);
+
+    // After fade duration, switch tournament + fade IN
+    setTimeout(() => {
+      setActiveIndex((i) => (i + 1) % tournaments.length);
+      setIsFading(false);
+    }, FADE_MS);
+  }, ROTATE_MS);
+
+  return () => {
     if (rotateTimer.current) clearInterval(rotateTimer.current);
-
-    rotateTimer.current = setInterval(() => {
-      setActiveIndex((i) => {
-        if (!tournaments.length) return 0;
-        return (i + 1) % tournaments.length;
-      });
-    }, ROTATE_MS);
-
-    return () => {
-      if (rotateTimer.current) clearInterval(rotateTimer.current);
-    };
-  }, [tournaments.length]);
+  };
+}, [tournaments.length]);
 
   // When active tournament changes, load its league tables
   useEffect(() => {
@@ -269,7 +277,7 @@ useEffect(() => {
     
       <div className="tv-main">
         {/* Left panel */}
-        <section className="tv-panel tv-left">
+     <section className={`tv-panel tv-left ${isFading ? "tv-fade" : ""}`}>
           <div className="tv-panel-header">
         
             <div className="tv-panel-subtitle">

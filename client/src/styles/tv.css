@@ -469,3 +469,14 @@
 .tv-winners-congrats {
   animation: tvCongratsFade 3s ease-out;
 }
+
+/* Smooth fade on rotation */
+.tv-panel.tv-left {
+  transition: opacity 800ms ease, transform 800ms ease;
+  will-change: opacity, transform;
+}
+
+.tv-panel.tv-left.tv-fade {
+  opacity: 0;
+  transform: translateY(6px);
+}
