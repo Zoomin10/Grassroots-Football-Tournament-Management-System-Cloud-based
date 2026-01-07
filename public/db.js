@@ -1,13 +1,9 @@
 // db.js
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
-// Use your actual DB credentials here
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'users',
-  password: 'password',
-  port: 5432, // default PostgreSQL port
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false,
 });
-
-module.exports = pool;
