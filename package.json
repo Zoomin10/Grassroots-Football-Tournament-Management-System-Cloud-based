@@ -8,6 +8,10 @@
   },
   "scripts": {
     "build": "npm --prefix client install && npm --prefix client run build",
-    "start": "node app.js"
+    "start": "node app.js",
+    "db:reset": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f db/reset.sql",
+    "db:seed": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f db/seed.sql",
+
+    "db:rebuild": "npm run db:reset && npm run db:seed"
   }
 }
