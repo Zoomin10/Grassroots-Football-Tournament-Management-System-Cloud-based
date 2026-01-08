@@ -146,7 +146,7 @@
   min-height: 0;
   position: relative;                 /* helps sticky behave consistently */
   padding-bottom: clamp(120px, 18vh, 190px); /* reserve room for banner */
-
+}
 .tv-loading,
 .tv-empty {
   font-size: 22px;
