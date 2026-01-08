@@ -823,3 +823,20 @@ background-color: #9bc5ee;
   margin-bottom: 0.5rem;
   border-radius: 8px;
 }
+/* Global mobile/demo behavior: sponsor footer should not dominate */
+@media (max-width: 768px) {
+  .sponsor-footer {
+    position: static !important;   /* disables sticky/fixed anywhere */
+  }
+
+  .sponsor-footer .tv-sponsor-logos,
+  .sponsor-footer .sponsor-logos {
+    gap: 24px !important;
+    flex-wrap: wrap;
+  }
+
+  .sponsor-footer img {
+    height: 42px !important;
+    width: auto;
+  }
+}
