@@ -487,10 +487,11 @@
 
 /* Congrats line under banner */
 .tv-winners-congrats {
-  margin-top: 6px;
+  margin-top: 8px;
   text-align: center;
   font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
-  font-size: clamp(11px, 1.3vh, 14px);
+  font-size: clamp(14px, 1.9vh, 20px);
+  letter-spacing: 0.6px;
   font-weight: 600;
     font-style: italic; 
   letter-spacing: 0.3px;
@@ -555,3 +556,22 @@
   transform: translateY(4px);
 }
 
+/* Mobile / demo mode: don't let sponsor footer dominate */
+@media (max-width: 768px) {
+  .tv-page {
+    height: auto;        /* allow page to scroll normally */
+    overflow: auto;
+  }
+
+  .tv-sponsor-footer {
+    position: static !important; /* disables sticky/fixed if you have it */
+  }
+
+  .tv-sponsor-logos {
+    gap: 24px;           /* much smaller than 120px */
+  }
+
+  .tv-sponsor-logos img {
+    height: 42px;        /* shrink logos on mobile */
+  }
+}
