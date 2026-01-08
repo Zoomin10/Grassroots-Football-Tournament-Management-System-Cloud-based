@@ -305,12 +305,15 @@ useEffect(() => {
   ) : (
     <>
       {/* Scrollable area (tables only) */}
-     <div className={`tv-league-swap ${isLeagueFading ? "tv-league-swap--fade" : ""}`}>
-       {activeLeague === "A" ? (
-  <LeagueTable title="League A" rows={leagueA} />
-) : (
-  <LeagueTable title="League B" rows={leagueB} />
-)}
+ <div className="tv-panel-body tv-left-scroll">
+  <div className={`tv-league-swap ${isLeagueFading ? "tv-league-swap--fade" : ""}`}>
+    {activeLeague === "A" ? (
+      <LeagueTable title="League A" rows={leagueA} />
+    ) : (
+      <LeagueTable title="League B" rows={leagueB} />
+    )}
+  </div>
+</div>
 
              </div>
 
