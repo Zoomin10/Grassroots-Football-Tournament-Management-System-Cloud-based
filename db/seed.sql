@@ -155,18 +155,18 @@ l AS (
 teams_to_insert AS (
   SELECT 'League A'::text AS league_name, team FROM (VALUES
     ('Wroughton Youth FC'),
-    ('Swindon Stars'),
-    ('Highworth Hurricanes'),
-    ('Old Town Owls'),
-    ('Purton Phoenix')
+    ('Chippenham FC'),
+    ('Derry Hill FC'),
+    ('Wootten Bassett FC'),
+    ('Stratton Juniors')
   ) a(team)
   UNION ALL
   SELECT 'League B'::text AS league_name, team FROM (VALUES
     ('Bishops Cannings'),
     ('Abbey Meads Angels'),
     ('Dorcan Diamonds'),
-    ('Stratton Sparks'),
-    ('Covingham Comets')
+    ('Melksham FC'),
+    ('Croft FC')
   ) b(team)
 ),
 ins_teams AS (
