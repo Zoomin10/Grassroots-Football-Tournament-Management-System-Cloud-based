@@ -286,10 +286,7 @@ export default function LargeScreenView() {
         <LeagueTable title="League A" rows={leagueA} />
         <LeagueTable title="League B" rows={leagueB} />
 
-        <div className="tv-rotate-hint">
-          Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
-        </div>
-      </div>
+             </div>
 
       {/* Fixed footer (winners) */}
       {hasWinners ? (
