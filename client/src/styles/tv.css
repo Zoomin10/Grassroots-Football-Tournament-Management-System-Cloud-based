@@ -30,7 +30,6 @@
   gap: 12px;
   padding: 12px;
   box-sizing: border-box;
-  background: transparent;
 }
 
 /* Header overrides */
@@ -39,8 +38,8 @@
   grid-template-columns: 1fr auto 1fr;
    justify-content: center;   /* 👈 this centers the title box */
   align-items: center;
-  gap: 18px;
-  padding: 18px 28px;
+  gap: 12px;
+  padding: 12px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
@@ -103,10 +102,10 @@
 
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
 
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 1px;
 
@@ -125,28 +124,28 @@
 }
 
 .tv-panel-header {
-  padding: 16px 18px;
+  padding: 12px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.10);
 }
 
 .tv-panel-title {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 800;
 }
 
 .tv-panel-subtitle {
   margin-top: 6px;
-  font-size: 28px;
+  font-size: 18px;
   opacity: 0.85;
   color: #ecf014;
 }
 
 .tv-panel-body {
   flex: 1;
-  padding: 10px;
   overflow: auto;
   min-height: 0;
-}
+  position: relative;                 /* helps sticky behave consistently */
+  padding-bottom: clamp(120px, 18vh, 190px); /* reserve room for banner */
 
 .tv-loading,
 .tv-empty {
@@ -351,7 +350,6 @@
   bottom: 0;
   z-index: 2;
   
-  flex: 0 0 auto;
   height: clamp(110px, 16vh, 180px); /* reserve space */
   margin: 8px 0 0 0;          /* remove left/right margins */
   padding: 8px 10px;
@@ -360,9 +358,9 @@
     background: rgba(11,15,20,0.92); 
   overflow: hidden;                  /* prevent it growing */
   backdrop-filter: blur(6px);
-
-
+  box-sizing: border-box;
 }
+
 .tv-winners-title {
   font-size: clamp(16px, 2.6vh, 28px); /* replaces 48px */
   font-weight: 900;
