@@ -1,13 +1,13 @@
 
 /* Wraps header + route content + footer */
 .tv-page {
-  min-height: 100vh;
+  height: 100vh;        /* exact height, not min-height */
+  overflow: hidden;     /* prevent page scroll */
   display: flex;
   flex-direction: column;
   background: #0b0f14;
   color: #ffffff;
 }
-
 /* Makes the routed page take the remaining height between header/footer */
 .tv-content {
   flex: 1;
@@ -343,42 +343,51 @@
   background: #cfd8dc;
   color: #000;
 }
+/* Footer section: always visible */
 .tv-winners-banner {
-  margin-top: 10px;
-  margin-left: 40px;
-  margin-right: 40px;
+  flex: 0 0 auto;
+  height: clamp(110px, 16vh, 180px); /* reserve space */
+  margin: 8px 12px;                  /* reduce big margins */
   padding: 10px 12px;
   border-radius: 14px;
   border: 2px solid rgba(255,255,255,0.25);
   background: rgba(255,255,255,0.08);
+  overflow: hidden;                  /* prevent it growing */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;           /* keep content centered vertically */
 }
-
 .tv-winners-title {
-  font-size: 48px;
+  font-size: clamp(18px, 3.6vh, 34px); /* replaces 48px */
   font-weight: 900;
-  margin-bottom: 6px;
+  margin: 0 0 6px 0;
   text-align: center;
+  line-height: 1.05;
 }
-
 .tv-winners-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 3px 0;
+  justify-content: space-between; /* keeps label + team neat */
+  gap: 8px;                       /* slightly tighter */
+  padding: 2px 0;                 /* slightly tighter */
+  min-height: 0;
 }
 
 .tv-winners-label {
-  width: 54px;
-  font-weight: 800;
   opacity: 0.9;
   margin-left: 36px;
   margin-right: 36px;
+   font-size: clamp(12px, 1.8vh, 18px);
+  font-weight: 700;
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 .tv-winners-team {
   flex: 1;
-  font-weight: 900;
-  font-size: 32px;
+  font-weight: 800;
+  font-size: clamp(12px, 1.8vh, 18px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
