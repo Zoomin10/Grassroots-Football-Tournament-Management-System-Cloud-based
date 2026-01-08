@@ -360,12 +360,12 @@
 .tv-winners-banner {
   position: relative;
    font-size: clamp(16px, 2.4vh, 26px);
-  margin: 0 0 6px 0;
+  margin: 12px 12px 6px 0;
   bottom: auto;
     height: 100%;
      display: flex;
   flex-direction: column;
-  padding: 14px 18px;
+  padding: 12px 14px;
   border-radius: 16px;
     gap: 8px;
    justify-content: center;
@@ -415,6 +415,7 @@
 
 .tv-winners-label {
   opacity: 0.9;
+  margin-left: 60px;
    font-size: clamp(13px, 1.8vh, 18px);
   font-weight: 700;
   white-space: nowrap;
@@ -450,18 +451,18 @@
 }
 
 .tv-winners-logo {
-  width: clamp(18px, 2.2vh, 26px);
-  height: clamp(18px, 2.2vh, 26px);
+  width: clamp(22px, 2.2vh, 26px);
+  height: clamp(22px, 2.2vh, 26px);
   object-fit: contain;
   flex: 0 0 auto;
 }
 
 .tv-winners-team-wrap {
   display: flex;
-  margin-left: 160px;
-  margin-right: 160px;
+  margin-left: 80px;
+ 
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
 }
