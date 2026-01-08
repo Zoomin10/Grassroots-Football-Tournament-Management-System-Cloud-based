@@ -91,16 +91,16 @@ function LeagueTable({ title, rows }) {
         <div className="tv-empty">No teams yet.</div>
       ) : (
         <table className="tv-table">
-          <thead>
-              <tr>
-   
+         <thead>
+  <tr>
+    <th className="tv-col-team">Team</th>
     <th>P</th>
     <th>GF</th>
     <th>GA</th>
     <th>GD</th>
     <th className="tv-col-pts">Pts</th>
   </tr>
-          </thead>
+</thead>
    <tbody>
   {rows.map((r) => {
     const goalDiff = r.goals_for - r.goals_against;
@@ -295,56 +295,48 @@ useEffect(() => {
                 <LeagueTable title="League A" rows={leagueA} />
                 <LeagueTable title="League B" rows={leagueB} />
 
-      {winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
+    
+
+{winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
   <>
     <div className="tv-winners-spacer" />
     <div className="tv-winners-banner tv-winners-banner--celebrate">
-      ...
+      <div className="tv-winners-title">🏆 Tournament Winners</div>
+
+      <div className="tv-winners-row">
+        <span className="tv-winners-label">Cup:</span>
+
+        <div className="tv-winners-team-wrap">
+          <img
+            src={getLogoSrc(winners.cup)}
+            alt={winners.cup}
+            className="tv-winners-logo tv-winners-logo--cup"
+          />
+          <span className="tv-winners-team">{winners.cup}</span>
+        </div>
+
+        <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
+      </div>
+
+      <div className="tv-winners-row">
+        <span className="tv-winners-label">Plate:</span>
+
+        <div className="tv-winners-team-wrap">
+          <img
+            src={getLogoSrc(winners.plate)}
+            alt={winners.plate}
+            className="tv-winners-logo"
+          />
+          <span className="tv-winners-team">{winners.plate}</span>
+        </div>
+
+        <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
+      </div>
+
+      <div className="tv-winners-congrats">Congratulations 🎉</div>
     </div>
   </>
 ) : null}
-
-{winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
- <div className="tv-winners-banner tv-winners-banner--celebrate">
-
-    <div className="tv-winners-title">🏆 Tournament Winners</div>
-
-    <div className="tv-winners-row">
-  <span className="tv-winners-label">Cup:</span>
-
-  <div className="tv-winners-team-wrap">
-    <img
-      src={getLogoSrc(winners.cup)}
-      alt={winners.cup}
-       className="tv-winners-logo tv-winners-logo--cup"
-    />
-    <span className="tv-winners-team">{winners.cup}</span>
-  </div>
-
-  <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
-</div>
-
-<div className="tv-winners-row">
-  <span className="tv-winners-label">Plate:</span>
-
-  <div className="tv-winners-team-wrap">
-    <img
-      src={getLogoSrc(winners.plate)}
-      alt={winners.plate}
-      className="tv-winners-logo"
-    />
-    <span className="tv-winners-team">{winners.plate}</span>
-  </div>
-
-  <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
-  </div>
-  <div className="tv-winners-congrats">
-  Congratulations 🎉
-
-</div>
-  </div>
-) : null}
-
                 <div className="tv-rotate-hint">
                   Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
                 </div>

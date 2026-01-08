@@ -157,8 +157,8 @@
 
 /* League placeholders (swap with your real tables next) */
 .tv-league-block {
-  margin-bottom: 10px;
-  padding: 10px 12px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
   border: 1px dashed rgba(255,255,255,0.18);
   border-radius: 14px;
 }
@@ -486,5 +486,5 @@
   transform: translateY(6px);
 }
 .tv-winners-spacer {
-  height: clamp(110px, 16vh, 180px);
+   height: calc(clamp(110px, 16vh, 180px) + 8px);
 }
