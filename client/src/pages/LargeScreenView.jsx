@@ -339,8 +339,7 @@ useEffect(() => {
             </div>
 
             <div className="tv-winners-row">
-              <span className="tv-winners-label">Plate:</span>
-
+             
               <div className="tv-winners-team-wrap">
                 <img
                   src={getLogoSrc(winners.plate)}
