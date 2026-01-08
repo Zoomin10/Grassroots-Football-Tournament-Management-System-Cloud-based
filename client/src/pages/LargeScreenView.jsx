@@ -324,7 +324,7 @@ useEffect(() => {
             <div className="tv-winners-title">🏆 Tournament Winners</div>
 
             <div className="tv-winners-row">
-              <span className="tv-winners-label">Cup:</span>
+        
 
               <div className="tv-winners-team-wrap">
                 <img
