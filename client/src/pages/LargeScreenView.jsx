@@ -52,7 +52,7 @@ function scorePrefix(s) {
   return [gender, age, bracket, round].filter(Boolean).join(" ");
 }
 
-_attach: the above is your existing score helpers; paste your current ones if you prefer._
+
 
 function scoreLine(s) {
   const prefix = scorePrefix(s);
