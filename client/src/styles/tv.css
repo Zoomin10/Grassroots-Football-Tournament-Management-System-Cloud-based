@@ -148,6 +148,21 @@
    overflow-x: hidden;
   overflow-y: auto;
 }
+/* left panel scroll area */
+.tv-left-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 10px; /* small */
+}
+
+/* footer slot sits below scroll area */
+.tv-left-footer {
+  flex: 0 0 auto;
+  padding: 8px;              /* matches panel spacing */
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
 
 .tv-loading,
 .tv-empty {
@@ -345,12 +360,10 @@
 }
 /* Footer section: always visible */
 .tv-winners-banner {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  
-  height: clamp(110px, 16vh, 180px); /* reserve space */
-  margin: 8px 0 0 0;          /* remove left/right margins */
+  position: relative;
+  bottom: auto;
+    height: auto;
+  margin: 0;
   padding: 8px 10px;
   border-radius: 14px;
   border: 2px solid rgba(255,255,255,0.25);
@@ -485,6 +498,4 @@
   opacity: 0;
   transform: translateY(6px);
 }
-.tv-winners-spacer {
-   height: calc(clamp(110px, 16vh, 180px) + 8px);
-}
+

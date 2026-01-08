@@ -6,8 +6,6 @@ const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 6;
 
-
-
 function getWinnerFromFinal(match) {
   if (!match || !match.played) return null;
 
@@ -18,8 +16,6 @@ function getWinnerFromFinal(match) {
 
   if (hs > as) return match.home_team;
   if (as > hs) return match.away_team;
-
-  // If you ever support penalties later, you can expand this.
   return "Draw";
 }
 
@@ -51,15 +47,12 @@ function formatRound(round) {
 function scorePrefix(s) {
   const gender = formatGender(s.gender);
   const age = s.age_group ? s.age_group.toUpperCase() : "";
-  const bracket = formatBracket(s.bracket);     // Cup / Plate (only present for knockouts)
-  const round = formatRound(s.round);           // Semi-Final / Final (blank for league)
-
-  // Examples:
-  // "Girls U12" (league)
-  // "Girls U12 Cup Semi-Final"
-  // "Girls U12 Plate Final"
+  const bracket = formatBracket(s.bracket);
+  const round = formatRound(s.round);
   return [gender, age, bracket, round].filter(Boolean).join(" ");
 }
+
+_attach: the above is your existing score helpers; paste your current ones if you prefer._
 
 function scoreLine(s) {
   const prefix = scorePrefix(s);
@@ -74,12 +67,6 @@ function tournamentLabel(t) {
   return parts.join(" • ");
 }
 
-// function scoreLine(s) {
-  // from /api/matches/latest: gender, age_group, home_team, away_team, home_score, away_score
-  // const prefix = [s.gender, s.age_group].filter(Boolean).join(" ");
-  //return `${prefix ? prefix + ": " : ""}${s.home_team} ${s.home_score}–${s.away_score} ${s.away_team}`;
-// }
-
 function LeagueTable({ title, rows }) {
   return (
     <div className="tv-league-block">
@@ -91,41 +78,41 @@ function LeagueTable({ title, rows }) {
         <div className="tv-empty">No teams yet.</div>
       ) : (
         <table className="tv-table">
-         <thead>
-  <tr>
-    <th className="tv-col-team">Team</th>
-    <th>P</th>
-    <th>GF</th>
-    <th>GA</th>
-    <th>GD</th>
-    <th className="tv-col-pts">Pts</th>
-  </tr>
-</thead>
-   <tbody>
-  {rows.map((r) => {
-    const goalDiff = r.goals_for - r.goals_against;
+          <thead>
+            <tr>
+              <th className="tv-col-team">Team</th>
+              <th>P</th>
+              <th>GF</th>
+              <th>GA</th>
+              <th>GD</th>
+              <th className="tv-col-pts">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const goalDiff = r.goals_for - r.goals_against;
 
-    return (
-      <tr key={r.id}>
-       <td className="tv-col-team">
-  <div className="tv-team-cell">
-    <img
-      src={getLogoSrc(r.team)}
-      alt={r.team}
-      className="tv-team-logo"
-    />
-    <span className="tv-team-name">{r.team}</span>
-  </div>
-</td>
-        <td>{r.played}</td>
-        <td>{r.goals_for}</td>
-        <td>{r.goals_against}</td>
-        <td>{goalDiff}</td>
-        <td className="tv-col-pts">{r.points}</td>
-      </tr>
-    );
-  })}
-</tbody>
+              return (
+                <tr key={r.id}>
+                  <td className="tv-col-team">
+                    <div className="tv-team-cell">
+                      <img
+                        src={getLogoSrc(r.team)}
+                        alt={r.team}
+                        className="tv-team-logo"
+                      />
+                      <span className="tv-team-name">{r.team}</span>
+                    </div>
+                  </td>
+                  <td>{r.played}</td>
+                  <td>{r.goals_for}</td>
+                  <td>{r.goals_against}</td>
+                  <td>{goalDiff}</td>
+                  <td className="tv-col-pts">{r.points}</td>
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       )}
     </div>
@@ -140,18 +127,27 @@ export default function LargeScreenView() {
   const [leagueB, setLeagueB] = useState(null);
 
   const [latestScores, setLatestScores] = useState([]);
-  const [status, setStatus] = useState("loading"); // loading | ready | error
-const [isFading, setIsFading] = useState(false);
-const FADE_MS = 800;
+  const [status, setStatus] = useState("loading");
+  const [isFading, setIsFading] = useState(false);
+
+  const [winners, setWinners] = useState({ cup: null, plate: null });
+
+  const FADE_MS = 800;
   const rotateTimer = useRef(null);
   const tournamentsPoll = useRef(null);
   const scoresPoll = useRef(null);
-const [winners, setWinners] = useState({ cup: null, plate: null });
+
   const activeTournament = useMemo(() => {
     if (!tournaments.length) return null;
     const idx = Math.max(0, Math.min(activeIndex, tournaments.length - 1));
     return tournaments[idx];
   }, [tournaments, activeIndex]);
+
+  const hasWinners =
+    winners.cup &&
+    winners.plate &&
+    winners.cup !== "Draw" &&
+    winners.plate !== "Draw";
 
   async function fetchTournaments() {
     try {
@@ -165,25 +161,7 @@ const [winners, setWinners] = useState({ cup: null, plate: null });
     }
   }
 
-async function fetchFinalWinners(tournamentId) {
-  try {
-    const res = await fetch(`/api/matches?tournamentId=${tournamentId}&round=final`);
-    const finals = await res.json();
-
-    const cupFinal = finals.find((m) => (m.bracket || "").toLowerCase() === "cup");
-    const plateFinal = finals.find((m) => (m.bracket || "").toLowerCase() === "plate");
-
-    const cupWinner = getWinnerFromFinal(cupFinal);
-    const plateWinner = getWinnerFromFinal(plateFinal);
-
-    setWinners({ cup: cupWinner, plate: plateWinner });
-  } catch (e) {
-    console.error("TV: failed to fetch final winners", e);
-    setWinners({ cup: null, plate: null });
-  }
-}
   async function fetchLeaguesAndTables(tournamentId) {
-    // Reset so the UI shows "Loading..." during tournament switch
     setLeagueA(null);
     setLeagueB(null);
 
@@ -222,7 +200,24 @@ async function fetchFinalWinners(tournamentId) {
     }
   }
 
-  // Initial load + polling
+  async function fetchFinalWinners(tournamentId) {
+    try {
+      const res = await fetch(`/api/matches?tournamentId=${tournamentId}&round=final`);
+      const finals = await res.json();
+
+      const cupFinal = finals.find((m) => (m.bracket || "").toLowerCase() === "cup");
+      const plateFinal = finals.find((m) => (m.bracket || "").toLowerCase() === "plate");
+
+      setWinners({
+        cup: getWinnerFromFinal(cupFinal),
+        plate: getWinnerFromFinal(plateFinal),
+      });
+    } catch (e) {
+      console.error("TV: failed to fetch final winners", e);
+      setWinners({ cup: null, plate: null });
+    }
+  }
+
   useEffect(() => {
     fetchTournaments();
     fetchLatestScores();
@@ -236,165 +231,157 @@ async function fetchFinalWinners(tournamentId) {
     };
   }, []);
 
-  // Rotate tournaments
- useEffect(() => {
-  if (rotateTimer.current) clearInterval(rotateTimer.current);
-
-  rotateTimer.current = setInterval(() => {
-    if (!tournaments.length) return;
-
-    // Fade OUT
-    setIsFading(true);
-
-    // After fade duration, switch tournament + fade IN
-    setTimeout(() => {
-      setActiveIndex((i) => (i + 1) % tournaments.length);
-      setIsFading(false);
-    }, FADE_MS);
-  }, ROTATE_MS);
-
-  return () => {
+  useEffect(() => {
     if (rotateTimer.current) clearInterval(rotateTimer.current);
-  };
-}, [tournaments.length]);
 
-  // When active tournament changes, load its league tables
+    rotateTimer.current = setInterval(() => {
+      if (!tournaments.length) return;
+
+      setIsFading(true);
+      setTimeout(() => {
+        setActiveIndex((i) => (i + 1) % tournaments.length);
+        setIsFading(false);
+      }, FADE_MS);
+    }, ROTATE_MS);
+
+    return () => {
+      if (rotateTimer.current) clearInterval(rotateTimer.current);
+    };
+  }, [tournaments.length]);
+
   useEffect(() => {
     if (!activeTournament?.id) return;
     fetchLeaguesAndTables(activeTournament.id);
+    fetchFinalWinners(activeTournament.id);
   }, [activeTournament?.id]);
-useEffect(() => {
-  if (!activeTournament?.id) return;
-  fetchFinalWinners(activeTournament.id);
-}, [activeTournament?.id]);
 
-useEffect(() => {
-  if (!activeTournament?.id) return;
-  const t = setInterval(() => fetchFinalWinners(activeTournament.id), 5000);
-  return () => clearInterval(t);
-}, [activeTournament?.id]);
+  useEffect(() => {
+    if (!activeTournament?.id) return;
+    const t = setInterval(() => fetchFinalWinners(activeTournament.id), 5000);
+    return () => clearInterval(t);
+  }, [activeTournament?.id]);
+
   return (
-    
-      <div className="tv-main">
-        {/* Left panel */}
-     <section className={`tv-panel tv-left ${isFading ? "tv-fade" : ""}`}>
-          <div className="tv-panel-header">
-        
-            <div className="tv-panel-subtitle">
-              {activeTournament ? tournamentLabel(activeTournament) : ""}
-            </div>
+    <div className="tv-main">
+      {/* LEFT PANEL */}
+      <section className={`tv-panel tv-left ${isFading ? "tv-fade" : ""}`}>
+        <div className="tv-panel-header">
+          <div className="tv-panel-subtitle">
+            {activeTournament ? tournamentLabel(activeTournament) : ""}
           </div>
+        </div>
 
+        {status === "loading" ? (
           <div className="tv-panel-body">
-            {status === "loading" ? (
-              <div className="tv-loading">Loading…</div>
-            ) : !activeTournament ? (
-              <div className="tv-empty">No tournaments found.</div>
-            ) : (
-              <>
-                <LeagueTable title="League A" rows={leagueA} />
-                <LeagueTable title="League B" rows={leagueB} />
+            <div className="tv-loading">Loading…</div>
+          </div>
+        ) : !activeTournament ? (
+          <div className="tv-panel-body">
+            <div className="tv-empty">No tournaments found.</div>
+          </div>
+        ) : (
+          <>
+            {/* Scrollable area (leagues + hint) */}
+            <div className="tv-panel-body tv-left-scroll">
+              <LeagueTable title="League A" rows={leagueA} />
+              <LeagueTable title="League B" rows={leagueB} />
 
-    
+              <div className="tv-rotate-hint">
+                Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
+              </div>
+            </div>
 
-{winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
-  <>
-    <div className="tv-winners-spacer" />
-    <div className="tv-winners-banner tv-winners-banner--celebrate">
-      <div className="tv-winners-title">🏆 Tournament Winners</div>
+            {/* Fixed footer area (winners) */}
+            {hasWinners ? (
+              <div className="tv-left-footer">
+                <div className="tv-winners-banner tv-winners-banner--celebrate">
+                  <div className="tv-winners-title">🏆 Tournament Winners</div>
 
-      <div className="tv-winners-row">
-        <span className="tv-winners-label">Cup:</span>
+                  <div className="tv-winners-row">
+                    <span className="tv-winners-label">Cup:</span>
 
-        <div className="tv-winners-team-wrap">
-          <img
-            src={getLogoSrc(winners.cup)}
-            alt={winners.cup}
-            className="tv-winners-logo tv-winners-logo--cup"
-          />
-          <span className="tv-winners-team">{winners.cup}</span>
-        </div>
+                    <div className="tv-winners-team-wrap">
+                      <img
+                        src={getLogoSrc(winners.cup)}
+                        alt={winners.cup}
+                        className="tv-winners-logo tv-winners-logo--cup"
+                      />
+                      <span className="tv-winners-team">{winners.cup}</span>
+                    </div>
 
-        <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
-      </div>
+                    <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
+                  </div>
 
-      <div className="tv-winners-row">
-        <span className="tv-winners-label">Plate:</span>
+                  <div className="tv-winners-row">
+                    <span className="tv-winners-label">Plate:</span>
 
-        <div className="tv-winners-team-wrap">
-          <img
-            src={getLogoSrc(winners.plate)}
-            alt={winners.plate}
-            className="tv-winners-logo"
-          />
-          <span className="tv-winners-team">{winners.plate}</span>
-        </div>
+                    <div className="tv-winners-team-wrap">
+                      <img
+                        src={getLogoSrc(winners.plate)}
+                        alt={winners.plate}
+                        className="tv-winners-logo"
+                      />
+                      <span className="tv-winners-team">{winners.plate}</span>
+                    </div>
 
-        <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
-      </div>
+                    <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
+                  </div>
 
-      <div className="tv-winners-congrats">Congratulations 🎉</div>
-    </div>
-  </>
-) : null}
-                <div className="tv-rotate-hint">
-                  Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
+                  <div className="tv-winners-congrats">Congratulations 🎉</div>
                 </div>
-              </>
-            )}
-          </div>
-        </section>
+              </div>
+            ) : null}
+          </>
+        )}
+      </section>
 
-        {/* Right panel */}
-        <section className="tv-panel tv-right">
-          <div className="tv-panel-header">
-            <div className="tv-panel-subtitle">Latest Scores</div>
-            
-          </div>
+      {/* RIGHT PANEL */}
+      <section className="tv-panel tv-right">
+        <div className="tv-panel-header">
+          <div className="tv-panel-subtitle">Latest Scores</div>
+        </div>
 
-          <div className="tv-panel-body tv-scores">
-            {latestScores.length === 0 ? (
-              <div className="tv-empty">No scores submitted yet.</div>
-            ) : (
-              <ul className="tv-score-list">
-                {latestScores.map((s, idx) => (
-            <li
-  key={s.id ?? idx}
-  className={[
-    "tv-score-item",
-    idx === 0 ? "tv-score-item--new" : "",
-    s.bracket ? "tv-score-item--knockout" : ""
-  ].join(" ")}
->
-  <div className="tv-score-line">
-    {scoreLine(s)}
+        <div className="tv-panel-body tv-scores">
+          {latestScores.length === 0 ? (
+            <div className="tv-empty">No scores submitted yet.</div>
+          ) : (
+            <ul className="tv-score-list">
+              {latestScores.map((s, idx) => (
+                <li
+                  key={s.id ?? idx}
+                  className={[
+                    "tv-score-item",
+                    idx === 0 ? "tv-score-item--new" : "",
+                    s.bracket ? "tv-score-item--knockout" : "",
+                  ].join(" ")}
+                >
+                  <div className="tv-score-line">
+                    {scoreLine(s)}
 
-    {s.bracket && (
-      <span
-        className={
-          s.bracket === "cup"
-            ? "tv-badge tv-badge--cup"
-            : "tv-badge tv-badge--plate"
-        }
-      >
-        {s.bracket.toUpperCase()}
-      </span>
-    )}
-  </div>
+                    {s.bracket && (
+                      <span
+                        className={
+                          s.bracket === "cup"
+                            ? "tv-badge tv-badge--cup"
+                            : "tv-badge tv-badge--plate"
+                        }
+                      >
+                        {s.bracket.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
 
-  {s.updated_at ? (
-    <div className="tv-score-time">
-      {new Date(s.updated_at).toLocaleTimeString()}
+                  {s.updated_at ? (
+                    <div className="tv-score-time">
+                      {new Date(s.updated_at).toLocaleTimeString()}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
     </div>
-  ) : null}
-</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-      </div>
-   
-    
   );
 }
