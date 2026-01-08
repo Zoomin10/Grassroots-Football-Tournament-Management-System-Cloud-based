@@ -3,8 +3,7 @@ import { getLogoSrc } from "../utils/getLogoSrc";
 
 const ROTATE_MS = 15000;
 const LEAGUE_ROTATE_MS = 5000; // league A/B rotation (5 sceonds)
-const [isLeagueFading, setIsLeagueFading] = useState(false);
-const LEAGUE_FADE_MS = 300;
+
 const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 6;
@@ -132,7 +131,8 @@ export default function LargeScreenView() {
   const [latestScores, setLatestScores] = useState([]);
   const [status, setStatus] = useState("loading");
   const [isFading, setIsFading] = useState(false);
-
+  const [isLeagueFading, setIsLeagueFading] = useState(false);
+  const LEAGUE_FADE_MS = 300;
   const [winners, setWinners] = useState({ cup: null, plate: null });
   const [activeLeague, setActiveLeague] = useState("A"); // "A" | "B"
   const leagueRotateTimer = useRef(null);
