@@ -499,3 +499,15 @@
   transform: translateY(6px);
 }
 
+.tv-left-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tv-left-footer {
+  flex: 0 0 auto;
+  padding: 8px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+}

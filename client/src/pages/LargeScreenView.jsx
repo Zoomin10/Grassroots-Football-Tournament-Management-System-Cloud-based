@@ -144,10 +144,10 @@ export default function LargeScreenView() {
   }, [tournaments, activeIndex]);
 
   const hasWinners =
-    winners.cup &&
-    winners.plate &&
-    winners.cup !== "Draw" &&
-    winners.plate !== "Draw";
+  winners.cup &&
+  winners.plate &&
+  winners.cup !== "Draw" &&
+  winners.plate !== "Draw";
 
   async function fetchTournaments() {
     try {
@@ -265,75 +265,75 @@ export default function LargeScreenView() {
     <div className="tv-main">
       {/* LEFT PANEL */}
       <section className={`tv-panel tv-left ${isFading ? "tv-fade" : ""}`}>
-        <div className="tv-panel-header">
-          <div className="tv-panel-subtitle">
-            {activeTournament ? tournamentLabel(activeTournament) : ""}
-          </div>
+  <div className="tv-panel-header">
+    <div className="tv-panel-subtitle">
+      {activeTournament ? tournamentLabel(activeTournament) : ""}
+    </div>
+  </div>
+
+  {status === "loading" ? (
+    <div className="tv-panel-body">
+      <div className="tv-loading">Loading…</div>
+    </div>
+  ) : !activeTournament ? (
+    <div className="tv-panel-body">
+      <div className="tv-empty">No tournaments found.</div>
+    </div>
+  ) : (
+    <>
+      {/* Scrollable area (tables only) */}
+      <div className="tv-panel-body tv-left-scroll">
+        <LeagueTable title="League A" rows={leagueA} />
+        <LeagueTable title="League B" rows={leagueB} />
+
+        <div className="tv-rotate-hint">
+          Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
         </div>
+      </div>
 
-        {status === "loading" ? (
-          <div className="tv-panel-body">
-            <div className="tv-loading">Loading…</div>
-          </div>
-        ) : !activeTournament ? (
-          <div className="tv-panel-body">
-            <div className="tv-empty">No tournaments found.</div>
-          </div>
-        ) : (
-          <>
-            {/* Scrollable area (leagues + hint) */}
-            <div className="tv-panel-body tv-left-scroll">
-              <LeagueTable title="League A" rows={leagueA} />
-              <LeagueTable title="League B" rows={leagueB} />
+      {/* Fixed footer (winners) */}
+      {hasWinners ? (
+        <div className="tv-left-footer">
+          <div className="tv-winners-banner tv-winners-banner--celebrate">
+            <div className="tv-winners-title">🏆 Tournament Winners</div>
 
-              <div className="tv-rotate-hint">
-                Rotating tournaments every {Math.round(ROTATE_MS / 1000)}s
+            <div className="tv-winners-row">
+              <span className="tv-winners-label">Cup:</span>
+
+              <div className="tv-winners-team-wrap">
+                <img
+                  src={getLogoSrc(winners.cup)}
+                  alt={winners.cup}
+                  className="tv-winners-logo tv-winners-logo--cup"
+                />
+                <span className="tv-winners-team">{winners.cup}</span>
               </div>
+
+              <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
             </div>
 
-            {/* Fixed footer area (winners) */}
-            {hasWinners ? (
-              <div className="tv-left-footer">
-                <div className="tv-winners-banner tv-winners-banner--celebrate">
-                  <div className="tv-winners-title">🏆 Tournament Winners</div>
+            <div className="tv-winners-row">
+              <span className="tv-winners-label">Plate:</span>
 
-                  <div className="tv-winners-row">
-                    <span className="tv-winners-label">Cup:</span>
-
-                    <div className="tv-winners-team-wrap">
-                      <img
-                        src={getLogoSrc(winners.cup)}
-                        alt={winners.cup}
-                        className="tv-winners-logo tv-winners-logo--cup"
-                      />
-                      <span className="tv-winners-team">{winners.cup}</span>
-                    </div>
-
-                    <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
-                  </div>
-
-                  <div className="tv-winners-row">
-                    <span className="tv-winners-label">Plate:</span>
-
-                    <div className="tv-winners-team-wrap">
-                      <img
-                        src={getLogoSrc(winners.plate)}
-                        alt={winners.plate}
-                        className="tv-winners-logo"
-                      />
-                      <span className="tv-winners-team">{winners.plate}</span>
-                    </div>
-
-                    <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
-                  </div>
-
-                  <div className="tv-winners-congrats">Congratulations 🎉</div>
-                </div>
+              <div className="tv-winners-team-wrap">
+                <img
+                  src={getLogoSrc(winners.plate)}
+                  alt={winners.plate}
+                  className="tv-winners-logo"
+                />
+                <span className="tv-winners-team">{winners.plate}</span>
               </div>
-            ) : null}
-          </>
-        )}
-      </section>
+
+              <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
+            </div>
+
+            <div className="tv-winners-congrats">Congratulations 🎉</div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  )}
+</section>
 
       {/* RIGHT PANEL */}
       <section className="tv-panel tv-right">
