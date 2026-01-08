@@ -512,3 +512,14 @@
   padding: 8px;
   border-top: 1px solid rgba(255,255,255,0.10);
 }
+
+.tv-league-swap {
+  transition: opacity 300ms ease, transform 300ms ease;
+  will-change: opacity, transform;
+}
+
+.tv-league-swap--fade {
+  opacity: 0;
+  transform: translateY(4px);
+}
+

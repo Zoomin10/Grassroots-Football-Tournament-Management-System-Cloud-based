@@ -3,6 +3,8 @@ import { getLogoSrc } from "../utils/getLogoSrc";
 
 const ROTATE_MS = 15000;
 const LEAGUE_ROTATE_MS = 5000; // league A/B rotation (5 sceonds)
+const [isLeagueFading, setIsLeagueFading] = useState(false);
+const LEAGUE_FADE_MS = 300;
 const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 6;
@@ -232,12 +234,15 @@ export default function LargeScreenView() {
       if (scoresPoll.current) clearInterval(scoresPoll.current);
     };
   }, []);
-
-  useEffect(() => {
+useEffect(() => {
   if (leagueRotateTimer.current) clearInterval(leagueRotateTimer.current);
 
   leagueRotateTimer.current = setInterval(() => {
-    setActiveLeague((prev) => (prev === "A" ? "B" : "A"));
+    setIsLeagueFading(true);
+    setTimeout(() => {
+      setActiveLeague((prev) => (prev === "A" ? "B" : "A"));
+      setIsLeagueFading(false);
+    }, LEAGUE_FADE_MS);
   }, LEAGUE_ROTATE_MS);
 
   return () => {
@@ -300,7 +305,7 @@ useEffect(() => {
   ) : (
     <>
       {/* Scrollable area (tables only) */}
-      <div className="tv-panel-body tv-left-scroll">
+     <div className={`tv-league-swap ${isLeagueFading ? "tv-league-swap--fade" : ""}`}>
        {activeLeague === "A" ? (
   <LeagueTable title="League A" rows={leagueA} />
 ) : (
