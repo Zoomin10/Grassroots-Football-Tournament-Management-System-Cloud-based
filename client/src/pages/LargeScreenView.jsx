@@ -93,7 +93,7 @@ function LeagueTable({ title, rows }) {
         <table className="tv-table">
           <thead>
               <tr>
-    <th className="tv-col-team">Team</th>
+   
     <th>P</th>
     <th>GF</th>
     <th>GA</th>
@@ -294,6 +294,16 @@ useEffect(() => {
               <>
                 <LeagueTable title="League A" rows={leagueA} />
                 <LeagueTable title="League B" rows={leagueB} />
+
+      {winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
+  <>
+    <div className="tv-winners-spacer" />
+    <div className="tv-winners-banner tv-winners-banner--celebrate">
+      ...
+    </div>
+  </>
+) : null}
+
 {winners.cup && winners.plate && winners.cup !== "Draw" && winners.plate !== "Draw" ? (
  <div className="tv-winners-banner tv-winners-banner--celebrate">
 
