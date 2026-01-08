@@ -415,7 +415,7 @@
 
 .tv-winners-label {
   opacity: 0.9;
-  margin-left: 60px;
+  margin-left: 20px;
    font-size: clamp(13px, 1.8vh, 18px);
   font-weight: 700;
   white-space: nowrap;
@@ -442,6 +442,7 @@
     background: linear-gradient(135deg, #f5c542, #ffd966);
   color: #000;
    box-shadow: 0 0 14px rgba(245,197,66,0.75);
+   margin-right: 60px;
 }
 
 .tv-winners-badge--plate {
