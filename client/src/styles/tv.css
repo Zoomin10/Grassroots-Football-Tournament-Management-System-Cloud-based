@@ -490,11 +490,10 @@
   margin-top: 8px;
   text-align: center;
   font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
-  font-size: clamp(14px, 1.9vh, 20px);
-  letter-spacing: 0.6px;
+  font-size: clamp(18px, 2.2vh, 24px);
+  letter-spacing: 0.8px;
   font-weight: 600;
     font-style: italic; 
-  letter-spacing: 0.3px;
   opacity: 0.9;
    color: #f5e6b3;
   text-shadow: 0 0 8px rgba(245,197,66,0.35);
@@ -535,8 +534,9 @@
 
 .tv-left-footer {
  flex: 0 0 auto;
-  height: clamp(160px, 24vh, 260px);
-  padding: 12px;
+  height: clamp(280px, 24vh, 340px);
+  padding: 14px;
+  border-radius: 8px;
   border-top: 1px solid rgba(245,197,66,0.25);
   background: linear-gradient(
     to bottom,
