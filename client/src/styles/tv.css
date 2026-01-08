@@ -145,8 +145,9 @@
   overflow: auto;
   min-height: 0;
   position: relative;                 /* helps sticky behave consistently */
-  padding-bottom: clamp(120px, 18vh, 190px); /* reserve room for banner */
+   padding-bottom: calc(clamp(110px, 16vh, 180px) + 12px);
 }
+
 .tv-loading,
 .tv-empty {
   font-size: 22px;
