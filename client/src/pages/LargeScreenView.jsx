@@ -315,7 +315,7 @@ useEffect(() => {
   </div>
 </div>
 
-             </div>
+            
 
       {/* Fixed footer (winners) */}
       {hasWinners ? (
