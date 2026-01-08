@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getLogoSrc } from "../utils/getLogoSrc";
 
 const ROTATE_MS = 15000;
+const LEAGUE_ROTATE_MS = 5000; // league A/B rotation (5 sceonds)
 const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 6;
@@ -131,7 +132,8 @@ export default function LargeScreenView() {
   const [isFading, setIsFading] = useState(false);
 
   const [winners, setWinners] = useState({ cup: null, plate: null });
-
+  const [activeLeague, setActiveLeague] = useState("A"); // "A" | "B"
+  const leagueRotateTimer = useRef(null);
   const FADE_MS = 800;
   const rotateTimer = useRef(null);
   const tournamentsPoll = useRef(null);
@@ -232,6 +234,22 @@ export default function LargeScreenView() {
   }, []);
 
   useEffect(() => {
+  if (leagueRotateTimer.current) clearInterval(leagueRotateTimer.current);
+
+  leagueRotateTimer.current = setInterval(() => {
+    setActiveLeague((prev) => (prev === "A" ? "B" : "A"));
+  }, LEAGUE_ROTATE_MS);
+
+  return () => {
+    if (leagueRotateTimer.current) clearInterval(leagueRotateTimer.current);
+  };
+}, []);
+
+useEffect(() => {
+  setActiveLeague("A");
+}, [activeTournament?.id]);
+
+  useEffect(() => {
     if (rotateTimer.current) clearInterval(rotateTimer.current);
 
     rotateTimer.current = setInterval(() => {
@@ -283,8 +301,11 @@ export default function LargeScreenView() {
     <>
       {/* Scrollable area (tables only) */}
       <div className="tv-panel-body tv-left-scroll">
-        <LeagueTable title="League A" rows={leagueA} />
-        <LeagueTable title="League B" rows={leagueB} />
+       {activeLeague === "A" ? (
+  <LeagueTable title="League A" rows={leagueA} />
+) : (
+  <LeagueTable title="League B" rows={leagueB} />
+)}
 
              </div>
 

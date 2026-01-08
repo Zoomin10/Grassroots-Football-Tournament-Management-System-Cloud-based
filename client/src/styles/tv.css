@@ -362,23 +362,28 @@
   margin: 0;
   padding: 8px 10px;
   border-radius: 14px;
-  border: 2px solid rgba(255,255,255,0.25);
-    background: rgba(11,15,20,0.92); 
+  border: 1px solid rgba(245, 197, 66, 0.35);
+    background: linear-gradient(90deg, rgba(11,15,20,0.95), rgba(11,15,20,0.75));
   overflow: hidden;                  /* prevent it growing */
   backdrop-filter: blur(6px);
   box-sizing: border-box;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
 }
 
 .tv-winners-title {
-  font-size: clamp(16px, 2.6vh, 28px); /* replaces 48px */
-  font-weight: 900;
+   font-size: clamp(14px, 2.2vh, 22px);
+   letter-spacing: 0.6px;
+  font-weight: 700;
   margin: 0 0 4px 0;
   text-align: center;
   line-height: 1.05;
+   opacity: 0.95;
 }
+
 .tv-winners-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;                       /* slightly tighter */
   padding: 2px 0;                 /* slightly tighter */
   min-height: 0;
@@ -427,7 +432,7 @@
 .tv-winners-team-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
