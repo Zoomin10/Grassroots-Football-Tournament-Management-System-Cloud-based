@@ -25,7 +25,12 @@
   flex: 1;
   min-height: 0;
 }
-
+/* Blend only table logos */
+.tv-page .team-logo,
+.tv-page .tv-team-logo {
+  mix-blend-mode: multiply;
+  background: transparent;
+}
 
 /* Main content */
 .tv-main {
@@ -472,6 +477,11 @@
   height: clamp(48px, 3.6vh, 56px);
   object-fit: contain;
   flex: 0 0 auto;
+}
+
+/* Keep winners logos crisp (undo blend) */
+.tv-page .tv-winners-logo {
+  mix-blend-mode: normal !important;
 }
 
 .tv-winners-team-wrap {
