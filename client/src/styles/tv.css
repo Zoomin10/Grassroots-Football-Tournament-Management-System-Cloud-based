@@ -26,10 +26,8 @@
   flex: 1;
   min-height: 0;
 }
-/* DEBUG: prove selector hits the table logos */
-.tv-page .team-logo {
-  outline: 6px solid hotpink !important;
-}
+
+
 /* Main content */
 .tv-main {
   flex: 1;
@@ -601,4 +599,3 @@
     height: 42px;        /* shrink logos on mobile */
   }
 }
-.tv-page img { outline: 4px solid hotpink !important; }
