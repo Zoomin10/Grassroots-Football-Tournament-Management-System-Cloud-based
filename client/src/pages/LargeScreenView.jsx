@@ -285,6 +285,7 @@ useEffect(() => {
   }, [activeTournament?.id]);
 
   return (
+    <div className="tv-page">
     <div className="tv-main">
       {/* LEFT PANEL */}
       <section className={`tv-panel tv-left ${isFading ? "tv-fade" : ""}`}>
@@ -292,6 +293,7 @@ useEffect(() => {
     <div className="tv-panel-subtitle">
       {activeTournament ? tournamentLabel(activeTournament) : ""}
     </div>
+  </div>
   </div>
 
   {status === "loading" ? (
@@ -302,6 +304,7 @@ useEffect(() => {
     <div className="tv-panel-body">
       <div className="tv-empty">No tournaments found.</div>
     </div>
+   
   ) : (
     <>
       {/* Scrollable area (tables only) */}

@@ -37,6 +37,7 @@
   gap: 8px;
   padding: 8px;
   box-sizing: border-box;
+  isolation: isolate;
 }
 
 /* Header overrides */
