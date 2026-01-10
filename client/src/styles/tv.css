@@ -39,6 +39,14 @@
   box-sizing: border-box;
   isolation: isolate;
 }
+.tv-main { isolation: isolate; }
+
+/* TV-only logo blend */
+.tv-main .team-logo,
+.tv-main .tv-winners-logo {
+  mix-blend-mode: multiply;
+  background: transparent;
+}
 
 /* Header overrides */
 .tv-header {
