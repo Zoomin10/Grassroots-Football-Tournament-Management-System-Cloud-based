@@ -26,7 +26,10 @@
   flex: 1;
   min-height: 0;
 }
-
+/* DEBUG: prove selector hits the table logos */
+.tv-page .team-logo {
+  outline: 6px solid hotpink !important;
+}
 /* Main content */
 .tv-main {
   flex: 1;
@@ -42,8 +45,8 @@
 .tv-main { isolation: isolate; }
 
 /* TV-only logo blend */
-.tv-main .team-logo,
-.tv-main .tv-winners-logo {
+.tv-page .team-logo,
+.tv-page .tv-winners-logo {
   mix-blend-mode: multiply;
   background: transparent;
 }
