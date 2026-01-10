@@ -19,7 +19,6 @@
 .tv-page .tv-team-logo,
 .tv-page .tv-winners-logo {
   background: transparent;
-  mix-blend-mode: multiply;
   background-color: transparent;
 }
 .tv-content > * {
@@ -45,7 +44,6 @@
 /* TV-only logo blend */
 .tv-page .team-logo,
 .tv-page .tv-winners-logo {
-  mix-blend-mode: multiply;
   background: transparent;
 }
 
@@ -470,8 +468,8 @@
 }
 
 .tv-winners-logo {
-  width: clamp(36px, 3.6vh, 48px);
-  height: clamp(36px, 3.6vh, 48px);
+  width: clamp(48px, 3.6vh, 56px);
+  height: clamp(48px, 3.6vh, 56px);
   object-fit: contain;
   flex: 0 0 auto;
 }
