@@ -601,3 +601,4 @@
     height: 42px;        /* shrink logos on mobile */
   }
 }
+.tv-page img { outline: 4px solid hotpink !important; }
