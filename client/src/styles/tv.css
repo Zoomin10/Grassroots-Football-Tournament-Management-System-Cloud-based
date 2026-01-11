@@ -25,6 +25,18 @@
   mix-blend-mode: multiply;
   background: transparent;
 }
+/* Main content layout (default: 2 panels) */
+.tv-main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  overflow: hidden;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  isolation: isolate;
+}
 
 /* Main content */
 /* TV logo handling */
@@ -580,36 +592,26 @@
   transform: translateY(4px);
 }
 
-/* Mobile / demo mode: don't let sponsor footer dominate */
+/* Mobile / demo mode */
 @media (max-width: 768px) {
   .tv-page {
-    height: auto;        /* allow page to scroll normally */
+    height: auto;
     overflow: auto;
   }
-/* Only collapse on actual mobile */
-@media (max-width: 768px) {
-  .tv-main {
-    grid-template-columns: 1fr;
-  }
-}
-.tv-main {
-  grid-template-columns: 1.2fr 1fr;
-}
 
-@media (max-width: 700px) {
   .tv-main {
     grid-template-columns: 1fr;
   }
-}
+
   .tv-sponsor-footer {
-    position: static !important; /* disables sticky/fixed if you have it */
+    position: static !important;
   }
 
   .tv-sponsor-logos {
-    gap: 24px;           /* much smaller than 120px */
+    gap: 24px;
   }
 
   .tv-sponsor-logos img {
-    height: 42px;        /* shrink logos on mobile */
+    height: 42px;
   }
 }
