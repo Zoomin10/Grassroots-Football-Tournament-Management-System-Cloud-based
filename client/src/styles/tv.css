@@ -270,12 +270,7 @@
   opacity: 0.95;
 }
 
-/* Optional: make it adapt nicely on smaller screens too */
-@media (max-width: 1100px) {
-  .tv-main {
-    grid-template-columns: 1fr;
-  }
-}
+
 .tv-table {
   width: 100%;
   border-collapse: collapse;
