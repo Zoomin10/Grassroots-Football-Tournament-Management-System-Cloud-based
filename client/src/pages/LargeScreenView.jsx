@@ -83,6 +83,9 @@ function LeagueTable({ title, rows }) {
           <thead>
             <tr>
               <th className="tv-col-team">Team</th>
+              <th>W</th>
+              <th>D</th>
+              <th>L</th>
               <th>P</th>
               <th>GF</th>
               <th>GA</th>
@@ -106,6 +109,11 @@ function LeagueTable({ title, rows }) {
                       <span className="tv-team-name">{r.team}</span>
                     </div>
                   </td>
+
+                  <td>{r.won}</td>
+                  <td>{r.drawn}</td>
+                  <td>{r.lost}</td>
+
                   <td>{r.played}</td>
                   <td>{r.goals_for}</td>
                   <td>{r.goals_against}</td>

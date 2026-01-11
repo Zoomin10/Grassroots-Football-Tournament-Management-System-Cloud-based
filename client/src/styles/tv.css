@@ -309,7 +309,7 @@
 .tv-table th:not(.tv-col-team),
 .tv-table td:not(.tv-col-team) {
   text-align: right;
-  width: 52px;
+  width: 44px;
   font-variant-numeric: tabular-nums; /* makes digits line up nicely */
 }
 .tv-col-team {
@@ -571,7 +571,7 @@
 .tv-left-footer {
  flex: 0 0 auto;
   height: clamp(280px, 24vh, 340px);
-  padding: 14px;
+  padding: 8px;
   border-radius: 12px;
   border-top: 1px solid rgba(245,197,66,0.25);
   background: linear-gradient(
