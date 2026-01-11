@@ -277,7 +277,7 @@ const formatTime = (timeStr) => {
           )}
 
           <div className="public-tournament-selector">
-            <label htmlFor="tournament-select">Tournament</label>
+            <label htmlFor="tournament-select">Select Tournament</label>
             <select
               id="tournament-select"
               value={selectedTournamentId || ""}
