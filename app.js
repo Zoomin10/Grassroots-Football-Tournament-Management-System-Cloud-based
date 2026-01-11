@@ -523,13 +523,37 @@ app.get('/api/league', async (req, res) => {
   try {
     const result = await pool.query(
       `
- SELECT *
+SELECT *
 FROM (
   SELECT
     t.id,
     t.team,
 
     COUNT(m.id) AS played,
+
+    /* NEW: W / D / L */
+    COALESCE(SUM(
+      CASE
+        WHEN t.id = m.home_team_id AND m.home_score > m.away_score THEN 1
+        WHEN t.id = m.away_team_id AND m.away_score > m.home_score THEN 1
+        ELSE 0
+      END
+    ), 0) AS won,
+
+    COALESCE(SUM(
+      CASE
+        WHEN m.home_score = m.away_score THEN 1
+        ELSE 0
+      END
+    ), 0) AS drawn,
+
+    COALESCE(SUM(
+      CASE
+        WHEN t.id = m.home_team_id AND m.home_score < m.away_score THEN 1
+        WHEN t.id = m.away_team_id AND m.away_score < m.home_score THEN 1
+        ELSE 0
+      END
+    ), 0) AS lost,
 
     COALESCE(SUM(
       CASE
