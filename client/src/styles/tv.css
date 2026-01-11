@@ -591,6 +591,12 @@
     height: auto;        /* allow page to scroll normally */
     overflow: auto;
   }
+/* Only collapse on actual mobile */
+@media (max-width: 768px) {
+  .tv-main {
+    grid-template-columns: 1fr;
+  }
+}
 
   .tv-sponsor-footer {
     position: static !important; /* disables sticky/fixed if you have it */
