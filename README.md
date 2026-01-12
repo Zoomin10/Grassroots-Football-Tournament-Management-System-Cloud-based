@@ -9,7 +9,8 @@ All club badges, logos, and team names are the property of their respective owne
 License / Usage - Licensed under Apache 2.0 license. Copyright 2025 Wroughton Youth Football Club (WYFC)
 ---
 
-## ✨ Features
+
+### ✨ Features
 
 ### Core
 - 3 Page view : Admin page, Audience page (public), TV page for club-house Smart TV screen
@@ -157,25 +158,25 @@ union all select 'leagues', count(*) from public.leagues
 union all select 'teams', count(*) from public.teams
 union all select 'matches', count(*) from public.matches;
 
-            ┌─────────────────────┐
-            │   Railway Database   │
-            │  (Source of Truth)   │
-            └─────────┬───────────┘
-                      │
-              dump-railway.sh
-                      │
-        ┌─────────────▼─────────────┐
-        │   schema.sql + seed.sql    │
-        └─────────────┬─────────────┘
-                      │
-      ┌───────────────┼────────────────┐
-      │               │                │
-rebuild-local.sh  railway-reset-demo.sh  railway-reset-schema-only.sh
-      │               │                │
-┌─────▼─────┐   ┌─────▼─────┐   ┌─────▼─────┐
-│ Local DB  │   │ Demo DB   │   │ Empty DB  │
-│ (users)   │   │ (Railway) │   │ (Railway) │
-└───────────┘   └───────────┘   └───────────┘
+                    ┌─────────────────────┐
+                    │   Railway Database   │
+                    │  (Source of Truth)   │
+                    └─────────┬───────────┘
+                              │
+                      dump-railway.sh
+                              │
+                ┌─────────────▼─────────────┐
+                │   schema.sql + seed.sql    │
+                └─────────────┬─────────────┘
+                              │
+              ┌───────────────┼────────────────┐
+              │               │                │
+        rebuild-local.sh  railway-reset-demo.sh  railway-reset-schema-only.sh
+              │               │                │
+        ┌─────▼─────┐   ┌─────▼─────┐   ┌─────▼─────┐
+        │ Local DB  │   │ Demo DB   │   │ Empty DB  │
+        │ (users)   │   │ (Railway) │   │ (Railway) │
+        └───────────┘   └───────────┘   └───────────┘
 
 
 ## 🧭 Application Routes
@@ -194,65 +195,65 @@ rebuild-local.sh  railway-reset-demo.sh  railway-reset-schema-only.sh
 
 The frontend is a React SPA that communicates with a REST API. The TV view polls the backend at short intervals to keep displays up to date.
 
-┌────────────────────────────┐
-│        Display Devices     │
-│  (TV, PC, Tablet, Browser) │
-└───────────────┬────────────┘
-                │ HTTPS
-                ▼
-┌────────────────────────────┐
-│        Frontend (React)     │
-│                             │
-│ • Standard UI Pages         │
-│ • TV Mode (LargeScreenView) │
-│ • TV-specific CSS           │
-│ • Logo assets (/public)     │
-└───────────────┬────────────┘
-                │ REST API
-                ▼
-┌────────────────────────────┐
-│     Backend (Node.js)       │
-│        Express API          │
-│                             │
-│ • /api/tournaments          │
-│ • /api/leagues              │
-│ • /api/league               │
-│ • /api/matches              │
-│ • Business logic            │
-│ • SQL aggregation           │
-└───────────────┬────────────┘
-                │ SQL (pg)
-                ▼
-┌────────────────────────────┐
-│      PostgreSQL Database    │
-│                             │
-│ Tables:                     │
-│ • tournaments               │
-│ • leagues                   │
-│ • teams                     │
-│ • matches                   │
-│                             │
-│ Environments:               │
-│ • Railway (Cloud)           │
-│ • Local Dev                 │
-└────────────────────────────┘
+        ┌────────────────────────────┐
+        │        Display Devices     │
+        │  (TV, PC, Tablet, Browser) │
+        └───────────────┬────────────┘
+                        │ HTTPS
+                        ▼
+        ┌────────────────────────────┐
+        │        Frontend (React)     │
+        │                             │
+        │ • Standard UI Pages         │
+        │ • TV Mode (LargeScreenView) │
+        │ • TV-specific CSS           │
+        │ • Logo assets (/public)     │
+        └───────────────┬────────────┘
+                        │ REST API
+                        ▼
+        ┌────────────────────────────┐
+        │     Backend (Node.js)       │
+        │        Express API          │
+        │                             │
+        │ • /api/tournaments          │
+        │ • /api/leagues              │
+        │ • /api/league               │
+        │ • /api/matches              │
+        │ • Business logic            │
+        │ • SQL aggregation           │
+        └───────────────┬────────────┘
+                        │ SQL (pg)
+                        ▼
+        ┌────────────────────────────┐
+        │      PostgreSQL Database    │
+        │                             │
+        │ Tables:                     │
+        │ • tournaments               │
+        │ • leagues                   │
+        │ • teams                     │
+        │ • matches                   │
+        │                             │
+        │ Environments:               │
+        │ • Railway (Cloud)           │
+        │ • Local Dev                 │
+        └────────────────────────────┘
 
-TV Screen loads /tv
-        │
-        ▼
-React LargeScreenView
-        │
-        ├─ GET /api/tournaments
-        ├─ GET /api/leagues
-        ├─ GET /api/league
-        ├─ GET /api/matches/latest
-        └─ GET /api/matches?round=final
-        │
-        ▼
-Node aggregates scores + tables
-        │
-        ▼
-Postgres executes league + match queries
+        TV Screen loads /tv
+                │
+                ▼
+        React LargeScreenView
+                │
+                ├─ GET /api/tournaments
+                ├─ GET /api/leagues
+                ├─ GET /api/league
+                ├─ GET /api/matches/latest
+                └─ GET /api/matches?round=final
+                │
+                ▼
+        Node aggregates scores + tables
+                │
+                ▼
+        Postgres executes league + match queries
 
 ---
 
