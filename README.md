@@ -4,6 +4,9 @@ A Cloud hosted, web application for managing youth football tournaments, fixture
 
 Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, and a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators.
 
+All club badges, logos, and team names are the property of their respective owners and are used for identification purposes only.
+
+License / Usage - Licensed under Apache 2.0 license. Copyright 2025 Wroughton Youth Football Club (WYFC)
 ---
 
 ## ✨ Features
@@ -32,7 +35,6 @@ Designed for **simplicity, reliability, and readability on large screens**, this
 - Cup & Plate semi-finals
 - Manual final generation once semis complete
 
-License / Usage - Licensed under Apache 2.0 license.
 
 ---
 ### Tech Stack
@@ -58,10 +60,13 @@ Database
       Fully rebuildable
 
 Running Locally :
+
       npm install
+
       npm run dev
 
       Ensure PostgreSQL is running locally.
+
 
 ### Cloud Deployment (Railway)
       Node.js app deployed as Railway Web Service
@@ -76,7 +81,9 @@ Environment Variables
       LOCAL_DB_NAME=users
 
 ┌─────────────────────────────────────┐
+
 │              Railway                │
+
 │                                     │
 │  ┌──────────────┐   ┌─────────────┐ │
 │  │ Node Service │──▶│ Postgres DB │ │
@@ -340,7 +347,9 @@ All scripts are located in the scripts/ directory.
 URL for accessing the app (When hosted on Railway) : 
 
 https://grassroots-football-tournament-management-system-production.up.railway.app/
+
 https://grassroots-football-tournament-management-system-production.up.railway.app/tv
+
 https://grassroots-football-tournament-management-system-production.up.railway.app/public
 
 ---
@@ -378,11 +387,6 @@ Wroughton Youth FC → /logos/wroughtonyouthfc.png
 
 ## 🛣️ Roadmap
 
-- Standings-based knockout seeding
-- WebSocket live updates
-- Admin authentication
-- Historical tournament archive
-- Print-friendly public views
 
 ---
 
