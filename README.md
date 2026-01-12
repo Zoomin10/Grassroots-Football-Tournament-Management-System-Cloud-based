@@ -1,11 +1,11 @@
 # Wroughton Youth FC – Tournament Management System
 
-A Cloud hosted, web application for managing youth football tournaments, fixtures, league tables, knockouts, and for tournament matchdays.
-
+A Multi-view, Cloud hosted, web application for managing youth football tournaments. Tournament creation, fixtures, league tables, knockouts etc. For use on tournament matchdays.
+---
 Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, and a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators.
 
 All club badges, logos, and team names are the property of their respective owners and are used for identification purposes only.
---- 
+
 License / Usage - Licensed under Apache 2.0 license. Copyright 2025 Wroughton Youth Football Club (WYFC)
 
 GitHub Repository : 
