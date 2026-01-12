@@ -80,29 +80,29 @@ Environment Variables
       RAILWAY_DATABASE_URL=postgresql://...
       LOCAL_DB_NAME=users
 
-┌─────────────────────────────────────┐
+        ┌─────────────────────────────────────┐
 
-│              Railway                │
+        │              Railway                │
 
-│                                     │
-│  ┌──────────────┐   ┌─────────────┐ │
-│  │ Node Service │──▶│ Postgres DB │ │
-│  │ (app.js)     │   │ (managed)   │ │
-│  └──────────────┘   └─────────────┘ │
-│        ▲                            │
-│        │                            │
-│   GitHub Deploy                     │
-└────────┼─────────────────────────────┘
-         │
-         ▼
-┌────────────────────────────┐
-│        Git Repository      │
-│                            │
-│ • React frontend           │
-│ • Express backend          │
-│ • SQL schema + seed        │
-│ • Reset / dump scripts     │
-└────────────────────────────┘
+        │                                     │
+        │  ┌──────────────┐   ┌─────────────┐ │
+        │  │ Node Service │──▶│ Postgres DB │ │
+        │  │ (app.js)     │   │ (managed)   │ │
+        │  └──────────────┘   └─────────────┘ │
+        │        ▲                            │
+        │        │                            │
+        │   GitHub Deploy                     │
+        └────────┼─────────────────────────────┘
+                 │
+                 ▼
+        ┌────────────────────────────┐
+        │        Git Repository      │
+        │                            │
+        │ • React frontend           │
+        │ • Express backend          │
+        │ • SQL schema + seed        │
+        │ • Reset / dump scripts     │
+        └────────────────────────────┘
 
 ### TV Mode
 
