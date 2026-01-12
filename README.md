@@ -9,12 +9,15 @@ Designed for **simplicity, reliability, and readability on large screens**, this
 ## ✨ Features
 
 ### Core
+- 3 Page view : Admin page, Audience page (public), TV page for club-house Smart TV screen
 - Tournament creation (year, gender, age group, date, location, pitch allocation)
 - League A / League B structure
 - Team allocation to leagues
 - Round-robin fixture generation, or manual fixture creation
+- Knockout stages (Cup & Plate)
 - Result submission
 - Automatic league tables adjustments based on results
+- Cloud-hosted via Railway 
 
 ### Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
@@ -29,7 +32,144 @@ Designed for **simplicity, reliability, and readability on large screens**, this
 - Cup & Plate semi-finals
 - Manual final generation once semis complete
 
+License / Usage - Licensed under Apache 2.0 license.
+
 ---
+### Tech Stack
+      Frontend
+      React
+      CSS (TV-specific styles)
+
+Backend
+
+      Node.js
+      Express
+      REST API
+
+Database
+      PostgreSQL
+
+
+### Environments
+
+### Local Development
+      PostgreSQL installed locally
+      Database name: users
+      Fully rebuildable
+
+Running Locally :
+      npm install
+      npm run dev
+
+      Ensure PostgreSQL is running locally.
+
+### Cloud Deployment (Railway)
+      Node.js app deployed as Railway Web Service
+      PostgreSQL managed by Railway
+      Connected via DATABASE_URL
+
+Environment Variables
+
+      Create a .env file (not committed):
+
+      RAILWAY_DATABASE_URL=postgresql://...
+      LOCAL_DB_NAME=users
+
+┌─────────────────────────────────────┐
+│              Railway                │
+│                                     │
+│  ┌──────────────┐   ┌─────────────┐ │
+│  │ Node Service │──▶│ Postgres DB │ │
+│  │ (app.js)     │   │ (managed)   │ │
+│  └──────────────┘   └─────────────┘ │
+│        ▲                            │
+│        │                            │
+│   GitHub Deploy                     │
+└────────┼─────────────────────────────┘
+         │
+         ▼
+┌────────────────────────────┐
+│        Git Repository      │
+│                            │
+│ • React frontend           │
+│ • Express backend          │
+│ • SQL schema + seed        │
+│ • Reset / dump scripts     │
+└────────────────────────────┘
+
+### TV Mode
+
+TV mode is designed for 1920×1080 displays and above.
+
+Access:
+      /tv
+
+Characteristics:
+      Dark, high-contrast UI
+      Auto-rotating tournaments and leagues
+      Live score updates
+      Winners banner
+      Sponsors footer
+
+### Database Operations (Critical)
+
+      All database operations are script-driven and explicit.
+
+      Scripts live in:  scripts/
+
+      Snapshot Railway (Create Demo Dataset) :   ./scripts/dump-railway.sh
+
+      Produces:
+
+          db/schema.sql
+          db/seed.sql
+
+Rebuild Local Database :   ./scripts/rebuild-local.sh
+
+      Drops and recreates the local DB using schema + seed.
+
+Reset Railway – Schema Only :    ./scripts/railway-reset-schema-only.sh
+
+      Deletes all data but keeps schema.
+
+Reset Railway – Demo Dataset :    ./scripts/railway-reset-demo.sh
+
+      Fully rebuilds Railway with demo data.
+
+### Safety Rules
+
+      Never auto-run Railway reset scripts
+      Always confirm before destructive actions
+      Treat local DB as disposable
+      Prefer separate Railway projects for demo vs production
+
+### Verification Query
+
+select 'tournaments' t, count(*) c from public.tournaments
+union all select 'leagues', count(*) from public.leagues
+union all select 'teams', count(*) from public.teams
+union all select 'matches', count(*) from public.matches;
+
+            ┌─────────────────────┐
+            │   Railway Database   │
+            │  (Source of Truth)   │
+            └─────────┬───────────┘
+                      │
+              dump-railway.sh
+                      │
+        ┌─────────────▼─────────────┐
+        │   schema.sql + seed.sql    │
+        └─────────────┬─────────────┘
+                      │
+      ┌───────────────┼────────────────┐
+      │               │                │
+rebuild-local.sh  railway-reset-demo.sh  railway-reset-schema-only.sh
+      │               │                │
+┌─────▼─────┐   ┌─────▼─────┐   ┌─────▼─────┐
+│ Local DB  │   │ Demo DB   │   │ Empty DB  │
+│ (users)   │   │ (Railway) │   │ (Railway) │
+└───────────┘   └───────────┘   └───────────┘
+
 
 ## 🧭 Application Routes
 
@@ -43,17 +183,69 @@ Designed for **simplicity, reliability, and readability on large screens**, this
 
 ## 🏗️ Architecture Overview
 
-```text
-Browser (Public / Admin / TV)
-        │
-        ▼
-Node.js + Express (REST API)
-        │
-        ▼
-PostgreSQL Database
-```
+
 
 The frontend is a React SPA that communicates with a REST API. The TV view polls the backend at short intervals to keep displays up to date.
+
+┌────────────────────────────┐
+│        Display Devices     │
+│  (TV, PC, Tablet, Browser) │
+└───────────────┬────────────┘
+                │ HTTPS
+                ▼
+┌────────────────────────────┐
+│        Frontend (React)     │
+│                             │
+│ • Standard UI Pages         │
+│ • TV Mode (LargeScreenView) │
+│ • TV-specific CSS           │
+│ • Logo assets (/public)     │
+└───────────────┬────────────┘
+                │ REST API
+                ▼
+┌────────────────────────────┐
+│     Backend (Node.js)       │
+│        Express API          │
+│                             │
+│ • /api/tournaments          │
+│ • /api/leagues              │
+│ • /api/league               │
+│ • /api/matches              │
+│ • Business logic            │
+│ • SQL aggregation           │
+└───────────────┬────────────┘
+                │ SQL (pg)
+                ▼
+┌────────────────────────────┐
+│      PostgreSQL Database    │
+│                             │
+│ Tables:                     │
+│ • tournaments               │
+│ • leagues                   │
+│ • teams                     │
+│ • matches                   │
+│                             │
+│ Environments:               │
+│ • Railway (Cloud)           │
+│ • Local Dev                 │
+└────────────────────────────┘
+
+TV Screen loads /tv
+        │
+        ▼
+React LargeScreenView
+        │
+        ├─ GET /api/tournaments
+        ├─ GET /api/leagues
+        ├─ GET /api/league
+        ├─ GET /api/matches/latest
+        └─ GET /api/matches?round=final
+        │
+        ▼
+Node aggregates scores + tables
+        │
+        ▼
+Postgres executes league + match queries
 
 ---
 
@@ -130,16 +322,6 @@ npm run dev
 
 ## 🖥️ Matchday Deployment 
 
-**LAN-based deployment** (no internet required):
-
-1. Run server on a laptop or mini PC
-2. Connect all devices to the same Wi-Fi
-3. Open:
-   - Admin: `http://<LAN-IP>:3000/admin`
-   - TV: `http://<LAN-IP>:3000/tv`
-4. Put TV browser in fullscreen / kiosk mode
-
----
 
 **CLOUD-based deployment**
 
@@ -156,9 +338,22 @@ Notes:
 All scripts are located in the scripts/ directory.
 
 URL for accessing the app (When hosted on Railway) : 
+
 https://grassroots-football-tournament-management-system-production.up.railway.app/
 https://grassroots-football-tournament-management-system-production.up.railway.app/tv
 https://grassroots-football-tournament-management-system-production.up.railway.app/public
+
+---
+
+**LAN-based deployment** (no internet required):
+
+1. Run server on a laptop or mini PC
+2. Connect all devices to the same Wi-Fi
+3. Open:
+   - Admin: `http://<LAN-IP>:3000/admin`
+   - TV: `http://<LAN-IP>:3000/tv`
+4. Put TV browser in fullscreen / kiosk mode
+
 
 ## 🧩 Team Logos
 
