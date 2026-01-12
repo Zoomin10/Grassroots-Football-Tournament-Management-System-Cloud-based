@@ -1,6 +1,6 @@
 # Wroughton Youth FC – Tournament Management System
 
-A web-based application for managing youth football tournaments, fixtures, league tables, knockouts, and for tournament matchdays.
+A Cloud hosted, web application for managing youth football tournaments, fixtures, league tables, knockouts, and for tournament matchdays.
 
 Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, and a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators.
 
@@ -128,7 +128,7 @@ npm run dev
 
 ---
 
-## 🖥️ Matchday Deployment (Recommended)
+## 🖥️ Matchday Deployment 
 
 **LAN-based deployment** (no internet required):
 
@@ -140,6 +140,25 @@ npm run dev
 4. Put TV browser in fullscreen / kiosk mode
 
 ---
+
+**CLOUD-based deployment**
+
+Required Files & Setup
+
+1 Environment Variables (.env)
+RAILWAY_DATABASE_URL=postgresql://...
+LOCAL_DB_NAME=users
+Notes:
+    • .env is not committed
+    
+
+2. Script Reference
+All scripts are located in the scripts/ directory.
+
+URL for accessing the app (When hosted on Railway) : 
+https://grassroots-football-tournament-management-system-production.up.railway.app/
+https://grassroots-football-tournament-management-system-production.up.railway.app/tv
+https://grassroots-football-tournament-management-system-production.up.railway.app/public
 
 ## 🧩 Team Logos
 

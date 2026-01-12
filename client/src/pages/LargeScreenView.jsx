@@ -6,7 +6,7 @@ const LEAGUE_ROTATE_MS = 4000; // league A/B rotation (5 sceonds)
 
 const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
-const LATEST_LIMIT = 8;
+const LATEST_LIMIT = 7;
 
 function getWinnerFromFinal(match) {
   if (!match || !match.played) return null;
