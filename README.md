@@ -377,6 +377,7 @@ Teams belong to one league per tournament
 Teams are tournament-scoped (no global team registry)
 
 
+
 ⚽ matches
 
 Represents all fixtures in the system:
@@ -433,6 +434,7 @@ This is the central and most flexible table.
     decided_by_penalties — boolean
 
     penalties_home, penalties_away — penalty shootout scores
+    
 
 Rules
 
@@ -448,12 +450,13 @@ Rules
 
     updated_at
 
-🔗 Relationship overview
-tournaments
- ├─ leagues
- │   └─ teams
- │       └─ matches (league)
- └─ matches (semi-finals & finals)
+        🔗 Relationship overview
+        tournaments
+         ├─ leagues
+         │   └─ teams
+         │       └─ matches (league)
+         └─ matches (semi-finals & finals)
+
 
 🧠 Design principles
 
@@ -469,22 +472,23 @@ Penalty shootouts are stored explicitly rather than inferred.
 Safe resets
 Foreign keys and cascading deletes allow full tournament resets and demo rebuilds.
 
+
 🧪 Example queries
 
 Find finals decided by penalties
 
-select *
-from matches
-where round = 'final'
-  and decided_by_penalties = true;
+    select *
+    from matches
+    where round = 'final'
+      and decided_by_penalties = true;
 
 
 Get all Cup knockout matches
 
-select *
-from matches
-where bracket = 'cup'
-  and round in ('semi-final', 'final');
+    select *
+    from matches
+    where bracket = 'cup'
+      and round in ('semi-final', 'final');
 
 ---
 
@@ -542,11 +546,11 @@ All scripts are located in the scripts/ directory.
 
 URL for accessing the app (When hosted on Railway) : 
 
-https://grassroots-football-tournament-management-system-production.up.railway.app/
+    https://grassroots-football-tournament-management-system-production.up.railway.app/admin
 
-https://grassroots-football-tournament-management-system-production.up.railway.app/tv
+    https://grassroots-football-tournament-management-system-production.up.railway.app/tv
 
-https://grassroots-football-tournament-management-system-production.up.railway.app/public
+    https://grassroots-football-tournament-management-system-production.up.railway.app/public
 
 ---
 
