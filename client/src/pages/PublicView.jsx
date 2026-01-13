@@ -159,8 +159,8 @@ useEffect(() => {
   /* =========================
      Derive winners (robust)
   ========================= */
-function getFinalResult(knockouts) {
-  const final = knockouts.find(m => m.round === "final" && m.bracket === "cup");
+function getFinalResult(bracket) {
+  const final = knockouts.find(m => m.round === "final" && m.bracket === bracket);
   if (!final || !final.played) return null;
 
   const homeName = final.home_team;
@@ -184,15 +184,14 @@ function getFinalResult(knockouts) {
     winner = homeWonPens ? homeName : awayName;
     runnerUp = homeWonPens ? awayName : homeName;
   } else {
-    // Draw but no pens recorded yet (shouldn't happen for finals, but safe)
     return null;
   }
 
   return { winner, runnerUp };
 }
 
-  const cupResult = getFinalResult("cup");
-  const plateResult = getFinalResult("plate");
+const cupResult = getFinalResult("cup");
+const plateResult = getFinalResult("plate");
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -245,11 +244,12 @@ const formatTime = (timeStr) => {
           {selectedTournament ? (
             <>
               <h2 className="tournament-title">
-                {selectedTournament.year} –{" "}
-                {selectedTournament.gender.charAt(0).toUpperCase() +
-                  selectedTournament.gender.slice(1)}{" "}
-                {selectedTournament.age_group}
-              </h2>
+              {selectedTournament.year}
+              {selectedTournament.gender
+                ? ` – ${selectedTournament.gender.charAt(0).toUpperCase()}${selectedTournament.gender.slice(1)}`
+                : ""}
+              {selectedTournament.age_group ? ` ${selectedTournament.age_group}` : ""}
+            </h2>
 
               {(selectedTournament.date ||
                 selectedTournament.kickoff_time ||
