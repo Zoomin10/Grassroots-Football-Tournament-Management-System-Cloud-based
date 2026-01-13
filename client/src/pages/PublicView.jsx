@@ -159,51 +159,37 @@ useEffect(() => {
   /* =========================
      Derive winners (robust)
   ========================= */
-  const getFinalResult = (bracket) => {
-    const final = knockouts.find(
-      m =>
-        m.round === "final" &&
-        m.bracket === bracket &&
-        m.home_score !== null &&
-        m.away_score !== null
-    );
+function getFinalResult(knockouts) {
+  const final = knockouts.find(m => m.round === "final" && m.bracket === "cup");
+  if (!final || !final.played) return null;
 
-    if (!final) return null;
-
-    const homeName =
-      final.home_team_name || final.home_team || `Team ${final.home_team_id}`;
-    const awayName =
-      final.away_team_name || final.away_team || `Team ${final.away_team_id}`;
+  const homeName = final.home_team;
+  const awayName = final.away_team;
 
   let winner = null;
-let runnerUp = null;
+  let runnerUp = null;
 
-if (final.home_score > final.away_score) {
-  winner = homeName;
-  runnerUp = awayName;
-} else if (final.away_score > final.home_score) {
-  winner = awayName;
-  runnerUp = homeName;
-} else if (
-  final.decided_by_penalties &&
-  final.penalties_home != null &&
-  final.penalties_away != null
-) {
-  const homeWonPens = Number(final.penalties_home) > Number(final.penalties_away);
-  winner = homeWonPens ? homeName : awayName;
-  runnerUp = homeWonPens ? awayName : homeName;
-} else {
-  // still unresolved / should not happen for finals, but safe
-  return null;
+  if (final.home_score > final.away_score) {
+    winner = homeName;
+    runnerUp = awayName;
+  } else if (final.away_score > final.home_score) {
+    winner = awayName;
+    runnerUp = homeName;
+  } else if (
+    final.decided_by_penalties &&
+    final.penalties_home != null &&
+    final.penalties_away != null
+  ) {
+    const homeWonPens = Number(final.penalties_home) > Number(final.penalties_away);
+    winner = homeWonPens ? homeName : awayName;
+    runnerUp = homeWonPens ? awayName : homeName;
+  } else {
+    // Draw but no pens recorded yet (shouldn't happen for finals, but safe)
+    return null;
+  }
+
+  return { winner, runnerUp };
 }
-
-return { winner, runnerUp };
-
-    const runnerUp =
-      final.home_score > final.away_score ? awayName : homeName;
-
-    return { winner, runnerUp };
-  };
 
   const cupResult = getFinalResult("cup");
   const plateResult = getFinalResult("plate");
