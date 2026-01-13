@@ -399,35 +399,72 @@ app.post("/api/matches", async (req, res) => {
 
 // POST submit result
 app.post('/api/matches/:id/result', async (req, res) => {
-  const {
-  home_score,
-  away_score,
-  penalties_home,
-  penalties_away
-} = req.body;
+  const id = Number(req.params.id);
+  const { home_score, away_score, penalties_home, penalties_away } = req.body;
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ error: 'Invalid match id' });
+  }
+
+  const hs = Number(home_score);
+  const as = Number(away_score);
+
+  if (!Number.isFinite(hs) || !Number.isFinite(as) || hs < 0 || as < 0) {
+    return res.status(400).json({ error: 'Scores must be non-negative numbers' });
+  }
 
   try {
+    // Pull match context so we know if it's league or knockout
+    const matchRes = await pool.query(
+      `SELECT id, round, league_id FROM matches WHERE id = $1`,
+      [id]
+    );
+
+    if (matchRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+
+    const match = matchRes.rows[0];
+    const isLeague = match.round === 'league' || match.league_id != null;
+
+    let decidedByPenalties = false;
+    let ph = null;
+    let pa = null;
+
+    if (!isLeague && hs === as) {
+      // Knockout draw requires penalties
+      if (penalties_home == null || penalties_away == null) {
+        return res.status(400).json({ error: 'Knockout draw requires penalties' });
+      }
+
+      ph = Number(penalties_home);
+      pa = Number(penalties_away);
+
+      if (!Number.isFinite(ph) || !Number.isFinite(pa) || ph < 0 || pa < 0) {
+        return res.status(400).json({ error: 'Penalty scores must be non-negative numbers' });
+      }
+      if (ph === pa) {
+        return res.status(400).json({ error: 'Penalty scores cannot be equal' });
+      }
+
+      decidedByPenalties = true;
+    }
+
+    // For league OR non-draw knockout, we clear penalties to keep data clean
     await pool.query(
       `
-   UPDATE matches
-  SET home_score = $1,
-      away_score = $2,
-      penalties_home = $3,
-      penalties_away = $4,
-      decided_by_penalties = $5,
-      played = true,
-      updated_at = NOW()
-  WHERE id = $6
-  `,
-  [
-    home_score,
-    away_score,
-    ph,
-    pa,
-    decidedByPenalties,
-    req.params.id
-  ]
-);
+      UPDATE matches
+      SET home_score = $1,
+          away_score = $2,
+          penalties_home = $3,
+          penalties_away = $4,
+          decided_by_penalties = $5,
+          played = true,
+          updated_at = NOW()
+      WHERE id = $6
+      `,
+      [hs, as, ph, pa, decidedByPenalties, id]
+    );
 
     res.sendStatus(200);
   } catch (err) {
