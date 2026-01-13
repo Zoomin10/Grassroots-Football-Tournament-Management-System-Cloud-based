@@ -63,9 +63,20 @@ CREATE TABLE matches (
   bracket       TEXT,                           -- cup / plate
   home_score    INTEGER,
   away_score    INTEGER,
+
+  decided_by_penalties BOOLEAN NOT NULL DEFAULT FALSE,
+  penalties_home       INTEGER,
+  penalties_away       INTEGER,
+
   played        BOOLEAN NOT NULL DEFAULT FALSE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT penalties_valid CHECK (
+    (penalties_home IS NULL AND penalties_away IS NULL)
+    OR
+    (penalties_home IS NOT NULL AND penalties_away IS NOT NULL AND penalties_home <> penalties_away)
+  )
 );
 
 CREATE INDEX idx_matches_tournament_id ON matches(tournament_id);

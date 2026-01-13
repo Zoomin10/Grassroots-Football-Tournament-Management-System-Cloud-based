@@ -30,7 +30,7 @@ function getWinnerFromFinal(match) {
       : match.away_team;
   }
 
-  return "Draw";
+  return "null";
 }
 
 function formatGender(gender) {

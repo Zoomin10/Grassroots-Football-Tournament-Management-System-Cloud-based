@@ -67,11 +67,21 @@ CREATE TABLE public.matches (
     bracket text,
     home_score integer,
     away_score integer,
+
+    decided_by_penalties boolean DEFAULT false NOT NULL,
+    penalties_home integer,
+    penalties_away integer,
+
     played boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
 
+    CONSTRAINT penalties_valid CHECK (
+      (penalties_home IS NULL AND penalties_away IS NULL)
+      OR
+      (penalties_home IS NOT NULL AND penalties_away IS NOT NULL AND penalties_home <> penalties_away)
+    )
+);
 
 --
 -- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: -

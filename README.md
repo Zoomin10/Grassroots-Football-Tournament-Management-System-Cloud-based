@@ -294,6 +294,186 @@ Tie-break rules:
 2. Goal Difference (GD)
 3. Goals For (GF)
 
+📊 Database Schema Overview
+
+This application uses PostgreSQL to model a youth football tournament system, including league stages, knockout rounds (Cup & Plate), and penalty shootouts.
+
+All data is scoped to a tournament.
+
+
+
+🏆 tournaments
+
+Represents a single tournament event (e.g. 2026 Boys U11).
+
+Key fields
+
+id — primary key
+year — tournament year
+gender — boys / girls
+age_group — e.g. U11, U12
+date — tournament date
+kickoff_time — first kickoff time
+match_length — match duration (minutes)
+venue — location
+pitch_league_a, pitch_league_b — pitch assignments
+created_at
+
+Relationships
+
+    One tournament → many leagues
+
+    One tournament → many teams
+
+    One tournament → many matches
+
+🧩 leagues
+
+Represents group stages within a tournament (typically League A and League B).
+
+Key fields
+
+id — primary key
+
+name — e.g. "League A"
+
+tournament_id — foreign key → tournaments.id
+
+Relationships
+
+One league → many teams
+
+One league → many league-stage matches
+
+👕 teams
+
+Represents a team participating in a specific tournament.
+
+Key fields
+
+id — primary key
+
+team — team name
+
+league_id — foreign key → leagues.id
+
+tournament_id — foreign key → tournaments.id
+
+Notes
+
+Teams belong to one league per tournament
+
+Teams are tournament-scoped (no global team registry)
+
+⚽ matches
+
+Represents all fixtures in the system:
+
+League matches
+
+Semi-finals
+
+Finals (Cup & Plate)
+
+This is the central and most flexible table.
+
+Match identity
+
+id — primary key
+
+tournament_id — foreign key → tournaments.id
+
+league_id — foreign key → leagues.id
+(NULL for knockout matches)
+
+home_team_id, away_team_id — foreign keys → teams.id
+
+Match classification
+
+round
+
+'league'
+
+'semi-final'
+
+'final'
+
+bracket
+
+'cup'
+
+'plate'
+
+NULL for league matches
+
+Scores & status
+
+home_score, away_score — normal-time scores
+
+played — set to true once a result is submitted
+
+🥅 Penalty shootouts (knockout matches)
+
+Knockout matches may be decided by penalties if normal time ends in a draw.
+
+Penalty-related fields
+
+decided_by_penalties — boolean
+
+penalties_home, penalties_away — penalty shootout scores
+
+Rules
+
+League matches never use penalties
+
+Knockout matches may use penalties only when scores are level
+
+Finals may be decided by penalties
+
+Timestamps
+
+created_at
+
+updated_at
+
+🔗 Relationship overview
+tournaments
+ ├─ leagues
+ │   └─ teams
+ │       └─ matches (league)
+ └─ matches (semi-finals & finals)
+
+🧠 Design principles
+
+Tournament-scoped data
+All leagues, teams, and matches belong to a tournament.
+
+Single matches table
+League and knockout fixtures share one schema, differentiated by round and bracket.
+
+Explicit penalty support
+Penalty shootouts are stored explicitly rather than inferred.
+
+Safe resets
+Foreign keys and cascading deletes allow full tournament resets and demo rebuilds.
+
+🧪 Example queries
+
+Find finals decided by penalties
+
+select *
+from matches
+where round = 'final'
+  and decided_by_penalties = true;
+
+
+Get all Cup knockout matches
+
+select *
+from matches
+where bracket = 'cup'
+  and round in ('semi-final', 'final');
+
 ---
 
 ## 🔌 API Highlights

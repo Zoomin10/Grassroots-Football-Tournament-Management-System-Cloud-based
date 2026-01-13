@@ -42,7 +42,8 @@ echo "Dumping schema to db/schema.sql ..."
   -e PGSSLMODE=require \
   -e DATABASE_URL="$RAILWAY_DATABASE_URL" \
   postgres:17 \
-  sh -lc 'pg_dump "$DATABASE_URL" --schema-only --no-owner --no-privileges' \
+sh -lc 'pg_dump "$DATABASE_URL" --schema-only --no-owner --no-privileges --clean --if-exists'
+
 > db/schema.raw.sql
 
 # Remove PG17-only setting that breaks older locals
