@@ -306,27 +306,27 @@ Tie-break rules:
 
 Represents a single tournament event (e.g. 2026 Boys U11).
 
-Key fields
+    Key fields
 
-id — primary key
+    id — primary key
 
-year — tournament year
+    year — tournament year
 
-gender — boys / girls
+    gender — boys / girls
 
-age_group — e.g. U11, U12
+    age_group — e.g. U11, U12
 
-date — tournament date
+    date — tournament date
 
-kickoff_time — first kickoff time
+    kickoff_time — first kickoff time
 
-match_length — match duration (minutes)
+    match_length — match duration (minutes)
 
-venue — location
+    venue — location
 
-pitch_league_a, pitch_league_b — pitch assignments
+    pitch_league_a, pitch_league_b — pitch assignments
 
-created_at
+    created_at
 
 
 Relationships
@@ -342,33 +342,33 @@ Relationships
 
 Represents group stages within a tournament (typically League A and League B).
 
-Key fields
+    Key fields
 
-id — primary key
+    id — primary key
 
-name — e.g. "League A"
+    name — e.g. "League A"
 
-tournament_id — foreign key → tournaments.id
+    tournament_id — foreign key → tournaments.id
 
-Relationships
+    Relationships
 
-One league → many teams
+    One league → many teams
 
-One league → many league-stage matches
+    One league → many league-stage matches
 
 👕 teams
 
 Represents a team participating in a specific tournament.
 
-Key fields
+    Key fields
 
-id — primary key
+    id — primary key
 
-team — team name
+    team — team name
 
-league_id — foreign key → leagues.id
+    league_id — foreign key → leagues.id
 
-tournament_id — foreign key → tournaments.id
+    tournament_id — foreign key → tournaments.id
 
 Notes
 
@@ -389,64 +389,64 @@ Finals (Cup & Plate)
 
 This is the central and most flexible table.
 
-Match identity
+    Match identity
 
-id — primary key
+    id — primary key
 
-tournament_id — foreign key → tournaments.id
+    tournament_id — foreign key → tournaments.id
 
-league_id — foreign key → leagues.id
-(NULL for knockout matches)
+    league_id — foreign key → leagues.id
+    (NULL for knockout matches)
 
-home_team_id, away_team_id — foreign keys → teams.id
+    home_team_id, away_team_id — foreign keys → teams.id
 
-Match classification
+    Match classification
 
-round
+    round
 
-'league'
+    'league'
 
-'semi-final'
+    'semi-final'
 
-'final'
+    'final'
 
-bracket
+    bracket
 
-'cup'
+    'cup'
 
-'plate'
+    'plate'
 
-NULL for league matches
+    NULL for league matches
 
-Scores & status
+    Scores & status
 
-home_score, away_score — normal-time scores
+    home_score, away_score — normal-time scores
 
-played — set to true once a result is submitted
+    played — set to true once a result is submitted
 
-🥅 Penalty shootouts (knockout matches)
+    🥅 Penalty shootouts (knockout matches)
 
-Knockout matches may be decided by penalties if normal time ends in a draw.
+    Knockout matches may be decided by penalties if normal time ends in a draw.
 
-Penalty-related fields
+    Penalty-related fields
 
-decided_by_penalties — boolean
+    decided_by_penalties — boolean
 
-penalties_home, penalties_away — penalty shootout scores
+    penalties_home, penalties_away — penalty shootout scores
 
 Rules
 
-League matches never use penalties
+    League matches never use penalties
 
-Knockout matches may use penalties only when scores are level
+    Knockout matches may use penalties only when scores are level
 
-Finals may be decided by penalties
+    Finals may be decided by penalties
 
-Timestamps
+    Timestamps
 
-created_at
+    created_at
 
-updated_at
+    updated_at
 
 🔗 Relationship overview
 tournaments
