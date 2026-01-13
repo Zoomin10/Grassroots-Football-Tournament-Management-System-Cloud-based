@@ -281,6 +281,12 @@ server/
 
 ## 🗄️ Database (Summary)
 
+📊 Database Schema Overview
+
+This application uses PostgreSQL to model a youth football tournament system, including league stages, knockout rounds (Cup & Plate), and penalty shootouts.
+
+All data is scoped to a tournament.
+
 Core tables:
 - `tournaments`
 - `leagues`
@@ -294,12 +300,6 @@ Tie-break rules:
 2. Goal Difference (GD)
 3. Goals For (GF)
 
-📊 Database Schema Overview
-
-This application uses PostgreSQL to model a youth football tournament system, including league stages, knockout rounds (Cup & Plate), and penalty shootouts.
-
-All data is scoped to a tournament.
-
 
 
 🏆 tournaments
@@ -309,15 +309,25 @@ Represents a single tournament event (e.g. 2026 Boys U11).
 Key fields
 
 id — primary key
+
 year — tournament year
+
 gender — boys / girls
+
 age_group — e.g. U11, U12
+
 date — tournament date
+
 kickoff_time — first kickoff time
+
 match_length — match duration (minutes)
+
 venue — location
+
 pitch_league_a, pitch_league_b — pitch assignments
+
 created_at
+
 
 Relationships
 
@@ -326,6 +336,7 @@ Relationships
     One tournament → many teams
 
     One tournament → many matches
+    
 
 🧩 leagues
 
@@ -364,6 +375,7 @@ Notes
 Teams belong to one league per tournament
 
 Teams are tournament-scoped (no global team registry)
+
 
 ⚽ matches
 
