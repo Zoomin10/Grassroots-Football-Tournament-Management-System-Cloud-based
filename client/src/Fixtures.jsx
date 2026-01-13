@@ -18,12 +18,17 @@ export default function Fixtures({
         away_score: parseInt(awayScore)
       })
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to submit result');
-        if (typeof onResultsUpdated === 'function') {
-          onResultsUpdated();
-        }
-      })
+    .then(async (res) => {
+  if (!res.ok) {
+    let msg = "Failed to submit result";
+    try {
+      const data = await res.json();
+      if (data?.error) msg = data.error;
+    } catch {}
+    throw new Error(msg);
+  }
+  if (typeof onResultsUpdated === "function") onResultsUpdated();
+})
       .catch(err => {
         console.error('❌ Submit result error:', err);
         alert('Failed to submit result');
