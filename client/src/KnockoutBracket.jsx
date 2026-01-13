@@ -1,38 +1,38 @@
+import { useState } from 'react';
 import './KnockoutBracket.css';
-
-
 
 /* =========================
    Reusable Fixture Card
 ========================= */
 function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly }) {
-  const submitResult = (home, away) => {
-    fetch(`/api/matches/${match.id}/result`, {
+  const [isDraw, setIsDraw] = useState(false);
+
+  const submitResult = (home, away, ph, pa) => {
+    return fetch(`/api/matches/${match.id}/result`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        home_score: parseInt(home, 10),
-        away_score: parseInt(away, 10)
+        home_score: Number(home),
+        away_score: Number(away),
+        penalties_home: ph ? Number(ph) : null,
+        penalties_away: pa ? Number(pa) : null
       })
     })
-      .then(() => {
-  // If a semi-final was just completed, attempt to generate the final
-  if (match.round === 'semi-final') {
-    return fetch('/api/knockout/generate-final', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tournamentId,
-        bracket: match.bracket
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to submit result');
+
+        // If a semi-final was just completed, attempt to generate the final
+        if (match.round === 'semi-final') {
+          return fetch('/api/knockout/generate-final', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tournamentId, bracket: match.bracket })
+          }).catch(() => {});
+        }
       })
-    }).catch(() => {});
-  }
-})
-.finally(() => {
-  if (typeof onResultsUpdated === 'function') {
-    onResultsUpdated();
-  }
-});
+      .finally(() => {
+        if (typeof onResultsUpdated === 'function') onResultsUpdated();
+      });
   };
 
 
@@ -43,25 +43,54 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
         <strong>{match.away_team}</strong>
       </div>
 
-      {match.played && (
-        <div className="fixture-score">
-          {match.home_score} – {match.away_score}
-        </div>
+    {match.played && (
+  <div className="fixture-score">
+    {match.home_score} – {match.away_score}
+    {match.decided_by_penalties &&
+      match.penalties_home != null &&
+      match.penalties_away != null && (
+        <span className="fixture-pens">
+          {" "}
+          (pens {match.penalties_home}–{match.penalties_away})
+        </span>
       )}
+  </div>
+)}
 
       {!match.played && !readOnly && (
         <form
           className="fixture-score-form"
-          onSubmit={e => {
-            e.preventDefault();
-            submitResult(e.target.home.value, e.target.away.value);
-          }}
-        >
-          <input name="home" type="number" min="0" required />
-          <span>-</span>
-          <input name="away" type="number" min="0" required />
-          <button type="submit">Submit</button>
-        </form>
+  onSubmit={e => {
+    e.preventDefault();
+    const h = e.target.home.value;
+    const a = e.target.away.value;
+    submitResult(
+      h,
+      a,
+      e.target.ph?.value,
+      e.target.pa?.value
+    );
+  }}
+>
+  <input name="home" type="number" min="0" required
+    onChange={e => setIsDraw(e.target.value === e.target.form.away.value)}
+  />
+  <span>-</span>
+  <input name="away" type="number" min="0" required
+    onChange={e => setIsDraw(e.target.value === e.target.form.home.value)}
+  />
+
+  {isDraw && match.round !== 'league' && (
+    <div className="penalties">
+      <small>Penalties</small>
+      <input name="ph" type="number" min="0" required />
+      <span>-</span>
+      <input name="pa" type="number" min="0" required />
+    </div>
+  )}
+
+  <button type="submit">Submit</button>
+</form>
       )}
 
       {!match.played && readOnly && (

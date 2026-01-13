@@ -10,7 +10,18 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+function resolveKnockoutWinner(m) {
+  if (m.home_score > m.away_score) return m.home_team_id;
+  if (m.away_score > m.home_score) return m.away_team_id;
 
+  if (m.decided_by_penalties) {
+    return m.penalties_home > m.penalties_away
+      ? m.home_team_id
+      : m.away_team_id;
+  }
+
+  throw new Error('Knockout match unresolved');
+}
 
 // ----------------- DB -----------------
 const pool = new Pool({
@@ -388,20 +399,35 @@ app.post("/api/matches", async (req, res) => {
 
 // POST submit result
 app.post('/api/matches/:id/result', async (req, res) => {
-  const { home_score, away_score } = req.body;
+  const {
+  home_score,
+  away_score,
+  penalties_home,
+  penalties_away
+} = req.body;
 
   try {
     await pool.query(
       `
-      UPDATE matches
-      SET home_score = $1,
-          away_score = $2,
-          played = true,
-           updated_at = NOW()
-      WHERE id = $3
-      `,
-      [home_score, away_score, req.params.id]
-    );
+   UPDATE matches
+  SET home_score = $1,
+      away_score = $2,
+      penalties_home = $3,
+      penalties_away = $4,
+      decided_by_penalties = $5,
+      played = true,
+      updated_at = NOW()
+  WHERE id = $6
+  `,
+  [
+    home_score,
+    away_score,
+    ph,
+    pa,
+    decidedByPenalties,
+    req.params.id
+  ]
+);
 
     res.sendStatus(200);
   } catch (err) {
@@ -421,6 +447,9 @@ app.get("/api/matches/latest", async (req, res) => {
         m.id,
         m.home_score,
         m.away_score,
+        m.decided_by_penalties,
+        m.penalties_home,
+        m.penalties_away,
         m.updated_at,
         m.round,
         m.bracket,
@@ -746,9 +775,8 @@ app.post('/api/knockout/regenerate', async (req, res) => {
         return res.json({ message: 'Final already exists' });
       }
 
-      const winners = semis.rows.map(m =>
-        m.home_score > m.away_score ? m.home_team_id : m.away_team_id
-      );
+     const winners = semis.rows.map(resolveKnockoutWinner);
+
 
       await pool.query(
         `

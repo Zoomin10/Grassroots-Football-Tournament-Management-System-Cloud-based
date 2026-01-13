@@ -175,8 +175,29 @@ useEffect(() => {
     const awayName =
       final.away_team_name || final.away_team || `Team ${final.away_team_id}`;
 
-    const winner =
-      final.home_score > final.away_score ? homeName : awayName;
+  let winner = null;
+let runnerUp = null;
+
+if (final.home_score > final.away_score) {
+  winner = homeName;
+  runnerUp = awayName;
+} else if (final.away_score > final.home_score) {
+  winner = awayName;
+  runnerUp = homeName;
+} else if (
+  final.decided_by_penalties &&
+  final.penalties_home != null &&
+  final.penalties_away != null
+) {
+  const homeWonPens = Number(final.penalties_home) > Number(final.penalties_away);
+  winner = homeWonPens ? homeName : awayName;
+  runnerUp = homeWonPens ? awayName : homeName;
+} else {
+  // still unresolved / should not happen for finals, but safe
+  return null;
+}
+
+return { winner, runnerUp };
 
     const runnerUp =
       final.home_score > final.away_score ? awayName : homeName;

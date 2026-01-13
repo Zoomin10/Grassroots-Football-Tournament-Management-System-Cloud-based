@@ -18,6 +18,18 @@ function getWinnerFromFinal(match) {
 
   if (hs > as) return match.home_team;
   if (as > hs) return match.away_team;
+
+  // Draw at FT → decide by penalties if present
+  if (
+    match.decided_by_penalties &&
+    match.penalties_home != null &&
+    match.penalties_away != null
+  ) {
+    return Number(match.penalties_home) > Number(match.penalties_away)
+      ? match.home_team
+      : match.away_team;
+  }
+
   return "Draw";
 }
 
@@ -58,7 +70,12 @@ function scorePrefix(s) {
 
 function scoreLine(s) {
   const prefix = scorePrefix(s);
-  return `${prefix ? prefix + ": " : ""}${s.home_team} ${s.home_score}–${s.away_score} ${s.away_team}`;
+   const pens =
+    s.decided_by_penalties && s.penalties_home != null && s.penalties_away != null
+      ? ` (pens ${s.penalties_home}–${s.penalties_away})`
+      : "";
+  
+  return `${prefix ? prefix + ": " : ""}${s.home_team} ${s.home_score}–${s.away_score} ${s.away_team}${pens}`;
 }
 
 function tournamentLabel(t) {
