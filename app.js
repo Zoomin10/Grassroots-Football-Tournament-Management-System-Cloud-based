@@ -937,10 +937,24 @@ app.get("/api/tournaments/active", async (req, res) => {
          kickoff_time ASC NULLS LAST,
          year DESC`
     );
-    res.json({ tournaments: rows });
+
+    const tournaments = rows.map(t => {
+      const time = t.kickoff_time
+        ? String(t.kickoff_time).slice(0, 5)
+        : null;
+
+      const gender = t.gender.charAt(0).toUpperCase() + t.gender.slice(1);
+
+      return {
+        ...t,
+        label: `${t.year} ${t.age_group} ${gender} – ${t.venue}${time ? ` (${time})` : ""}`
+      };
+    });
+
+    res.json({ tournaments });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch active tournament" });
+    res.status(500).json({ error: "ServerError" });
   }
 });
 
@@ -1313,7 +1327,8 @@ app.get("/api/registrations/:teamIdCode", async (req, res) => {
 
 app.get("/api/kit-colours", (req, res) => {
   res.json({
-    colours: KIT_COLOUR_OPTIONS
+    colours: KIT_COLOUR_OPTIONS;
+     values: KIT_COLOUR_OPTIONS.map(c => c.value)
   });
 });
 

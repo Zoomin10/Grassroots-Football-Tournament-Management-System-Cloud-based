@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import PublicView from "./pages/PublicView";
 import AdminView from "./pages/AdminView";
 import LargeScreenView from "./pages/LargeScreenView";
+import RegisterPage from "./pages/RegisterPage";
+
 
 import "./App.css";
 import "./styles/public.css";
@@ -12,6 +14,8 @@ import "./styles/tv.css";
 function Layout({ children }) {
   const location = useLocation();
   const isTV = location.pathname === "/tv";
+  const isRegister = location.pathname.startsWith("/register");
+
 
   const [now, setNow] = useState(new Date());
 
@@ -53,7 +57,7 @@ function Layout({ children }) {
             className="title-logo"
           />
           <h1>Wroughton Youth FC</h1>
-          <h1>Summer Tournament</h1>
+            <h1>{isRegister ? "Tournament Registration" : "Summer Tournament"}</h1>
         </header>
       )}
 
@@ -100,6 +104,7 @@ function App() {
           <Route path="/" element={<PublicView />} />
           <Route path="/admin" element={<AdminView />} />
           <Route path="/tv" element={<LargeScreenView />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<PublicView />} />
         </Routes>
       </Layout>
