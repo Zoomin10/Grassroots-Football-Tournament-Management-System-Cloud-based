@@ -1327,7 +1327,7 @@ app.get("/api/registrations/:teamIdCode", async (req, res) => {
 
 app.get("/api/kit-colours", (req, res) => {
   res.json({
-    colours: KIT_COLOUR_OPTIONS;
+    colours: KIT_COLOUR_OPTIONS,
      values: KIT_COLOUR_OPTIONS.map(c => c.value)
   });
 });
