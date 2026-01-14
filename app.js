@@ -6,9 +6,32 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { Pool } = require('pg');
+const crypto = require("crypto");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const KIT_COLOUR_OPTIONS = [
+  { value: "red", label: "Red" },
+  { value: "black", label: "Black" },
+  { value: "white", label: "White" },
+  { value: "light_blue", label: "Light Blue" },
+  { value: "dark_blue", label: "Dark Blue" },
+  { value: "yellow", label: "Yellow" },
+  { value: "orange", label: "Orange" },
+  { value: "green", label: "Green" },
+  { value: "purple", label: "Purple" },
+  { value: "grey", label: "Grey" },
+  { value: "navy", label: "Navy" },
+  { value: "maroon", label: "Maroon" },
+  { value: "pink", label: "Pink" },
+  { value: "brown", label: "Brown" },
+  { value: "gold", label: "Gold" }
+];
+// Used for backend validation (fast lookups)
+const KIT_COLOURS = new Set(KIT_COLOUR_OPTIONS.map(c => c.value));
+
+
 
 function resolveKnockoutWinner(m) {
   if (m.home_score > m.away_score) return m.home_team_id;
@@ -62,7 +85,7 @@ app.get("/api/tournaments", async (req, res) => {
 });
 
 // Get active tournament (latest created for now)
-app.get("/api/tournaments/active", async (req, res) => {
+app.get("/api/tournaments/latest", async (req, res) => {
   try {
     const result = await pool.query(
       `
@@ -902,6 +925,397 @@ app.post('/api/knockout/regenerate', async (req, res) => {
     }
   });
 
+app.get("/api/tournaments/active", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, year, gender, age_group, date, kickoff_time, venue
+       FROM tournaments
+       WHERE date IS NULL OR date >= CURRENT_DATE
+       ORDER BY
+         (date IS NULL) ASC,
+         date ASC,
+         kickoff_time ASC NULLS LAST,
+         year DESC`
+    );
+    res.json({ tournaments: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch active tournament" });
+  }
+});
+
+app.post("/api/registrations", async (req, res) => {
+  try {
+    const {
+      tournamentId,
+      clubName,
+      teamName,
+      managerName,
+      email,
+      phone
+    } = req.body || {};
+
+    // Validate required fields
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
+    if (!requiredTrimmedString(clubName)) return res.status(400).json({ error: "ValidationError", field: "clubName" });
+    if (!requiredTrimmedString(teamName)) return res.status(400).json({ error: "ValidationError", field: "teamName" });
+    if (!requiredTrimmedString(managerName)) return res.status(400).json({ error: "ValidationError", field: "managerName" });
+    if (!isValidEmail(email)) return res.status(400).json({ error: "ValidationError", field: "email" });
+    if (!requiredTrimmedString(phone)) return res.status(400).json({ error: "ValidationError", field: "phone" });
+
+    // Check tournament exists and is open
+    const tRes = await pool.query(
+       `SELECT id, year, gender, age_group, venue, date, kickoff_time
+        FROM tournaments
+        WHERE id = $1`,
+        [tournamentId]
+    );
+
+    if (tRes.rowCount === 0) return res.status(404).json({ error: "TournamentNotFound" });
+
+    const tournament = tRes.rows[0];
+   if (tournament.date && tournament.date < new Date().toISOString().slice(0, 10)) {
+  return res.status(409).json({ error: "RegistrationClosed" });
+}
+
+    // Generate unique Team ID (retry for ultra-rare collision)
+    let teamIdCode = null;
+    for (let i = 0; i < 5; i++) {
+      const candidate = generateTeamIdCode(10);
+      const exists = await pool.query(`SELECT 1 FROM registrations WHERE team_id_code = $1`, [candidate]);
+      if (exists.rowCount === 0) {
+        teamIdCode = candidate;
+        break;
+      }
+    }
+    if (!teamIdCode) return res.status(500).json({ error: "TeamIdGenerationFailed" });
+
+    const ins = await pool.query(
+      `INSERT INTO registrations (
+        tournament_id, team_id_code,
+        club_name, team_name, manager_name, manager_email, manager_phone,
+        status
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,'submitted')
+      RETURNING id, team_id_code`,
+      [
+        tournamentId,
+        teamIdCode,
+        clubName.trim(),
+        teamName.trim(),
+        managerName.trim(),
+        String(email).trim(),
+        phone.trim()
+      ]
+    );
+
+    // Email (stub for now)
+    await sendTeamIdEmailStub({
+      to: String(email).trim(),
+      tournamentName: `${tournament.year || ""} ${tournament.age_group || ""} ${tournament.gender || ""}`.trim() || "Tournament",
+      teamIdCode
+    });
+
+    // Return Team ID immediately for UX reliability
+    res.status(201).json({
+      registrationId: ins.rows[0].id,
+      teamIdCode: ins.rows[0].team_id_code
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.get("/api/registrations/:teamIdCode", async (req, res) => {
+  try {
+    const teamIdCode = normalizeTeamIdCode(req.params.teamIdCode);
+
+    const regRes = await pool.query(
+      `SELECT r.*,
+              t.year, t.gender, t.age_group, t.venue, t.date
+       FROM registrations r
+       JOIN tournaments t ON t.id = r.tournament_id
+       WHERE r.team_id_code = $1`,
+      [teamIdCode]
+    );
+
+    if (regRes.rowCount === 0) return res.status(404).json({ error: "RegistrationNotFound" });
+
+    const registration = regRes.rows[0];
+
+    const playersRes = await pool.query(
+      `SELECT id, first_name, surname, dob
+       FROM registration_players
+       WHERE registration_id = $1
+       ORDER BY surname, first_name`,
+      [registration.id]
+    );
+
+    res.json({ registration, players: playersRes.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.patch("/api/registrations/:teamIdCode", async (req, res) => {
+  try {
+    const teamIdCode = normalizeTeamIdCode(req.params.teamIdCode);
+    const body = req.body || {};
+
+    const regRes = await pool.query(`SELECT id FROM registrations WHERE team_id_code = $1`, [teamIdCode]);
+    if (regRes.rowCount === 0) return res.status(404).json({ error: "RegistrationNotFound" });
+    const regId = regRes.rows[0].id;
+
+    // Validate kit colours if provided
+    if (Object.prototype.hasOwnProperty.call(body, "kitColour1") && body.kitColour1 != null) {
+      if (!KIT_COLOURS.has(String(body.kitColour1))) {
+        return res.status(400).json({ error: "ValidationError", field: "kitColour1" });
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(body, "kitColour2") && body.kitColour2 != null) {
+      if (!KIT_COLOURS.has(String(body.kitColour2))) {
+        return res.status(400).json({ error: "ValidationError", field: "kitColour2" });
+      }
+    }
+    if (body.kitColour1 && body.kitColour2 && String(body.kitColour1) === String(body.kitColour2)) {
+      return res.status(400).json({ error: "ValidationError", message: "Kit colours must be different" });
+    }
+
+    // Optional updates
+    const mapping = [
+      ["clubName", "club_name"],
+      ["teamName", "team_name"],
+      ["managerName", "manager_name"],
+      ["email", "manager_email"],
+      ["phone", "manager_phone"],
+      ["assistant1Name", "assistant1_name"],
+      ["assistant2Name", "assistant2_name"],
+      ["kitColour1", "kit_colour_1"],
+      ["kitColour2", "kit_colour_2"]
+    ];
+
+    const sets = [];
+    const values = [];
+    let idx = 1;
+
+    for (const [key, col] of mapping) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        if (key === "email" && body.email != null && !isValidEmail(body.email)) {
+          return res.status(400).json({ error: "ValidationError", field: "email" });
+        }
+        sets.push(`${col} = $${idx++}`);
+        values.push(body[key] === undefined ? null : body[key]);
+      }
+    }
+
+    if (sets.length === 0) return res.status(400).json({ error: "NoFieldsToUpdate" });
+
+    values.push(regId);
+
+    let upd;
+    try {
+      upd = await pool.query(
+        `UPDATE registrations
+         SET ${sets.join(", ")}
+         WHERE id = $${idx}
+         RETURNING *`,
+        values
+      );
+    } catch (e) {
+      // Catch DB constraint violations nicely (e.g. chk_different_kit_colours)
+      if (e.code === "23514") {
+        return res.status(400).json({ error: "ValidationError", message: "Kit colours must be different" });
+      }
+      if (e.code === "22P02") {
+        return res.status(400).json({ error: "ValidationError", message: "Invalid enum value provided" });
+      }
+      throw e;
+    }
+
+    res.json({ registration: upd.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.post("/api/registrations/:teamIdCode/players", async (req, res) => {
+  try {
+    const teamIdCode = normalizeTeamIdCode(req.params.teamIdCode);
+    const { firstName, surname, dob } = req.body || {};
+
+    if (!requiredTrimmedString(firstName)) return res.status(400).json({ error: "ValidationError", field: "firstName" });
+    if (!requiredTrimmedString(surname)) return res.status(400).json({ error: "ValidationError", field: "surname" });
+    if (!requiredTrimmedString(dob) || Number.isNaN(Date.parse(dob))) {
+      return res.status(400).json({ error: "ValidationError", field: "dob" });
+    }
+
+    const regRes = await pool.query(`SELECT id FROM registrations WHERE team_id_code = $1`, [teamIdCode]);
+    if (regRes.rowCount === 0) return res.status(404).json({ error: "RegistrationNotFound" });
+
+    const ins = await pool.query(
+      `INSERT INTO registration_players (registration_id, first_name, surname, dob)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, first_name, surname, dob`,
+      [regRes.rows[0].id, firstName.trim(), surname.trim(), new Date(dob)]
+    );
+
+    res.status(201).json({ player: ins.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.delete("/api/registrations/:teamIdCode/players/:playerId", async (req, res) => {
+  try {
+    const teamIdCode = normalizeTeamIdCode(req.params.teamIdCode);
+    const playerId = parseInt(req.params.playerId, 10);
+
+    if (!Number.isInteger(playerId) || playerId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "playerId" });
+    }
+
+    const regRes = await pool.query(`SELECT id FROM registrations WHERE team_id_code = $1`, [teamIdCode]);
+    if (regRes.rowCount === 0) return res.status(404).json({ error: "RegistrationNotFound" });
+
+    const del = await pool.query(
+      `DELETE FROM registration_players
+       WHERE id = $1 AND registration_id = $2
+       RETURNING id`,
+      [playerId, regRes.rows[0].id]
+    );
+
+    if (del.rowCount === 0) return res.status(404).json({ error: "PlayerNotFound" });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.post("/api/registrations", async (req, res) => {
+  try {
+    const { tournamentId, clubName, teamName, managerName, email, phone } = req.body || {};
+
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
+    if (!requiredTrimmedString(clubName)) return res.status(400).json({ error: "ValidationError", field: "clubName" });
+    if (!requiredTrimmedString(teamName)) return res.status(400).json({ error: "ValidationError", field: "teamName" });
+    if (!requiredTrimmedString(managerName)) return res.status(400).json({ error: "ValidationError", field: "managerName" });
+    if (!isValidEmail(email)) return res.status(400).json({ error: "ValidationError", field: "email" });
+    if (!requiredTrimmedString(phone)) return res.status(400).json({ error: "ValidationError", field: "phone" });
+
+    // Tournament must exist
+    const tRes = await pool.query(
+      `SELECT id, year, gender, age_group, venue, date
+       FROM tournaments
+       WHERE id = $1`,
+      [tournamentId]
+    );
+    if (tRes.rowCount === 0) return res.status(404).json({ error: "TournamentNotFound" });
+
+    // Optional: block registrations if tournament clearly in the past
+    const tournament = tRes.rows[0];
+    if (tournament.date) {
+      const todayISO = new Date().toISOString().slice(0, 10);
+      if (tournament.date < todayISO) {
+        return res.status(409).json({ error: "RegistrationClosed" });
+      }
+    }
+
+    // Generate unique team_id_code
+    let teamIdCode = null;
+    for (let i = 0; i < 5; i++) {
+      const candidate = generateTeamIdCode(10);
+      const exists = await pool.query(`SELECT 1 FROM registrations WHERE team_id_code = $1`, [candidate]);
+      if (exists.rowCount === 0) {
+        teamIdCode = candidate;
+        break;
+      }
+    }
+    if (!teamIdCode) return res.status(500).json({ error: "TeamIdGenerationFailed" });
+
+    const ins = await pool.query(
+      `INSERT INTO registrations (
+        tournament_id, team_id_code,
+        status,
+        club_name, team_name, manager_name, manager_email, manager_phone
+      )
+      VALUES ($1,$2,'submitted',$3,$4,$5,$6,$7)
+      RETURNING id, team_id_code, status`,
+      [
+        tournamentId,
+        teamIdCode,
+        clubName.trim(),
+        teamName.trim(),
+        managerName.trim(),
+        String(email).trim(),
+        phone.trim()
+      ]
+    );
+
+    // Email stub (replace later)
+    await sendTeamIdEmailStub({
+      to: String(email).trim(),
+      tournamentName: `${tournament.year} ${tournament.age_group} ${tournament.gender}`.trim(),
+      teamIdCode
+    });
+
+    res.status(201).json({
+      registrationId: ins.rows[0].id,
+      teamIdCode: ins.rows[0].team_id_code,
+      status: ins.rows[0].status
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.get("/api/registrations/:teamIdCode", async (req, res) => {
+  try {
+    const teamIdCode = normalizeTeamIdCode(req.params.teamIdCode);
+
+    const regRes = await pool.query(
+      `SELECT r.*,
+              t.year, t.gender, t.age_group, t.venue, t.date, t.kickoff_time
+       FROM registrations r
+       JOIN tournaments t ON t.id = r.tournament_id
+       WHERE r.team_id_code = $1`,
+      [teamIdCode]
+    );
+
+    if (regRes.rowCount === 0) return res.status(404).json({ error: "RegistrationNotFound" });
+
+    const registration = regRes.rows[0];
+
+    const playersRes = await pool.query(
+      `SELECT id, first_name, surname, dob
+       FROM registration_players
+       WHERE registration_id = $1
+       ORDER BY surname, first_name`,
+      [registration.id]
+    );
+
+    res.json({ registration, players: playersRes.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.get("/api/kit-colours", (req, res) => {
+  res.json({
+    colours: KIT_COLOUR_OPTIONS
+  });
+});
 
   // ----------------- SERVER START -----------------
   // ----------------- FRONTEND (Vite build) -----------------

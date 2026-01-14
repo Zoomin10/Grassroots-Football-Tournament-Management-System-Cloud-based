@@ -372,9 +372,10 @@ Represents a team participating in a specific tournament.
 
 Notes
 
-Teams belong to one league per tournament
+    Teams belong to one league per tournament
 
-Teams are tournament-scoped (no global team registry)
+    Teams are tournament-scoped (no global team registry)
+
 
 
 
