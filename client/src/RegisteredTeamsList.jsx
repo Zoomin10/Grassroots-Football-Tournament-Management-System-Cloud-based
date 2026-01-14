@@ -70,8 +70,11 @@ export default function RegisteredTeamsList({
       )}
 
       {sorted.map((item) => {
-        const teamName = item.team_name;
-        const logoName = teamName || item.club_name || "default";
+        const teamName =
+           item.club_name
+             ? `${item.club_name} – ${item.team_name}`
+             : item.team_name;
+   const logoName = item.club_name || item.team_name || "default";
 
         const isReg = item.source === "registration";
         const isApproved = isReg && !!item.team_row_id;
