@@ -1558,53 +1558,7 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
   }
 }); 
 
-    // ---- 2) Teams registered via website ----
-    const regsRes = await pool.query(
-      `SELECT
-         id,
-         tournament_id,
-         team_row_id,
-         club_name,
-         team_name,
-         manager_name,
-         manager_email,
-         manager_phone,
-         team_id_code,
-         status,
-         created_at
-       FROM registrations
-       WHERE tournament_id = $1
-       ORDER BY created_at DESC`,
-      [tournamentId]
-    );
 
-    const registrationTeams = regsRes.rows.map(r => ({
-      source: "registration",
-      id: `reg-${r.id}`,
-      registration_id: r.id,
-      team_row_id: r.team_row_id,
-      tournament_id: r.tournament_id,
-      team_name: r.team_name,
-      club_name: r.club_name,
-      league_id: null,
-      league_name: null,
-      manager_name: r.manager_name,
-      manager_email: r.manager_email,
-      manager_phone: r.manager_phone,
-      team_id_code: r.team_id_code,
-      status: r.status,
-      created_at: r.created_at
-    }));
-
-    // ---- Combine both sources ----
-    res.json({
-      teams: [...registrationTeams, ...adminTeams]
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "ServerError" });
-  }
-});
 
 
 
