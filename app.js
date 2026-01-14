@@ -1566,8 +1566,7 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
   }
 });
 
-const [registeredTeams, setRegisteredTeams] = useState([]);
-const [leagues, setLeagues] = useState([]);
+
 
 async function reloadRegisteredTeams() {
   const res = await fetch(`/api/tournaments/${selectedTournamentId}/registered-teams`);
