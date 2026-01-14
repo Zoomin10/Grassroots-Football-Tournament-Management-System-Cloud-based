@@ -15,8 +15,9 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 
 ### ✨ Features
 
+
 ### Core
-- 3 Page view : Admin page, Audience page (public), TV page for club-house Smart TV screen
+- 4 Page views (each with own URL) : Tournament Admin page, Tournament registration page, Audience page (public) and TV page for club-house Smart TV screen
 - Tournament creation (year, gender, age group, date, location, pitch allocation)
 - League A / League B structure
 - Team allocation to leagues
@@ -25,6 +26,88 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 - Result submission
 - Automatic league tables adjustments based on results
 - Cloud-hosted via Railway 
+
+📝 NEW: Public Team Registration System
+
+        A full self-service registration flow for teams entering tournaments.
+
+        Public Registration (/register)
+
+        Club-branded registration page with sponsor footer
+
+        Dropdown list of active tournaments
+
+        Minimum required details:
+
+        Club name
+
+        Team name
+
+        Manager name
+
+        Email address
+
+        Contact phone number
+
+        On submission:
+
+        Registration is stored in the database
+
+        A unique Team ID is generated and returned
+
+        (Email delivery currently stubbed; ready for SMTP integration)
+
+        Post-registration (via Team ID)
+
+        Using their Team ID, teams can later:
+
+        Add registered players (name + DoB)
+
+        Select kit colours (Colour 1 & Colour 2 dropdowns)
+
+        Add assistant coaches
+
+        This allows teams to complete details gradually without admin intervention.
+
+
+        🛂 Admin Approval Flow (Important Design)
+        Why approval is required
+
+        The tournament engine (fixtures, matches, knockouts) depends on the teams table, which requires a league assignment.
+
+        Web registrations do not immediately become tournament teams.
+
+        Approval process (Admin)
+
+        Admin opens Admin View
+
+        Sees a unified list of:
+
+        Web registrations
+
+        Manually added teams
+
+        For a web registration:
+
+        Admin selects a league
+
+        Clicks Approve
+
+        System:
+
+        Creates a teams row
+
+        Links it back to the registration
+
+        Preserves the original registration data
+
+        Result
+
+        Registrations remain intact for audit/history
+
+        Tournament engine works with teams
+
+        No duplicate rendering in Admin UI
 
 ### Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
@@ -39,6 +122,45 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 - Cup & Plate semi-finals
 - Manual final generation once semis complete
 
+
+### Architecture Overview
+        ┌────────────────────────────┐
+        │     Display Devices        │
+        │  (TV, PC, Tablet, Phone)   │
+        └───────────────┬────────────┘
+                        │ HTTPS
+                        ▼
+        ┌────────────────────────────┐
+        │      React Frontend        │
+        │                            │
+        │ • Public View              │
+        │ • Registration (/register) │
+        │ • Admin View               │
+        │ • TV Mode                  │
+        │ • Logo assets              │
+        └───────────────┬────────────┘
+                        │ REST API
+                        ▼
+        ┌────────────────────────────┐
+        │   Node.js + Express API    │
+        │                            │
+        │ • Tournament logic         │
+        │ • Registration handling    │
+        │ • Admin approval           │
+        │ • Fixtures & results       │
+        └───────────────┬────────────┘
+                        │ SQL (pg)
+                        ▼
+        ┌────────────────────────────┐
+        │     PostgreSQL Database    │
+        │                            │
+        │ • tournaments              │
+        │ • leagues                  │
+        │ • teams                    │
+        │ • registrations            │
+        │ • registration_players     │
+        │ • matches                  │
+        └────────────────────────────┘
 
 ---
 ### Tech Stack
@@ -287,12 +409,50 @@ This application uses PostgreSQL to model a youth football tournament system, in
 
 All data is scoped to a tournament.
 
-Core tables:
-- `tournaments`
-- `leagues`
-- `teams`
-- `matches`
+        Core Tables
 
+        tournaments
+
+        leagues
+
+        teams
+
+        matches
+
+        Registration Tables (NEW)
+
+        registrations
+
+        registration_players
+
+ Key Design Addition
+registrations.team_row_id → teams.id
+
+
+This links a web registration to the created tournament team after admin approval.
+
+team_row_id is nullable
+
+Set only when approved
+
+Unique partial index prevents double-linking
+
+        🧪 Database Operations (Critical)
+
+        All DB operations are explicit and script-driven.
+
+        Scripts live in scripts/:
+
+        dump-railway.sh → snapshot Railway DB
+
+        rebuild-local.sh → rebuild local DB
+
+        railway-reset-demo.sh → reset Railway with demo data
+
+        railway-reset-schema-only.sh → wipe data, keep schema
+
+        ⚠️ Never run reset scripts without confirmation
+        
 League tables are calculated dynamically from played matches.
 
 Tie-break rules:
@@ -497,15 +657,58 @@ Get all Cup knockout matches
 
 Examples:
 
-- `GET /api/tournaments`
-- `POST /api/league/generate-fixtures`
-- `POST /api/matches/:id/result`
-- `GET /api/matches/latest?limit=6`
+    Public
 
-(See full API list in architecture documentation.)
+    GET /api/tournaments/active
+
+    POST /api/registrations
+
+    GET /api/registrations/:teamIdCode
+
+    PUT /api/registrations/:teamIdCode
+
+    GET /api/kit-colours
+
+    Admin
+
+    GET /api/tournaments/:tournamentId/registered-teams
+
+    POST /api/registrations/:registrationId/assign-league
+
+    POST /api/league/generate-fixtures
+
+    POST /api/knockout/regenerate
+
+    POST /api/matches/:id/result
+
+    (See full API list in architecture documentation.)
 
 ---
 
+    👕 Team Logos (Improved)
+
+    Logos stored in /public/logos/
+
+    Logo detection is keyword-based, not exact-match
+
+    Example:
+    All of the following resolve to the Wroughton Youth FC logo:
+
+    Wroughton Youth FC
+
+    wroughton youth fc
+
+    Wroughton FC
+
+    Wroughton
+
+    This makes the system tolerant of real-world data entry.
+
+    Fallback:
+
+    /logos/default.png
+    
+    
 ## 🚀 Installation
 
 ### Prerequisites
