@@ -1574,17 +1574,8 @@ async function reloadRegisteredTeams() {
   setRegisteredTeams(data.teams || []);
 }
 
-useEffect(() => {
-  if (!selectedTournamentId) return;
 
-  // leagues for dropdowns
-  fetch(`/api/tournaments/${selectedTournamentId}/leagues`)
-    .then(r => r.json())
-    .then(d => setLeagues(d.leagues || []));
 
-  // combined list
-  reloadRegisteredTeams();
-}, [selectedTournamentId]);
 
 app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
   try {

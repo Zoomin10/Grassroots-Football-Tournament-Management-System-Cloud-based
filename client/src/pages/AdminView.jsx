@@ -111,6 +111,26 @@ useEffect(() => {
     .catch(err => console.error("❌ Fetch tournaments error:", err));
 }, []);
 
+useEffect(() => {
+  if (!selectedTournamentId) {
+    setLeagues([]);
+    setRegisteredTeams([]);
+    return;
+  }
+
+  // leagues for dropdowns
+  fetch(`/api/tournaments/${selectedTournamentId}/leagues`)
+    .then(r => r.json())
+    .then(d => setLeagues(d.leagues || []))
+    .catch(err => {
+      console.error("❌ Fetch leagues error:", err);
+      setLeagues([]);
+    });
+
+  // combined list
+  reloadRegisteredTeams();
+}, [selectedTournamentId]);
+
   /* =========================
      LOAD LEAGUES FOR TOURNAMENT
   ========================= */
