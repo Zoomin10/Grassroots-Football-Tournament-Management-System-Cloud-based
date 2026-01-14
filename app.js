@@ -55,6 +55,12 @@ function generateTeamIdCode(length = 10) {
   return out;
 }
 
+async function sendTeamIdEmailStub({ to, tournamentName, teamIdCode }) {
+  console.log("📧 TEAM ID EMAIL (stub)");
+  console.log("To:", to);
+  console.log("Tournament:", tournamentName);
+  console.log("Team ID:", teamIdCode);
+}
 
 function resolveKnockoutWinner(m) {
   if (m.home_score > m.away_score) return m.home_team_id;
