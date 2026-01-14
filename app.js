@@ -44,6 +44,18 @@ function normalizeTeamIdCode(s) {
   return String(s || "").trim().toUpperCase();
 }
 
+function generateTeamIdCode(length = 10) {
+  const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no O/0/I/1
+  const bytes = crypto.randomBytes(length);
+
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    out += ALPHABET[bytes[i] % ALPHABET.length];
+  }
+  return out;
+}
+
+
 function resolveKnockoutWinner(m) {
   if (m.home_score > m.away_score) return m.home_team_id;
   if (m.away_score > m.home_score) return m.away_team_id;
