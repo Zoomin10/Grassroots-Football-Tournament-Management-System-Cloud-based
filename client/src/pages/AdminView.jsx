@@ -83,9 +83,7 @@ const VENUES = [
   "The Deanery School",
   "The Ridgeway Leisure Center",
 ];
-useEffect(() => {
-  reloadRegisteredTeams();
-}, [selectedTournamentId, reloadKey]);
+
 
 
 useEffect(() => {
