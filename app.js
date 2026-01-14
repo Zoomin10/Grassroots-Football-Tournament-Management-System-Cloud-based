@@ -1361,6 +1361,233 @@ app.get("/api/kit-colours", (req, res) => {
   });
 });
 
+app.get("/api/tournaments/:tournamentId/leagues", async (req, res) => {
+  try {
+    const tournamentId = parseInt(req.params.tournamentId, 10);
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT id, name, tournament_id
+       FROM leagues
+       WHERE tournament_id = $1
+       ORDER BY name ASC`,
+      [tournamentId]
+    );
+
+    res.json({ leagues: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+app.post("/api/registrations/:registrationId/assign-league", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const registrationId = parseInt(req.params.registrationId, 10);
+    const leagueId = parseInt(req.body?.leagueId, 10);
+
+    if (!Number.isInteger(registrationId) || registrationId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "registrationId" });
+    }
+    if (!Number.isInteger(leagueId) || leagueId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "leagueId" });
+    }
+
+    await client.query("BEGIN");
+
+    // Lock the registration row so two admins can't approve it twice
+    const regRes = await client.query(
+      `SELECT id, tournament_id, club_name, team_name, team_row_id, status
+       FROM registrations
+       WHERE id = $1
+       FOR UPDATE`,
+      [registrationId]
+    );
+
+    if (regRes.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "RegistrationNotFound" });
+    }
+
+    const reg = regRes.rows[0];
+
+    if (reg.team_row_id) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: "AlreadyAssigned", message: "This registration is already assigned to a league." });
+    }
+
+    // Ensure league exists and belongs to same tournament
+    const leagueRes = await client.query(
+      `SELECT id, tournament_id, name
+       FROM leagues
+       WHERE id = $1`,
+      [leagueId]
+    );
+
+    if (leagueRes.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "LeagueNotFound" });
+    }
+
+    const league = leagueRes.rows[0];
+    if (league.tournament_id !== reg.tournament_id) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "ValidationError", message: "League does not belong to the same tournament." });
+    }
+
+    // Create a team row.
+    // teams.team is required; choose a consistent display string.
+    const displayTeamName = `${reg.club_name} - ${reg.team_name}`.trim();
+
+    const teamIns = await client.query(
+      `INSERT INTO teams (team, league_id, tournament_id)
+       VALUES ($1, $2, $3)
+       RETURNING id, team, league_id, tournament_id`,
+      [displayTeamName, league.id, reg.tournament_id]
+    );
+
+    const teamRow = teamIns.rows[0];
+
+    // Link registration -> team row
+    // Optionally update status, but only if your enum supports it.
+    // We'll keep it safe: just link and leave status as-is.
+    const upd = await client.query(
+      `UPDATE registrations
+       SET team_row_id = $1
+       WHERE id = $2
+       RETURNING id, team_row_id, status`,
+      [teamRow.id, reg.id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      ok: true,
+      registration: upd.rows[0],
+      team: teamRow,
+      league: { id: league.id, name: league.name }
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ error: "ServerError", message: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
+  try {
+    const tournamentId = parseInt(req.params.tournamentId, 10);
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
+
+    // ---- 1) Teams added manually in Admin ----
+    const teamsRes = await pool.query(
+      `SELECT
+         tm.id,
+         tm.tournament_id,
+         tm.league_id,
+         tm.team,
+         l.name AS league_name
+       FROM teams tm
+       JOIN leagues l ON l.id = tm.league_id
+       WHERE tm.tournament_id = $1
+       ORDER BY tm.id DESC`,
+      [tournamentId]
+    );
+
+    const adminTeams = teamsRes.rows.map(t => ({
+      source: "admin",
+      id: `team-${t.id}`,
+      team_row_id: t.id,
+      registration_id: null,
+      tournament_id: t.tournament_id,
+      team_name: t.team,
+      club_name: null,
+      league_id: t.league_id,
+      league_name: t.league_name,
+      manager_name: null,
+      manager_email: null,
+      manager_phone: null,
+      team_id_code: null,
+      status: "admin"
+    }));
+
+    // ---- 2) Teams registered via website ----
+    const regsRes = await pool.query(
+      `SELECT
+         id,
+         tournament_id,
+         team_row_id,
+         club_name,
+         team_name,
+         manager_name,
+         manager_email,
+         manager_phone,
+         team_id_code,
+         status,
+         created_at
+       FROM registrations
+       WHERE tournament_id = $1
+       ORDER BY created_at DESC`,
+      [tournamentId]
+    );
+
+    const registrationTeams = regsRes.rows.map(r => ({
+      source: "registration",
+      id: `reg-${r.id}`,
+      registration_id: r.id,
+      team_row_id: r.team_row_id,
+      tournament_id: r.tournament_id,
+      team_name: r.team_name,
+      club_name: r.club_name,
+      league_id: null,
+      league_name: null,
+      manager_name: r.manager_name,
+      manager_email: r.manager_email,
+      manager_phone: r.manager_phone,
+      team_id_code: r.team_id_code,
+      status: r.status,
+      created_at: r.created_at
+    }));
+
+    // ---- Combine both sources ----
+    res.json({
+      teams: [...registrationTeams, ...adminTeams]
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
+
+const [registeredTeams, setRegisteredTeams] = useState([]);
+const [leagues, setLeagues] = useState([]);
+
+async function reloadRegisteredTeams() {
+  const res = await fetch(`/api/tournaments/${selectedTournamentId}/registered-teams`);
+  const data = await res.json();
+  setRegisteredTeams(data.teams || []);
+}
+
+useEffect(() => {
+  if (!selectedTournamentId) return;
+
+  // leagues for dropdowns
+  fetch(`/api/tournaments/${selectedTournamentId}/leagues`)
+    .then(r => r.json())
+    .then(d => setLeagues(d.leagues || []));
+
+  // combined list
+  reloadRegisteredTeams();
+}, [selectedTournamentId]);
+
+
   // ----------------- SERVER START -----------------
   // ----------------- FRONTEND (Vite build) -----------------
 const clientDistPath = path.join(__dirname, "client", "dist");

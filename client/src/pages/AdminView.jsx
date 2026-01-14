@@ -7,7 +7,8 @@ import LeagueTable from "../LeagueTable";
 import Fixtures from "../Fixtures";
 import KnockoutBracket from "../KnockoutBracket";
 import { formatLeague } from "../utils/formatLeague";
-
+import RegisteredTeamsList from "../RegisteredTeamsList";
+import ApproveRegistration from "../ApproveRegistration";
 import "../App.css";
 
 export default function AdminView() {
@@ -45,12 +46,33 @@ const selectedTournament = tournaments.find(
 
 const [pitchLeagueA, setPitchLeagueA] = useState("");
 const [pitchLeagueB, setPitchLeagueB] = useState("");
+const [registeredTeams, setRegisteredTeams] = useState([]);
 
   const reloadData = () => setReloadKey(k => k + 1);
 
   const formattedLeague = Array.isArray(league)
     ? formatLeague(league)
     : [];
+
+    const reloadRegisteredTeams = async () => {
+  if (!selectedTournamentId) {
+    setRegisteredTeams([]);
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `/api/tournaments/${selectedTournamentId}/registered-teams`
+    );
+    if (!res.ok) throw new Error("Failed to fetch registered teams");
+    const data = await res.json();
+    setRegisteredTeams(data.teams || []);
+  } catch (err) {
+    console.error("❌ Fetch registered teams error:", err);
+    setRegisteredTeams([]);
+  }
+};
+
 
     console.log("ADMIN selectedTournamentId:", selectedTournamentId);
 const [venue, setVenue] = useState("");
@@ -60,6 +82,14 @@ const VENUES = [
   "The Deanery School",
   "The Ridgeway Leisure Center",
 ];
+
+useEffect(() => {
+  if (!selectedTournamentId) {
+    setRegisteredTeams([]);
+    return;
+  }
+  reloadRegisteredTeams();
+}, [selectedTournamentId, reloadKey]);
 
   /* =========================
      LOAD TOURNAMENTS
@@ -599,11 +629,14 @@ const activeLeagueName = activeLeague?.name ?? "";
       {/* Dashboard */}
   <div className="dashboard-wrapper">
   {/* LEFT PANEL — Teams */}
+
   <div className="left-panel">
-    <TeamList
-      teams={teams}
-      onDelete={reloadData}
-    />
+    <RegisteredTeamsList
+  items={registeredTeams}
+  leagues={leagues}
+  onRefresh={reloadRegisteredTeams}
+/>
+
 
     <AddTeam
       tournamentId={selectedTournamentId}
@@ -612,6 +645,7 @@ const activeLeagueName = activeLeague?.name ?? "";
       disabled={!selectedTournamentId}
     />
   </div>
+
 
   {/* RIGHT PANEL — League + Fixtures */}
   <div className="league-column">
