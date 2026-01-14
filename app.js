@@ -31,7 +31,18 @@ const KIT_COLOUR_OPTIONS = [
 // Used for backend validation (fast lookups)
 const KIT_COLOURS = new Set(KIT_COLOUR_OPTIONS.map(c => c.value));
 
+function requiredTrimmedString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
 
+function isValidEmail(email) {
+  return typeof email === "string" &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function normalizeTeamIdCode(s) {
+  return String(s || "").trim().toUpperCase();
+}
 
 function resolveKnockoutWinner(m) {
   if (m.home_score > m.away_score) return m.home_team_id;
