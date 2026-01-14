@@ -1556,7 +1556,7 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "ServerError" });
   }
-});
+}); 
 
     // ---- 2) Teams registered via website ----
     const regsRes = await pool.query(
