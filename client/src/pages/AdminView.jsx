@@ -73,21 +73,6 @@ const [registeredTeams, setRegisteredTeams] = useState([]);
   }
 };
 
-const reloadRegisteredTeams = async () => {
-  if (!selectedTournamentId) {
-    setRegisteredTeams([]);
-    return;
-  }
-
-  try {
-    const res = await fetch(`/api/tournaments/${selectedTournamentId}/registered-teams`);
-    const data = await res.json();
-    setRegisteredTeams(data.teams || []);
-  } catch (err) {
-    console.error("❌ Fetch registered teams error:", err);
-    setRegisteredTeams([]);
-  }
-};
 
 
     console.log("ADMIN selectedTournamentId:", selectedTournamentId);
