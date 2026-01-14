@@ -1486,13 +1486,49 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
       return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
     }
 
-    // ---- 1) Teams added manually in Admin ----
+    // ---- Web registrations (include league_name if approved) ----
+    const regsRes = await pool.query(
+      `SELECT
+         r.id,
+         r.team_row_id,
+         r.club_name,
+         r.team_name,
+         r.manager_name,
+         r.team_id_code,
+         r.created_at,
+         l.name AS league_name
+       FROM registrations r
+       LEFT JOIN teams tm ON tm.id = r.team_row_id
+       LEFT JOIN leagues l ON l.id = tm.league_id
+       WHERE r.tournament_id = $1
+       ORDER BY r.created_at DESC`,
+      [tournamentId]
+    );
+
+    const linkedTeamIds = new Set(
+      regsRes.rows
+        .map(r => r.team_row_id)
+        .filter(id => typeof id === "number")
+    );
+
+    const registrationTeams = regsRes.rows.map(r => ({
+      source: "registration",
+      id: `reg-${r.id}`,
+      registration_id: r.id,
+      team_row_id: r.team_row_id,
+      team_name: r.team_name,
+      club_name: r.club_name,
+      team_id_code: r.team_id_code,
+      manager_name: r.manager_name,
+      league_name: r.league_name
+    }));
+
+    // ---- Admin teams (EXCLUDE those created from registrations) ----
     const teamsRes = await pool.query(
       `SELECT
          tm.id,
-         tm.tournament_id,
-         tm.league_id,
          tm.team,
+         tm.league_id,
          l.name AS league_name
        FROM teams tm
        JOIN leagues l ON l.id = tm.league_id
@@ -1501,22 +1537,26 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
       [tournamentId]
     );
 
-    const adminTeams = teamsRes.rows.map(t => ({
-      source: "admin",
-      id: `team-${t.id}`,
-      team_row_id: t.id,
-      registration_id: null,
-      tournament_id: t.tournament_id,
-      team_name: t.team,
-      club_name: null,
-      league_id: t.league_id,
-      league_name: t.league_name,
-      manager_name: null,
-      manager_email: null,
-      manager_phone: null,
-      team_id_code: null,
-      status: "admin"
-    }));
+    const adminTeams = teamsRes.rows
+      .filter(t => !linkedTeamIds.has(t.id))   // ✅ key line: removes duplicates
+      .map(t => ({
+        source: "admin",
+        id: `team-${t.id}`,
+        registration_id: null,
+        team_row_id: t.id,
+        team_name: t.team,
+        club_name: null,
+        team_id_code: null,
+        manager_name: null,
+        league_name: t.league_name
+      }));
+
+    res.json({ teams: [...registrationTeams, ...adminTeams] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
 
     // ---- 2) Teams registered via website ----
     const regsRes = await pool.query(
