@@ -1587,6 +1587,77 @@ useEffect(() => {
   reloadRegisteredTeams();
 }, [selectedTournamentId]);
 
+app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
+  try {
+    const tournamentId = parseInt(req.params.tournamentId, 10);
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
+
+    // Admin teams (teams table)
+    const teamsRes = await pool.query(
+      `SELECT
+         tm.id,
+         tm.team,
+         tm.league_id,
+         l.name AS league_name
+       FROM teams tm
+       JOIN leagues l ON l.id = tm.league_id
+       WHERE tm.tournament_id = $1
+       ORDER BY tm.id DESC`,
+      [tournamentId]
+    );
+
+    const adminTeams = teamsRes.rows.map(t => ({
+      source: "admin",
+      id: `team-${t.id}`,
+      team_name: t.team,
+      club_name: null,
+      team_id_code: null,
+      manager_name: null,
+      registration_id: null,
+      team_row_id: t.id,
+      league_name: t.league_name
+    }));
+
+    // Web registrations (registrations table)
+    // Join through approved team (team_row_id) to get league_name when approved
+    const regsRes = await pool.query(
+      `SELECT
+         r.id,
+         r.team_row_id,
+         r.club_name,
+         r.team_name,
+         r.manager_name,
+         r.team_id_code,
+         r.created_at,
+         l.name AS league_name
+       FROM registrations r
+       LEFT JOIN teams tm ON tm.id = r.team_row_id
+       LEFT JOIN leagues l ON l.id = tm.league_id
+       WHERE r.tournament_id = $1
+       ORDER BY r.created_at DESC`,
+      [tournamentId]
+    );
+
+    const registrationTeams = regsRes.rows.map(r => ({
+      source: "registration",
+      id: `reg-${r.id}`,
+      team_name: r.team_name,
+      club_name: r.club_name,
+      team_id_code: r.team_id_code,
+      manager_name: r.manager_name,
+      registration_id: r.id,
+      team_row_id: r.team_row_id,
+      league_name: r.league_name
+    }));
+
+    res.json({ teams: [...registrationTeams, ...adminTeams] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ServerError" });
+  }
+});
 
   // ----------------- SERVER START -----------------
   // ----------------- FRONTEND (Vite build) -----------------
