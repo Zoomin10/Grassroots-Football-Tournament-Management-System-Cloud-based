@@ -8,6 +8,17 @@ const POLL_SCORES_MS = 4000;
 const POLL_TOURNAMENTS_MS = 20000;
 const LATEST_LIMIT = 7;
 
+function logoKeyFromTeamLabel(label) {
+  if (!label) return "";
+  const s = String(label).trim();
+
+  // If we display as "Club – Team" (en dash) or "Club - Team", take the club part
+  const clubPart = s.split(" – ")[0].split(" - ")[0].trim();
+
+  return clubPart || s;
+}
+
+
 function getWinnerFromFinal(match) {
   if (!match || !match.played) return null;
 
@@ -355,7 +366,7 @@ useEffect(() => {
 
               <div className="tv-winners-team-wrap">
                 <img
-                  src={getLogoSrc(winners.cup)}
+                 src={getLogoSrc(logoKeyFromTeamLabel(winners.cup))}
                   alt={winners.cup}
                   className="tv-winners-logo tv-winners-logo--cup"
                 />
@@ -369,7 +380,7 @@ useEffect(() => {
              
               <div className="tv-winners-team-wrap">
                 <img
-                  src={getLogoSrc(winners.plate)}
+                  src={getLogoSrc(logoKeyFromTeamLabel(winners.plate))}
                   alt={winners.plate}
                   className="tv-winners-logo"
                 />
