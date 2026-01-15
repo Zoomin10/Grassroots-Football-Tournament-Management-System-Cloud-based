@@ -178,11 +178,9 @@ function KitSwatch({ colour, titlePrefix = "" }) {
 {isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
-    <KitSwatch colour={item.kit_colour_1} titlePrefix="Primary: " />
-    <KitSwatch colour={item.kit_colour_2} titlePrefix="Secondary: " />
-    {!item.kit_colour_1 && !item.kit_colour_2 ? (
-      <span className="kit-none">—</span>
-    ) : null}
+    <span style={{ fontFamily: "monospace" }}>
+      {String(item.kit_colour_1)} / {String(item.kit_colour_2)}
+    </span>
   </div>
 ) : null}
 
