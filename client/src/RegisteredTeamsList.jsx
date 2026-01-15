@@ -153,26 +153,29 @@ function KitSwatch({ colour, titlePrefix = "" }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
                 <span className="team-name">{teamName}</span>
 
-                <div style={{ fontSize: 12, opacity: 0.8 }}>
-                  {isReg ? (
-                    <>
-                      <strong>Web</strong>
-                      {item.team_id_code ? (
-                        <>
-                          {" "}
-                          • Team ID:{" "}
-                          <span style={{ fontFamily: "monospace" }}>{item.team_id_code}</span>
-                        </>
-                      ) : null}
-                      {item.manager_name ? <> • {item.manager_name}</> : null}
-                    </>
-                  ) : (
-                    <>
-                      <strong>Admin</strong>
-                      {item.league_name ? <> • {item.league_name}</> : null}
-                    </>
-                  )}
-                    {isReg ? (
+         <div style={{ fontSize: 12, opacity: 0.8 }}>
+  {isReg ? (
+    <>
+      <strong>Web</strong>
+      {item.team_id_code ? (
+        <>
+          {" "}
+          • Team ID:{" "}
+          <span style={{ fontFamily: "monospace" }}>{item.team_id_code}</span>
+        </>
+      ) : null}
+      {item.manager_name ? <> • {item.manager_name}</> : null}
+    </>
+  ) : (
+    <>
+      <strong>Admin</strong>
+      {item.league_name ? <> • {item.league_name}</> : null}
+    </>
+  )}
+</div>
+
+{/* ✅ Kit colours — separate JSX block */}
+{isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
     <KitSwatch colour={item.kit_colour_1} titlePrefix="Primary: " />
@@ -182,9 +185,6 @@ function KitSwatch({ colour, titlePrefix = "" }) {
     ) : null}
   </div>
 ) : null}
-
-                  
-                </div>
 
                 {isReg && isApproved && item.league_name ? (
                   <div style={{ fontSize: 12, opacity: 0.8 }}>
