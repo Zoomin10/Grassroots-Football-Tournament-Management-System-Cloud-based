@@ -18,6 +18,41 @@ export default function RegisteredTeamsList({
   const [playersLoading, setPlayersLoading] = useState(false);
   const [playersError, setPlayersError] = useState(null);
 
+  const KIT_COLOUR_TO_CSS = {
+  red: "#ef4444",
+  black: "#111111",
+  white: "#ffffff",
+  light_blue: "#60a5fa",
+  dark_blue: "#1d4ed8",
+  yellow: "#facc15",
+  orange: "#fb923c",
+  green: "#22c55e",
+  purple: "#a855f7",
+  grey: "#9ca3af",
+  navy: "#0f172a",
+  maroon: "#7f1d1d",
+  pink: "#f472b6",
+  brown: "#92400e",
+  gold: "#f59e0b",
+};
+
+function KitSwatch({ colour, titlePrefix = "" }) {
+  if (!colour) return null;
+  const css = KIT_COLOUR_TO_CSS[colour] || "#d1d5db";
+  const label = `${titlePrefix}${colour.replaceAll("_", " ")}`;
+
+  return (
+    <span
+      className="kit-swatch"
+      title={label}
+      style={{
+        background: css,
+        border: colour === "white" ? "1px solid rgba(0,0,0,0.2)" : undefined,
+      }}
+    />
+  );
+}
+
   async function loadPlayers(registrationId) {
     setPlayersLoading(true);
     setPlayersError(null);
@@ -136,6 +171,17 @@ export default function RegisteredTeamsList({
                       <strong>Admin</strong>
                       {item.league_name ? <> • {item.league_name}</> : null}
                     </>
+                    {isReg ? (
+  <div className="kit-row">
+    <span className="kit-label">Kit:</span>
+    <KitSwatch colour={item.kit_colour_1} titlePrefix="Primary: " />
+    <KitSwatch colour={item.kit_colour_2} titlePrefix="Secondary: " />
+    {!item.kit_colour_1 && !item.kit_colour_2 ? (
+      <span className="kit-none">—</span>
+    ) : null}
+  </div>
+) : null}
+
                   )}
                 </div>
 
