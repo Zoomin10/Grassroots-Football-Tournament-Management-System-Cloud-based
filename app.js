@@ -1634,6 +1634,8 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
       team_name: r.team_name,
       club_name: r.club_name,
       team_id_code: r.team_id_code,
+      kit_colour_1: r.kit_colour_1,
+      kit_colour_2: r.kit_colour_2,
       manager_name: r.manager_name,
       registration_id: r.id,
       team_row_id: r.team_row_id,
