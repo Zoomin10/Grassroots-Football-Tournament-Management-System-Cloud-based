@@ -180,9 +180,9 @@ const kit2 = item.kit_colour_2 ?? item.kitColour2;
 {isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
-    <KitSwatch colour={kit1} titlePrefix="Primary: " />
-    <KitSwatch colour={kit2} titlePrefix="Secondary: " />
-    {!kit1 && !kit2 ? <span className="kit-none">—</span> : null}
+    <span style={{ fontFamily: "monospace" }}>
+      sc1={String(item.kit_colour_1)} sc2={String(item.kit_colour_2)} | cc1={String(item.kitColour1)} cc2={String(item.kitColour2)}
+    </span>
   </div>
 ) : null}
 
