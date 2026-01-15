@@ -254,7 +254,7 @@ async function loadPlayers(registrationId) {
     ) : null}
   </div>
 );
-) : null}
+
             {/* Right-side actions */}
             {!readOnly && (
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
