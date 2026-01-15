@@ -1,7 +1,8 @@
 import { useState } from "react";
 import "./TeamList.css";
+
 // If this file is in src/components, use "../utils/getLogoSrc"
-import { getLogoSrc } from "./utils/getLogoSrc";
+import { getLogoSrc } from "../utils/getLogoSrc";
 
 export default function RegisteredTeamsList({
   items = [],
