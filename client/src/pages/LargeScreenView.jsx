@@ -13,7 +13,7 @@ function logoKeyFromTeamLabel(label) {
   const s = String(label).trim();
 
   // If we display as "Club – Team" (en dash) or "Club - Team", take the club part
-  const clubPart = s.split(" – ")[0].split(" - ")[0].trim();
+  const clubPart = s.split(" – ")[0].split(" ")[0].trim();
 
   return clubPart || s;
 }
