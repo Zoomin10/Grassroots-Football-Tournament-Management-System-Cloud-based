@@ -4,12 +4,26 @@
 
 .team-card {
   display: flex;
-  align-items: center;
+   flex-direction: column;   /* ✅ add */
+  align-items: stretch;  
   padding: 0.5rem;
   border-bottom: 1px solid #eee;
   gap: 0.5rem;
 }
+.team-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
 
+.team-card-players {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+}
 .team-logo {
   width: 30px;
   height: 30px;

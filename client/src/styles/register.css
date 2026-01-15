@@ -1,5 +1,5 @@
 .register-page-wrap {
-  padding: 160px;
+  padding: 32px 24px 180px; /* bottom has extra space for sponsor/footer */
 }
 
 .register-container {
@@ -166,5 +166,28 @@
   .players-head, .players-row {
     grid-template-columns: 1fr 1fr;
     grid-auto-rows: auto;
+  }
+}
+
+.players-panel {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+}
+
+.players-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.players-table th,
+.players-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+@media (max-width: 640px) {
+  .register-page-wrap {
+    padding: 20px 16px 200px;
   }
 }

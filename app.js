@@ -1643,6 +1643,28 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
   }
 });
 
+// Get players for a registration (admin + public can use if you want)
+app.get("/api/registrations/:registrationId/players", async (req, res) => {
+  const { registrationId } = req.params;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT id, registration_id, first_name, surname, dob, created_at, updated_at
+      FROM public.registration_players
+      WHERE registration_id = $1
+      ORDER BY surname, first_name, dob
+      `,
+      [registrationId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Failed to fetch registration players", err);
+    res.status(500).json({ error: "Failed to fetch players" });
+  }
+});
+
   // ----------------- SERVER START -----------------
   // ----------------- FRONTEND (Vite build) -----------------
 const clientDistPath = path.join(__dirname, "client", "dist");
