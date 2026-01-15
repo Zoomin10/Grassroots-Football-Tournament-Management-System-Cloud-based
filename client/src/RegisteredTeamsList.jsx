@@ -136,6 +136,8 @@ function KitSwatch({ colour, titlePrefix = "" }) {
 
         const isReg = item.source === "registration";
         const isApproved = isReg && !!item.team_row_id;
+const kit1 = item.kit_colour_1 ?? item.kitColour1;
+const kit2 = item.kit_colour_2 ?? item.kitColour2;
 
         return (
           <div key={item.id} className="team-card">
@@ -178,9 +180,9 @@ function KitSwatch({ colour, titlePrefix = "" }) {
 {isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
-    <span style={{ fontFamily: "monospace" }}>
-      {String(item.kit_colour_1)} / {String(item.kit_colour_2)}
-    </span>
+    <KitSwatch colour={kit1} titlePrefix="Primary: " />
+    <KitSwatch colour={kit2} titlePrefix="Secondary: " />
+    {!kit1 && !kit2 ? <span className="kit-none">—</span> : null}
   </div>
 ) : null}
 
