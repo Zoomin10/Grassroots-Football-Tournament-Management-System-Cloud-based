@@ -171,6 +171,7 @@ function KitSwatch({ colour, titlePrefix = "" }) {
                       <strong>Admin</strong>
                       {item.league_name ? <> • {item.league_name}</> : null}
                     </>
+                  )}
                     {isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
@@ -182,7 +183,7 @@ function KitSwatch({ colour, titlePrefix = "" }) {
   </div>
 ) : null}
 
-                  )}
+                  
                 </div>
 
                 {isReg && isApproved && item.league_name ? (
