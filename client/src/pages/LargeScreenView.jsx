@@ -13,11 +13,15 @@ function logoKeyFromTeamLabel(label) {
   const s = String(label).trim();
 
   // If we display as "Club – Team" (en dash) or "Club - Team", take the club part
-  const clubPart = s.split(" – ")[0].split(" ")[0].trim();
+  const clubPart = s.split(" – ")[0].split(" - ")[0].trim();
 
   return clubPart || s;
 }
 
+function formatTeamName(name) {
+  if (!name) return "";
+  return name.replace(/\s*[-–]\s*/g, " ");
+}
 
 function getWinnerFromFinal(match) {
   if (!match || !match.played) return null;
@@ -86,7 +90,8 @@ function scoreLine(s) {
       ? ` (pens ${s.penalties_home}–${s.penalties_away})`
       : "";
   
-  return `${prefix ? prefix + ": " : ""}${s.home_team} ${s.home_score}–${s.away_score} ${s.away_team}${pens}`;
+  return `${prefix ? prefix + ": " : ""}${formatTeamName(s.home_team)} ${s.home_score}–${s.away_score} ${formatTeamName(s.away_team)}${pens}`;
+
 }
 
 function tournamentLabel(t) {
@@ -370,7 +375,8 @@ useEffect(() => {
                   alt={winners.cup}
                   className="tv-winners-logo tv-winners-logo--cup"
                 />
-                <span className="tv-winners-team">{winners.cup}</span>
+        <span className="tv-winners-team">{formatTeamName(winners.cup)}</span>
+
               </div>
 
               <span className="tv-winners-badge tv-winners-badge--cup">CUP</span>
@@ -384,7 +390,8 @@ useEffect(() => {
                   alt={winners.plate}
                   className="tv-winners-logo"
                 />
-                <span className="tv-winners-team">{winners.plate}</span>
+               <span className="tv-winners-team">{formatTeamName(winners.plate)}</span>
+
               </div>
 
               <span className="tv-winners-badge tv-winners-badge--plate">PLATE</span>
@@ -401,7 +408,7 @@ useEffect(() => {
       {/* RIGHT PANEL */}
       <section className="tv-panel tv-right">
         <div className="tv-panel-header">
-          <div className="tv-panel-subtitle">Latest Scores</div>
+          <div className="tv-panel-subtitle">Latest Results</div>
         </div>
 
         <div className="tv-panel-body tv-scores">
