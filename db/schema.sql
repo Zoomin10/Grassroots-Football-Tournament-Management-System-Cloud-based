@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict UbaCX0rAewgAsoblnoUVMDNYtIibexuWyblWVf5O56dhJq9dBSINrc4jAwi8TDU
 
 -- Dumped from database version 17.7 (Debian 17.7-3.pgdg13+1)
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -17,6 +16,122 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_tournament_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.registrations DROP CONSTRAINT IF EXISTS registrations_tournament_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.registrations DROP CONSTRAINT IF EXISTS registrations_team_row_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.registration_players DROP CONSTRAINT IF EXISTS registration_players_registration_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.matches DROP CONSTRAINT IF EXISTS matches_tournament_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.matches DROP CONSTRAINT IF EXISTS matches_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.matches DROP CONSTRAINT IF EXISTS matches_home_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.matches DROP CONSTRAINT IF EXISTS matches_away_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_tournament_id_fkey;
+DROP TRIGGER IF EXISTS trg_registrations_set_updated_at ON public.registrations;
+DROP TRIGGER IF EXISTS trg_registration_players_set_updated_at ON public.registration_players;
+DROP INDEX IF EXISTS public.uniq_registrations_team_row_id;
+DROP INDEX IF EXISTS public.uniq_reg_player_identity;
+DROP INDEX IF EXISTS public.idx_teams_tournament_id;
+DROP INDEX IF EXISTS public.idx_teams_league_id;
+DROP INDEX IF EXISTS public.idx_registrations_tournament_id;
+DROP INDEX IF EXISTS public.idx_registrations_manager_email;
+DROP INDEX IF EXISTS public.idx_reg_players_registration_id;
+DROP INDEX IF EXISTS public.idx_matches_tournament_id;
+DROP INDEX IF EXISTS public.idx_matches_round;
+DROP INDEX IF EXISTS public.idx_matches_league_id;
+DROP INDEX IF EXISTS public.idx_matches_bracket;
+DROP INDEX IF EXISTS public.idx_leagues_tournament_id;
+ALTER TABLE IF EXISTS ONLY public.tournaments DROP CONSTRAINT IF EXISTS tournaments_pkey;
+ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.registrations DROP CONSTRAINT IF EXISTS registrations_team_id_code_key;
+ALTER TABLE IF EXISTS ONLY public.registrations DROP CONSTRAINT IF EXISTS registrations_pkey;
+ALTER TABLE IF EXISTS ONLY public.registration_players DROP CONSTRAINT IF EXISTS registration_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.matches DROP CONSTRAINT IF EXISTS matches_pkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_pkey;
+ALTER TABLE IF EXISTS public.tournaments ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.teams ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.registrations ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.registration_players ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.matches ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.leagues ALTER COLUMN id DROP DEFAULT;
+DROP SEQUENCE IF EXISTS public.tournaments_id_seq;
+DROP TABLE IF EXISTS public.tournaments;
+DROP SEQUENCE IF EXISTS public.teams_id_seq;
+DROP TABLE IF EXISTS public.teams;
+DROP SEQUENCE IF EXISTS public.registrations_id_seq;
+DROP TABLE IF EXISTS public.registrations;
+DROP SEQUENCE IF EXISTS public.registration_players_id_seq;
+DROP TABLE IF EXISTS public.registration_players;
+DROP SEQUENCE IF EXISTS public.matches_id_seq;
+DROP TABLE IF EXISTS public.matches;
+DROP SEQUENCE IF EXISTS public.leagues_id_seq;
+DROP TABLE IF EXISTS public.leagues;
+DROP FUNCTION IF EXISTS public.set_updated_at();
+DROP TYPE IF EXISTS public.registration_status;
+DROP TYPE IF EXISTS public.kit_colour;
+DROP EXTENSION IF EXISTS citext;
+--
+-- Name: citext; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
+
+
+--
+-- Name: kit_colour; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.kit_colour AS ENUM (
+    'red',
+    'black',
+    'white',
+    'light_blue',
+    'dark_blue',
+    'yellow',
+    'orange',
+    'green',
+    'purple',
+    'grey',
+    'navy',
+    'maroon',
+    'pink',
+    'brown',
+    'gold'
+);
+
+
+--
+-- Name: registration_status; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.registration_status AS ENUM (
+    'pending',
+    'submitted',
+    'locked',
+    'cancelled'
+);
+
+
+--
+-- Name: set_updated_at(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.set_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
 
 SET default_tablespace = '';
 
@@ -67,21 +182,15 @@ CREATE TABLE public.matches (
     bracket text,
     home_score integer,
     away_score integer,
-
     decided_by_penalties boolean DEFAULT false NOT NULL,
     penalties_home integer,
     penalties_away integer,
-
     played boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-
-    CONSTRAINT penalties_valid CHECK (
-      (penalties_home IS NULL AND penalties_away IS NULL)
-      OR
-      (penalties_home IS NOT NULL AND penalties_away IS NOT NULL AND penalties_home <> penalties_away)
-    )
+    CONSTRAINT penalties_valid CHECK ((((penalties_home IS NULL) AND (penalties_away IS NULL)) OR ((penalties_home IS NOT NULL) AND (penalties_away IS NOT NULL) AND (penalties_home <> penalties_away))))
 );
+
 
 --
 -- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: -
@@ -101,6 +210,86 @@ CREATE SEQUENCE public.matches_id_seq
 --
 
 ALTER SEQUENCE public.matches_id_seq OWNED BY public.matches.id;
+
+
+--
+-- Name: registration_players; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.registration_players (
+    id integer NOT NULL,
+    registration_id integer NOT NULL,
+    first_name text NOT NULL,
+    surname text NOT NULL,
+    dob date NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: registration_players_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.registration_players_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: registration_players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.registration_players_id_seq OWNED BY public.registration_players.id;
+
+
+--
+-- Name: registrations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.registrations (
+    id integer NOT NULL,
+    tournament_id integer NOT NULL,
+    team_id_code character varying(32) NOT NULL,
+    status public.registration_status DEFAULT 'pending'::public.registration_status NOT NULL,
+    club_name text NOT NULL,
+    team_name text NOT NULL,
+    manager_name text NOT NULL,
+    manager_email public.citext NOT NULL,
+    manager_phone text NOT NULL,
+    assistant1_name text,
+    assistant2_name text,
+    kit_colour_1 public.kit_colour,
+    kit_colour_2 public.kit_colour,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    team_row_id integer,
+    CONSTRAINT chk_different_kit_colours CHECK (((kit_colour_1 IS NULL) OR (kit_colour_2 IS NULL) OR (kit_colour_1 <> kit_colour_2)))
+);
+
+
+--
+-- Name: registrations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.registrations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: registrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.registrations_id_seq OWNED BY public.registrations.id;
 
 
 --
@@ -189,6 +378,20 @@ ALTER TABLE ONLY public.matches ALTER COLUMN id SET DEFAULT nextval('public.matc
 
 
 --
+-- Name: registration_players id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registration_players ALTER COLUMN id SET DEFAULT nextval('public.registration_players_id_seq'::regclass);
+
+
+--
+-- Name: registrations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registrations ALTER COLUMN id SET DEFAULT nextval('public.registrations_id_seq'::regclass);
+
+
+--
 -- Name: teams id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -216,6 +419,30 @@ ALTER TABLE ONLY public.leagues
 
 ALTER TABLE ONLY public.matches
     ADD CONSTRAINT matches_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: registration_players registration_players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registration_players
+    ADD CONSTRAINT registration_players_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: registrations registrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registrations
+    ADD CONSTRAINT registrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: registrations registrations_team_id_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registrations
+    ADD CONSTRAINT registrations_team_id_code_key UNIQUE (team_id_code);
 
 
 --
@@ -270,6 +497,27 @@ CREATE INDEX idx_matches_tournament_id ON public.matches USING btree (tournament
 
 
 --
+-- Name: idx_reg_players_registration_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_reg_players_registration_id ON public.registration_players USING btree (registration_id);
+
+
+--
+-- Name: idx_registrations_manager_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_registrations_manager_email ON public.registrations USING btree (manager_email);
+
+
+--
+-- Name: idx_registrations_tournament_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_registrations_tournament_id ON public.registrations USING btree (tournament_id);
+
+
+--
 -- Name: idx_teams_league_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -281,6 +529,34 @@ CREATE INDEX idx_teams_league_id ON public.teams USING btree (league_id);
 --
 
 CREATE INDEX idx_teams_tournament_id ON public.teams USING btree (tournament_id);
+
+
+--
+-- Name: uniq_reg_player_identity; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uniq_reg_player_identity ON public.registration_players USING btree (registration_id, first_name, surname, dob);
+
+
+--
+-- Name: uniq_registrations_team_row_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uniq_registrations_team_row_id ON public.registrations USING btree (team_row_id) WHERE (team_row_id IS NOT NULL);
+
+
+--
+-- Name: registration_players trg_registration_players_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_registration_players_set_updated_at BEFORE UPDATE ON public.registration_players FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: registrations trg_registrations_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_registrations_set_updated_at BEFORE UPDATE ON public.registrations FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -324,6 +600,30 @@ ALTER TABLE ONLY public.matches
 
 
 --
+-- Name: registration_players registration_players_registration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registration_players
+    ADD CONSTRAINT registration_players_registration_id_fkey FOREIGN KEY (registration_id) REFERENCES public.registrations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: registrations registrations_team_row_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registrations
+    ADD CONSTRAINT registrations_team_row_id_fkey FOREIGN KEY (team_row_id) REFERENCES public.teams(id) ON DELETE SET NULL;
+
+
+--
+-- Name: registrations registrations_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.registrations
+    ADD CONSTRAINT registrations_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES public.tournaments(id) ON DELETE CASCADE;
+
+
+--
 -- Name: teams teams_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -343,5 +643,4 @@ ALTER TABLE ONLY public.teams
 -- PostgreSQL database dump complete
 --
 
-\unrestrict UbaCX0rAewgAsoblnoUVMDNYtIibexuWyblWVf5O56dhJq9dBSINrc4jAwi8TDU
 

@@ -30,84 +30,61 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 📝 NEW: Public Team Registration System
 
         A full self-service registration flow for teams entering tournaments.
-
         Public Registration (/register)
-
         Club-branded registration page with sponsor footer
-
+        
         Dropdown list of active tournaments
-
+        
         Minimum required details:
-
         Club name
-
         Team name
-
         Manager name
-
         Email address
-
         Contact phone number
-
+        
         On submission:
 
         Registration is stored in the database
-
         A unique Team ID is generated and returned
-
         (Email delivery currently stubbed; ready for SMTP integration)
-
         Post-registration (via Team ID)
-
+        
         Using their Team ID, teams can later:
-
         Add registered players (name + DoB)
-
         Select kit colours (Colour 1 & Colour 2 dropdowns)
-
         Add assistant coaches
 
         This allows teams to complete details gradually without admin intervention.
 
 
         🛂 Admin Approval Flow (Important Design)
-        Why approval is required
+        
+        Why approval is required    
 
         The tournament engine (fixtures, matches, knockouts) depends on the teams table, which requires a league assignment.
-
         Web registrations do not immediately become tournament teams.
-
+        
         Approval process (Admin)
-
+        
         Admin opens Admin View
-
         Sees a unified list of:
-
         Web registrations
-
         Manually added teams
 
         For a web registration:
-
         Admin selects a league
-
         Clicks Approve
 
         System:
-
         Creates a teams row
-
         Links it back to the registration
-
         Preserves the original registration data
 
         Result
-
         Registrations remain intact for audit/history
-
         Tournament engine works with teams
-
         No duplicate rendering in Admin UI
+
 
 ### Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
@@ -412,84 +389,64 @@ All data is scoped to a tournament.
         Core Tables
 
         tournaments
-
         leagues
-
         teams
-
         matches
-
         Registration Tables (NEW)
-
         registrations
-
         registration_players
 
  Key Design Addition
-registrations.team_row_id → teams.id
+    registrations.team_row_id → teams.id
 
 
-This links a web registration to the created tournament team after admin approval.
+    This links a web registration to the created tournament team after admin approval.
 
-team_row_id is nullable
-
-Set only when approved
-
-Unique partial index prevents double-linking
+    team_row_id is nullable
+    Set only when approved
+    Unique partial index prevents double-linking
+    
 
         🧪 Database Operations (Critical)
 
         All DB operations are explicit and script-driven.
-
+        
         Scripts live in scripts/:
-
         dump-railway.sh → snapshot Railway DB
-
         rebuild-local.sh → rebuild local DB
-
         railway-reset-demo.sh → reset Railway with demo data
-
         railway-reset-schema-only.sh → wipe data, keep schema
 
         ⚠️ Never run reset scripts without confirmation
         
-League tables are calculated dynamically from played matches.
+    League tables are calculated dynamically from played matches.
 
-Tie-break rules:
-1. Points
-2. Goal Difference (GD)
-3. Goals For (GF)
+    Tie-break rules:
+    1. Points
+    2. Goal Difference (GD)
+    3. Goals For (GF)
 
 
 
-🏆 tournaments
+    🏆 tournaments
 
-Represents a single tournament event (e.g. 2026 Boys U11).
+    Represents a single tournament event (e.g. 2026 Boys U11).
 
     Key fields
 
     id — primary key
-
     year — tournament year
-
     gender — boys / girls
-
     age_group — e.g. U11, U12
-
     date — tournament date
-
     kickoff_time — first kickoff time
-
     match_length — match duration (minutes)
-
     venue — location
-
     pitch_league_a, pitch_league_b — pitch assignments
-
     created_at
 
 
-Relationships
+    Relationships
 
     One tournament → many leagues
 
