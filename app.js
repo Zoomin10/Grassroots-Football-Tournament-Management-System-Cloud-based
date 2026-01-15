@@ -1573,8 +1573,14 @@ async function reloadRegisteredTeams() {
 
 
 
+app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
+  try {
+    const tournamentId = parseInt(req.params.tournamentId, 10);
+    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
+      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
+    }
 
-
+  
     // Web registrations (registrations table)
     // Join through approved team (team_row_id) to get league_name when approved
     const regsRes = await pool.query(
