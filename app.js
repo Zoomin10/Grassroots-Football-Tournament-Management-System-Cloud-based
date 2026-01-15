@@ -1487,23 +1487,25 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
     }
 
     // ---- Web registrations (include league_name if approved) ----
-    const regsRes = await pool.query(
-      `SELECT
-         r.id,
-         r.team_row_id,
-         r.club_name,
-         r.team_name,
-         r.manager_name,
-         r.team_id_code,
-         r.created_at,
-         l.name AS league_name
-       FROM registrations r
-       LEFT JOIN teams tm ON tm.id = r.team_row_id
-       LEFT JOIN leagues l ON l.id = tm.league_id
-       WHERE r.tournament_id = $1
-       ORDER BY r.created_at DESC`,
-      [tournamentId]
-    );
+  const regsRes = await pool.query(
+  `SELECT
+     r.id,
+     r.team_row_id,
+     r.club_name,
+     r.team_name,
+     r.manager_name,
+     r.team_id_code,
+     r.kit_colour_1,
+     r.kit_colour_2,
+     r.created_at,
+     l.name AS league_name
+   FROM registrations r
+   LEFT JOIN teams tm ON tm.id = r.team_row_id
+   LEFT JOIN leagues l ON l.id = tm.league_id
+   WHERE r.tournament_id = $1
+   ORDER BY r.created_at DESC`,
+  [tournamentId]
+);
 
     const linkedTeamIds = new Set(
       regsRes.rows
@@ -1614,6 +1616,8 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
          r.team_name,
          r.manager_name,
          r.team_id_code,
+          r.kit_colour_1,
+          r.kit_colour_2,
          r.created_at,
          l.name AS league_name
        FROM registrations r
