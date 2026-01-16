@@ -259,7 +259,7 @@ headerSponsorLogo: {
    gridTemplateColumns: "120px 640px 1fr 220px",
 
     alignItems: "center",
-    padding: "6px 0",
+    padding: "2px 0",
     fontSize: "22px",
     borderBottom: "1px solid #333",
   },
