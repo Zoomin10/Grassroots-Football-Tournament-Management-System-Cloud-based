@@ -13,7 +13,7 @@ const LOGO_RULES = [
   { keywords: ["draycott"], file: "draycottfc.png" },
    { keywords: ["bishops"], file: "bishopscannings.png" },
     { keywords: ["derry"], file: "derryhillfc.png" },
-    { keywords: ["chip"], file: "chippenhamfcc.png" },
+    { keywords: ["chipp"], file: "chippenhamfc.png" },
     { keywords: ["bluns"], file: "blunsdonfc.png" },
     { keywords: ["malm"], file: "malmesbury.png" },
     { keywords: ["croft"], file: "croftfc.png" },
@@ -22,7 +22,7 @@ const LOGO_RULES = [
     { keywords: ["develop"], file: "developfc.png" },
     { keywords: ["melks"], file: "melkshamfc.png" },
     { keywords: ["ashton"], file: "ashtonkeynes.png" },
-    { keywords: ["bath"], file: "batchcity.png" },
+    { keywords: ["bath "], file: "bathcity.png" },
     { keywords: ["strat"], file: "strattonjuniors.png" },
     { keywords: ["spitf"], file: "swindonspitfires.png" },
   // add more clubs here
