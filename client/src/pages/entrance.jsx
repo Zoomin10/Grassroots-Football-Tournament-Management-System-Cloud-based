@@ -100,15 +100,17 @@ export default function entrance() {
             <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
-            <span style={styles.providerCell}>
-                 <span style={styles.providerLogoBox}></span>
-                 {item.providerLogo ? (
-                  <img
-                    src={item.providerLogo}
-                    alt={item.providerName || "Provider"}
-                    style={styles.providerLogo}
-                    />
-  ) : null}
+     <span style={styles.providerCell}>
+  <span style={styles.providerLogoBox}>
+    {item.providerLogo ? (
+      <img
+        src={item.providerLogo}
+        alt={item.providerName || "Provider"}
+        style={styles.providerLogo}
+      />
+    ) : null}
+  </span>
+
   <span style={styles.providerName}>{item.providerName}</span>
 </span>
 
@@ -126,22 +128,24 @@ export default function entrance() {
             <span>Activity</span>
             <span>Provided By</span>
             <span style={styles.headerRight}>Location</span>
-            <span style={styles.headerRight}>Provided By</span>
+        
           </div>
 
           {otherActivities.map((item, i) => (
             <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
-             <span style={styles.providerCell}>
-                 <span style={styles.providerLogoBox}></span>
-                {item.providerLogo ? (
-                    <img
-                    src={item.providerLogo}
-                    alt={item.providerName || "Provider"}
-                    style={styles.providerLogo}
-                    />
-  ) : null}
+       <span style={styles.providerCell}>
+  <span style={styles.providerLogoBox}>
+    {item.providerLogo ? (
+      <img
+        src={item.providerLogo}
+        alt={item.providerName || "Provider"}
+        style={styles.providerLogo}
+      />
+    ) : null}
+  </span>
+
   <span style={styles.providerName}>{item.providerName}</span>
 </span>
 
@@ -313,10 +317,5 @@ providerLogo: {
     objectFit: "contain",
   },
 
-providerLogoBox: {
-  width: "110px",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-},
+
 }
