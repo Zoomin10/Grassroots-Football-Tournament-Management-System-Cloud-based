@@ -31,7 +31,7 @@ export default function entrance() {
       title: "Petanque - Weekly Session",
       location: "Petanque Court",
       providerName: "Petanque Club",
-      providerLogo: null,
+      providerLogo: "/petanque.jpeg",
     },
     {
       time: "13:00",
@@ -292,7 +292,7 @@ providerLogoBox: {
 },
 
 providerLogo: {
-  height: "48px",
+  height: "52px",
   maxWidth: "90px",
   objectFit: "contain",
 },
