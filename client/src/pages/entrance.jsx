@@ -95,7 +95,7 @@ headerCenter: {
   justifyContent: "center",
     alignItems: "center",   // 👈 add this
   textAlign: "center",    // 👈 and this
-  paddingLeft: "80px",  
+  paddingright: "80px",  
 },
 
 headerSponsorLogo: {
