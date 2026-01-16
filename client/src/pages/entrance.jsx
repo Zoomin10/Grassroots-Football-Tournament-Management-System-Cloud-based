@@ -45,7 +45,7 @@ export default function entrance() {
       title: "Community Fitness Session",
       location: "Grass P1",
       providerName: "Bootcamp UK",
-      providerLogo: "/bootcamp.png",
+      providerLogo: "/bootcamp.jpeg",
     },
     {
       time: "18:00",
