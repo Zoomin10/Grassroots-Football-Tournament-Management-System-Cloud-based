@@ -85,6 +85,7 @@ header: {
   alignItems: "center",
   gap: "32px",
   padding: "22px 40px",
+    backgroundColor: "#ffffff",   // NEW
   borderBottom: "4px solid #ffcc00",
 },
 headerCenter: {
@@ -93,7 +94,7 @@ headerCenter: {
   justifyContent: "center",
 },
 headerSponsorLogo: {
-  height: "70px",
+  height: "90px",
   width: "auto",
   objectFit: "contain",
 },
@@ -102,7 +103,7 @@ footer: {
   justifyContent: "center",
   alignItems: "center",
   padding: "26px 32px",     // bigger footer
-  backgroundColor: "#111",
+    backgroundColor: "#ffffff",   // NEW
   borderTop: "4px solid #ffcc00",
 },
 footerSponsorLogo: {
