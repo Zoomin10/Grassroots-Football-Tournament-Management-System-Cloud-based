@@ -7,21 +7,21 @@ export default function entrance() {
       title: "U12 Boys Tournament",
       location: "Pitch 1 (3G)",
       providerName: "Wiltshire FA",
-      providerLogo: "/wiltsfa.png",
+      providerLogo: "/wiltsfadark.png",
     },
     {
       time: "11:30",
       title: "U14 Girls Tournament",
       location: "Pitch 2 (3G)",
       providerName: "Wiltshire FA",
-      providerLogo: "/wiltsfa.png",
+      providerLogo: "/wiltsfadark.png",
     },
     {
       time: "14:00",
       title: "Adult 5-a-side Finals",
       location: "Pitch 3 (3G)",
-      providerName: "Wichelstowe Sports Hub",
-      providerLogo: "/wichelstowe.png",
+      providerName: "Wroughton Youth FC",
+      providerLogo: "/wroughtonyouthfc.png",
     },
   ];
 
@@ -31,14 +31,14 @@ export default function entrance() {
       title: "Petanque - Weekly Session",
       location: "Petanque Court",
       providerName: "Petanque Club",
-      providerLogo: "/wichelstowe.png",
+      providerLogo: null,
     },
     {
       time: "13:00",
       title: "Seniors Walking Football",
       location: "Pitch 4 (3G)",
-      providerName: "Walking Football Group",
-      providerLogo: "/wichelstowe.png",
+      providerName: "Wroughton Youth FC",
+      providerLogo: "/wroughtonyouthfc.png",
     },
     {
       time: "14:00",
