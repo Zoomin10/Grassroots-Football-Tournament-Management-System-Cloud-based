@@ -33,7 +33,7 @@ export default function entrance() {
   <img src="/wichelstowe.png" alt="Facility Logo" style={styles.logo} />
 
   <div style={styles.headerCenter}>
-    <h1 style={styles.title}>Today at the Sports Facility</h1>
+    <h1 style={styles.title}>Today at the Sports Hub</h1>
     <div style={styles.date}>{today}</div>
   </div>
 
@@ -115,7 +115,7 @@ footerSponsorLogo: {
   objectFit: "contain",
 },
 
-  logo: { height: "80px" },
+  logo: { height: "120px", width: "auto" },
   title: { fontSize: "48px", alignItems: "center", margin: 0 },
   date: { fontSize: "24px", color: "#e21111ff" },
   main: { flex: 1, display: "grid", gridTemplateRows: "1fr 1fr" },
