@@ -175,7 +175,7 @@ const styles = {
     gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
     gap: "32px",
-    padding: "22px 40px",
+    padding: "16px 32px",
     backgroundColor: "#ffffff",
     borderBottom: "4px solid #ffcc00",
   },
@@ -186,10 +186,9 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-
-    // Nudge to visually compensate for the larger left logo
-    paddingLeft: "60px",
+transform: "translateX(30px)",
   },
+    
 
   logo: {
     height: "80px",
@@ -198,7 +197,7 @@ const styles = {
   },
 
   headerSponsorLogo: {
-    height: "120px",
+    height: "90px",
     width: "auto",
     objectFit: "contain",
   },
@@ -235,8 +234,8 @@ const styles = {
     display: "grid",
   gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
-    padding: "10px 0 14px",
-    fontSize: "18px",
+    padding: "8px 0 10px",
+    fontSize: "16px",
     color: "#bbb",
     borderBottom: "1px solid #333",
     textTransform: "uppercase",
@@ -251,8 +250,8 @@ const styles = {
     display: "grid",
    gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
-    padding: "12px 0",
-    fontSize: "26px",
+    padding: "10px 0",
+    fontSize: "24px",
     borderBottom: "1px solid #333",
   },
 
@@ -298,7 +297,7 @@ providerCell: {
   },
 
   footerSponsorLogo: {
-    maxHeight: "90px",
+    maxHeight: "70px",
     width: "auto",
     objectFit: "contain",
   },
