@@ -28,26 +28,19 @@ export default function Entrance() {
 
   return (
     <div style={styles.page}>
-      {/* Header */}
       <header style={styles.header}>
-        <img
-          src="/facility-logo.png"
-          alt="Facility Logo"
-          style={styles.logo}
-        />
+        <img src="/facility-logo.png" alt="Facility Logo" style={styles.logo} />
         <div>
           <h1 style={styles.title}>Today at the Sports Facility</h1>
           <div style={styles.date}>{today}</div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main style={styles.main}>
-        {/* Football Panel */}
         <section style={styles.panel}>
           <h2 style={styles.panelTitle}>Football Tournaments Today</h2>
-          {footballTournaments.map((item, index) => (
-            <div key={index} style={styles.row}>
+          {footballTournaments.map((item, i) => (
+            <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
               <span style={styles.location}>{item.location}</span>
@@ -55,11 +48,10 @@ export default function Entrance() {
           ))}
         </section>
 
-        {/* Other Activities Panel */}
         <section style={styles.panel}>
           <h2 style={styles.panelTitle}>Other Activities Today</h2>
-          {otherActivities.map((item, index) => (
-            <div key={index} style={styles.row}>
+          {otherActivities.map((item, i) => (
+            <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
               <span style={styles.location}>{item.location}</span>
@@ -68,15 +60,9 @@ export default function Entrance() {
         </section>
       </main>
 
-      {/* Sponsors */}
       <footer style={styles.footer}>
-        {sponsors.map((logo, index) => (
-          <img
-            key={index}
-            src={logo}
-            alt="Sponsor logo"
-            style={styles.sponsorLogo}
-          />
+        {sponsors.map((logo, i) => (
+          <img key={i} src={logo} alt="Sponsor" style={styles.sponsorLogo} />
         ))}
       </footer>
     </div>
@@ -99,31 +85,12 @@ const styles = {
     padding: "32px 48px",
     borderBottom: "4px solid #ffcc00",
   },
-  logo: {
-    height: "80px",
-  },
-  title: {
-    fontSize: "48px",
-    margin: 0,
-  },
-  date: {
-    fontSize: "24px",
-    color: "#ffcc00",
-  },
-  main: {
-    flex: 1,
-    display: "grid",
-    gridTemplateRows: "1fr 1fr",
-  },
-  panel: {
-    padding: "32px 48px",
-    borderBottom: "2px solid #222",
-  },
-  panelTitle: {
-    fontSize: "36px",
-    marginBottom: "24px",
-    color: "#00e5ff",
-  },
+  logo: { height: "80px" },
+  title: { fontSize: "48px", margin: 0 },
+  date: { fontSize: "24px", color: "#ffcc00" },
+  main: { flex: 1, display: "grid", gridTemplateRows: "1fr 1fr" },
+  panel: { padding: "32px 48px", borderBottom: "2px solid #222" },
+  panelTitle: { fontSize: "36px", marginBottom: "24px", color: "#00e5ff" },
   row: {
     display: "grid",
     gridTemplateColumns: "120px 1fr 200px",
@@ -132,17 +99,9 @@ const styles = {
     fontSize: "26px",
     borderBottom: "1px solid #333",
   },
-  time: {
-    fontWeight: "bold",
-    color: "#ffcc00",
-  },
-  itemTitle: {
-    paddingLeft: "16px",
-  },
-  location: {
-    textAlign: "right",
-    color: "#ccc",
-  },
+  time: { fontWeight: "bold", color: "#ffcc00" },
+  itemTitle: { paddingLeft: "16px" },
+  location: { textAlign: "right", color: "#ccc" },
   footer: {
     display: "flex",
     justifyContent: "space-evenly",
@@ -151,8 +110,5 @@ const styles = {
     backgroundColor: "#111",
     borderTop: "4px solid #ffcc00",
   },
-  sponsorLogo: {
-    maxHeight: "60px",
-    filter: "brightness(1.1)",
-  },
+  sponsorLogo: { maxHeight: "60px", filter: "brightness(1.1)" },
 };
