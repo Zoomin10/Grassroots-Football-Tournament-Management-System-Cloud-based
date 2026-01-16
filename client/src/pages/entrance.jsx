@@ -10,7 +10,7 @@ export default function entrance() {
   const otherActivities = [
     { time: "08:30", title: "Morning Yoga", location: "Pitch 4" },
     { time: "12:00", title: "Petanque", location: "Petanuque Court" },
-    { time: "18:00", title: "Community Fitness Session", location: "Main Hall" },
+    { time: "14:00", title: "Community Fitness Session", location: "Grass P1" },
   ];
 
   const sponsors = [
@@ -94,7 +94,7 @@ headerCenter: {
   justifyContent: "center",
 },
 headerSponsorLogo: {
-  height: "90px",
+  height: "120px",
   width: "auto",
   objectFit: "contain",
 },
@@ -134,7 +134,7 @@ footerSponsorLogo: {
     justifyContent: "space-evenly",
     alignItems: "center",
     padding: "16px 32px",
-    backgroundColor: "#111",
+    backgroundColor: "#ffffff",  
     borderTop: "4px solid #ffcc00",
   },
   sponsorLogo: { maxHeight: "60px", filter: "brightness(1.1)" },
