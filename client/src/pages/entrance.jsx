@@ -170,15 +170,15 @@ const styles = {
     fontFamily: "Arial, sans-serif",
   },
 
-  header: {
-    display: "grid",
-    gridTemplateColumns: "120px 1fr 420px 220px",
-    alignItems: "center",
-    gap: "32px",
-    padding: "16px 32px",
-    backgroundColor: "#ffffff",
-    borderBottom: "4px solid #ffcc00",
-  },
+  hheader: {
+  display: "grid",
+  gridTemplateColumns: "auto 1fr auto",
+  alignItems: "center",
+  gap: "32px",
+  padding: "16px 16px",   // 👈 smaller left/right padding
+  backgroundColor: "#ffffff",
+  borderBottom: "4px solid #ffcc00",
+},
 
   headerCenter: {
     display: "flex",
@@ -196,11 +196,12 @@ transform: "translateX(30px)",
     objectFit: "contain",
   },
 
-  headerSponsorLogo: {
-    height: "90px",
-    width: "auto",
-    objectFit: "contain",
-  },
+headerSponsorLogo: {
+  height: "90px",
+  width: "auto",
+  objectFit: "contain",
+  justifySelf: "end",   // 👈 THIS is the key
+},
 
   title: {
     fontSize: "48px",
