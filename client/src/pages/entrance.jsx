@@ -115,10 +115,10 @@ footerSponsorLogo: {
 
   logo: { height: "80px" },
   title: { fontSize: "48px", margin: 0 },
-  date: { fontSize: "24px", color: "#ffcc00" },
+  date: { fontSize: "24px", color: "#e21111ff" },
   main: { flex: 1, display: "grid", gridTemplateRows: "1fr 1fr" },
-  panel: { padding: "32px 48px", borderBottom: "2px solid #222" },
-  panelTitle: { fontSize: "36px", marginBottom: "24px", color: "#00e5ff" },
+  panel: { padding: "22px 48px", borderBottom: "2px solid #222" },
+  panelTitle: { fontSize: "36px", marginBottom: "18px", color: "#00e5ff" },
   row: {
     display: "grid",
     gridTemplateColumns: "120px 1fr 200px",
@@ -127,7 +127,7 @@ footerSponsorLogo: {
     fontSize: "26px",
     borderBottom: "1px solid #333",
   },
-  time: { fontWeight: "bold", color: "#ffcc00" },
+  time: { fontWeight: "bold", color: "#e21111ff" },
   itemTitle: { paddingLeft: "16px" },
   location: { textAlign: "right", color: "#ccc" },
   footer: {
