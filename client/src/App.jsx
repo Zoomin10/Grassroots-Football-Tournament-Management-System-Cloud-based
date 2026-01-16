@@ -98,18 +98,26 @@ function Layout({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<PublicView />} />
-          <Route path="/admin" element={<AdminView />} />
-          <Route path="/tv" element={<LargeScreenView />} />
-          <Route path="/register" element={<RegisterPage />} />          
-            <Route path="/entrance" element={<entrance />} />
+  <BrowserRouter>
+  <Routes>
+    <Route path="/entrance" element={<entrance />} />
+
+    <Route
+      path="*"
+      element={
+        <Layout>
+          <Routes>
+            <Route path="/" element={<PublicView />} />
+            <Route path="/admin" element={<AdminView />} />
+            <Route path="/tv" element={<LargeScreenView />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="*" element={<PublicView />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+          </Routes>
+        </Layout>
+      }
+    />
+  </Routes>
+</BrowserRouter>
   );
 }
 
