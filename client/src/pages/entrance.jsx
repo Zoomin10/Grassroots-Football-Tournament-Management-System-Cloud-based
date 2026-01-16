@@ -2,15 +2,17 @@ import React from "react";
 
 export default function entrance() {
   const footballTournaments = [
-    { time: "09:00", title: "U12 Boys Tournament", location: "Pitch 1" },
-    { time: "11:30", title: "U14 Girls Tournament", location: "Pitch 2" },
-    { time: "14:00", title: "Adult 5-a-side Finals", location: "Pitch 3" },
+    { time: "09:00", title: "U12 Boys Tournament", location: "Pitch 1 (3G)" },
+    { time: "11:30", title: "U14 Girls Tournament", location: "Pitch 2 (3G)" },
+    { time: "14:00", title: "Adult 5-a-side Finals", location: "Pitch 3 (3G)" },
   ];
 
   const otherActivities = [
     { time: "08:30", title: "Morning Yoga", location: "Pitch 4" },
-    { time: "12:00", title: "Petanque", location: "Petanuque Court" },
+    { time: "12:00", title: "Petanque - Weekly Session", location: "Petanuque Court" },
+    { time: "13:00", title: "Seniors Walking Football", location: "Pitch 4 (3G)" },
     { time: "14:00", title: "Community Fitness Session", location: "Grass P1" },
+    { time: "18:00", title: "Girls Sessional Football", location: "Pitch 1 (3G)" },
   ];
 
   const sponsors = [
