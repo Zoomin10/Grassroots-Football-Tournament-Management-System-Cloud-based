@@ -313,10 +313,10 @@ providerLogo: {
     objectFit: "contain",
   },
 
-
 providerLogoBox: {
   width: "110px",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-};
+},
+}
