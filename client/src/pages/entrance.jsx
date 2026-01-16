@@ -292,7 +292,7 @@ providerLogoBox: {
 },
 
 providerLogo: {
-  height: "32px",
+  height: "48px",
   maxWidth: "90px",
   objectFit: "contain",
 },
