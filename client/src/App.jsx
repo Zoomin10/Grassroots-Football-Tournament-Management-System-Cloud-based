@@ -5,7 +5,7 @@ import PublicView from "./pages/PublicView";
 import AdminView from "./pages/AdminView";
 import LargeScreenView from "./pages/LargeScreenView";
 import RegisterPage from "./pages/RegisterPage";
-import Entrance from "./pages/entrance";
+import entrance from "./pages/entrance";
 
 import "./App.css";
 import "./styles/public.css";
