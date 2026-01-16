@@ -170,7 +170,7 @@ const styles = {
     fontFamily: "Arial, sans-serif",
   },
 
-  hheader: {
+  header: {
   display: "grid",
   gridTemplateColumns: "auto 1fr auto",
   alignItems: "center",
@@ -186,7 +186,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-transform: "translateX(30px)",
+
   },
     
 
