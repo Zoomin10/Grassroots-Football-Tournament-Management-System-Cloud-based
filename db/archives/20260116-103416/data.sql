@@ -1,13 +1,3 @@
-BEGIN;
-TRUNCATE TABLE
-  public.registration_players,
-  public.registrations,
-  public.matches,
-  public.teams,
-  public.leagues,
-  public.tournaments
-RESTART IDENTITY CASCADE;
-
 INSERT INTO public.tournaments (id, created_at, year, gender, age_group, date, kickoff_time, match_length, venue, pitch_league_a, pitch_league_b) VALUES (7, '2026-01-15 11:29:15.598861+00', 2026, 'boys', 'U11', '2026-07-19', '09:00:00', 10, 'Wichelstowe Sports Hub', 'Pitch 1', 'Pitch 3');
 INSERT INTO public.tournaments (id, created_at, year, gender, age_group, date, kickoff_time, match_length, venue, pitch_league_a, pitch_league_b) VALUES (8, '2026-01-15 11:29:40.440199+00', 2026, 'Girls', 'U12', '2026-07-18', '09:00:00', 10, 'Wichelstowe Sports Hub', 'Pitch 2', 'Pitch 4');
 INSERT INTO public.leagues (id, name, tournament_id) VALUES (13, 'League A', 7);
@@ -84,5 +74,3 @@ SELECT pg_catalog.setval('public.registration_players_id_seq', 3, true);
 SELECT pg_catalog.setval('public.registrations_id_seq', 24, true);
 SELECT pg_catalog.setval('public.teams_id_seq', 62, true);
 SELECT pg_catalog.setval('public.tournaments_id_seq', 8, true);
-
-COMMIT;

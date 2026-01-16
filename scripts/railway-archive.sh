@@ -1,5 +1,3 @@
-# Archives current Railway state (schema + data) so you can always roll back. 
-
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -47,7 +45,7 @@ echo "Archiving Railway -> ${OUT_DIR}"
 sed '/transaction_timeout/d;/^\\restrict /d;/^\\unrestrict/d' "${OUT_DIR}/schema.raw.sql" > "${OUT_DIR}/schema.sql"
 rm -f "${OUT_DIR}/schema.raw.sql"
 
-# Data (include new tables!)
+# Data
 "${DOCKER[@]}" run --rm -i \
   -e PGSSLMODE=require \
   -e DATABASE_URL="$RAILWAY_DATABASE_URL" \
@@ -60,20 +58,22 @@ rm -f "${OUT_DIR}/schema.raw.sql"
     --table=public.tournaments \
     --table=public.leagues \
     --table=public.teams \
-    --table=public.matches \
     --table=public.registrations \
-    --table=public.registration_players' \
+    --table=public.registration_players \
+    --table=public.matches' \
   > "${OUT_DIR}/data.raw.sql"
 
 sed '/transaction_timeout/d;/^\\restrict /d;/^\\unrestrict/d;/DISABLE TRIGGER/d;/ENABLE TRIGGER/d' "${OUT_DIR}/data.raw.sql" \
 | awk '
-  /^INSERT INTO / {print; next}
+  /^INSERT INTO / || /^INSERT INTO ONLY / {print; next}
   /^SELECT pg_catalog\.setval/ {print; next}
   {next}
 ' > "${OUT_DIR}/data.sql"
+
 rm -f "${OUT_DIR}/data.raw.sql"
 
 echo "✅ Archive written:"
 echo " - ${OUT_DIR}/schema.sql"
 echo " - ${OUT_DIR}/data.sql"
 ls -lh "${OUT_DIR}/schema.sql" "${OUT_DIR}/data.sql"
+
