@@ -28,13 +28,16 @@ export default function entrance() {
 
   return (
     <div style={styles.page}>
-      <header style={styles.header}>
-        <img src="/facility-logo.png" alt="Facility Logo" style={styles.logo} />
-        <div>
-          <h1 style={styles.title}>Today at the Sports Facility</h1>
-          <div style={styles.date}>{today}</div>
-        </div>
-      </header>
+     <header style={styles.header}>
+  <img src="/wichelstowe.png" alt="Facility Logo" style={styles.logo} />
+
+  <div style={styles.headerCenter}>
+    <h1 style={styles.title}>Today at the Sports Facility</h1>
+    <div style={styles.date}>{today}</div>
+  </div>
+
+  <img src="/wiltsfa.png" alt="Wilts FA" style={styles.headerSponsorLogo} />
+</header>
 
       <main style={styles.main}>
         <section style={styles.panel}>
@@ -60,11 +63,9 @@ export default function entrance() {
         </section>
       </main>
 
-      <footer style={styles.footer}>
-        {sponsors.map((logo, i) => (
-          <img key={i} src={logo} alt="Sponsor" style={styles.sponsorLogo} />
-        ))}
-      </footer>
+     <footer style={styles.footer}>
+  <img src="/nationwide.png" alt="Nationwide" style={styles.footerSponsorLogo} />
+</footer>
     </div>
   );
 }
@@ -78,13 +79,38 @@ const styles = {
     flexDirection: "column",
     fontFamily: "Arial, sans-serif",
   },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    gap: "32px",
-    padding: "32px 48px",
-    borderBottom: "4px solid #ffcc00",
-  },
+header: {
+  display: "grid",
+  gridTemplateColumns: "auto 1fr auto",
+  alignItems: "center",
+  gap: "32px",
+  padding: "22px 40px",
+  borderBottom: "4px solid #ffcc00",
+},
+headerCenter: {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+},
+headerSponsorLogo: {
+  height: "70px",
+  width: "auto",
+  objectFit: "contain",
+},
+footer: {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "26px 32px",     // bigger footer
+  backgroundColor: "#111",
+  borderTop: "4px solid #ffcc00",
+},
+footerSponsorLogo: {
+  maxHeight: "90px",        // bigger logo
+  width: "auto",
+  objectFit: "contain",
+},
+
   logo: { height: "80px" },
   title: { fontSize: "48px", margin: 0 },
   date: { fontSize: "24px", color: "#ffcc00" },
