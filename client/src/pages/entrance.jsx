@@ -44,15 +44,15 @@ export default function entrance() {
       time: "14:00",
       title: "Community Fitness Session",
       location: "Grass P1",
-      providerName: "Community Fitness",
-      providerLogo: "/wichelstowe.png",
+      providerName: "Bootcamp UK",
+      providerLogo: "/bootcamp.png",
     },
     {
       time: "18:00",
       title: "Girls Sessional Football",
       location: "Pitch 1 (3G)",
-      providerName: "Wichelstowe Sports Hub",
-      providerLogo: "/wichelstowe.png",
+      providerName: "Wroughton Youth FC",
+      providerLogo: "/wroughtonyouthfc.png",
     },
   ];
 
