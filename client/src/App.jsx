@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import PublicView from "./pages/PublicView";
@@ -11,7 +11,7 @@ import "./App.css";
 import "./styles/public.css";
 import "./styles/tv.css";
 
-function Layout({ children }) {
+function Layout() {
   const location = useLocation();
   const isTV = location.pathname === "/tv";
   const isRegister = location.pathname.startsWith("/register");
@@ -62,7 +62,9 @@ function Layout({ children }) {
       )}
 
       {/* Page content */}
-      <div className={isTV ? "tv-content" : ""}>{children}</div>
+      <div className={isTV ? "tv-content" : ""}>
+  <Outlet />
+</div>
 
       {/* Footer */}
       {isTV ? (
