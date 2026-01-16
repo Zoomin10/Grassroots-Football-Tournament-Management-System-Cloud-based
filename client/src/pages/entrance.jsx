@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Entrance() {
+export default function entrance() {
   const footballTournaments = [
     { time: "09:00", title: "U12 Boys Tournament", location: "Pitch 1" },
     { time: "11:30", title: "U14 Girls Tournament", location: "Pitch 2" },
