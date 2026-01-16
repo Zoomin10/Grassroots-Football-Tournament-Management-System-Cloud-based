@@ -8,8 +8,8 @@ export default function entrance() {
   ];
 
   const otherActivities = [
-    { time: "08:30", title: "Morning Yoga", location: "Studio A" },
-    { time: "12:00", title: "Spin Class", location: "Studio B" },
+    { time: "08:30", title: "Morning Yoga", location: "Pitch 4" },
+    { time: "12:00", title: "Petanque", location: "Petanuque Court" },
     { time: "18:00", title: "Community Fitness Session", location: "Main Hall" },
   ];
 
