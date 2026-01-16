@@ -101,12 +101,13 @@ export default function entrance() {
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
             <span style={styles.providerCell}>
-  {item.providerLogo ? (
-    <img
-      src={item.providerLogo}
-      alt={item.providerName || "Provider"}
-      style={styles.providerLogo}
-    />
+                 <span style={styles.providerLogoBox}></span>
+                 {item.providerLogo ? (
+                  <img
+                    src={item.providerLogo}
+                    alt={item.providerName || "Provider"}
+                    style={styles.providerLogo}
+                    />
   ) : null}
   <span style={styles.providerName}>{item.providerName}</span>
 </span>
@@ -133,12 +134,13 @@ export default function entrance() {
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
              <span style={styles.providerCell}>
-  {item.providerLogo ? (
-    <img
-      src={item.providerLogo}
-      alt={item.providerName || "Provider"}
-      style={styles.providerLogo}
-    />
+                 <span style={styles.providerLogoBox}></span>
+                {item.providerLogo ? (
+                    <img
+                    src={item.providerLogo}
+                    alt={item.providerName || "Provider"}
+                    style={styles.providerLogo}
+                    />
   ) : null}
   <span style={styles.providerName}>{item.providerName}</span>
 </span>
@@ -233,7 +235,8 @@ headerSponsorLogo: {
 
   tableHeader: {
     display: "grid",
- gridTemplateColumns: "120px 1.4fr 380px 220px",
+ gridTemplateColumns: "120px 640px 1fr 220px",
+
     alignItems: "center",
     padding: "8px 0 10px",
     fontSize: "16px",
@@ -249,7 +252,8 @@ headerSponsorLogo: {
 
   row: {
     display: "grid",
-   gridTemplateColumns: "120px 1.4fr 380px 220px",
+   gridTemplateColumns: "120px 640px 1fr 220px",
+
     alignItems: "center",
     padding: "10px 0",
     fontSize: "24px",
@@ -272,9 +276,17 @@ headerSponsorLogo: {
 providerCell: {
   display: "flex",
   alignItems: "center",
-  justifyContent: "center",   // 👈 center everything in the column
+  justifyContent: "flex-start",
   gap: "12px",
 },
+
+providerLogoBox: {
+  width: "110px",           // consistent logo area
+  display: "flex",
+  justifyContent: "center", // center logo within the slot
+  alignItems: "center",
+},
+
 providerLogo: {
   height: "32px",
   maxWidth: "90px",
@@ -300,4 +312,11 @@ providerLogo: {
     width: "auto",
     objectFit: "contain",
   },
+
+
+providerLogoBox: {
+  width: "110px",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
 };
