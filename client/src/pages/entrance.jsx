@@ -233,7 +233,7 @@ headerSponsorLogo: {
 
   tableHeader: {
     display: "grid",
-  gridTemplateColumns: "120px 1fr 420px 220px",
+ gridTemplateColumns: "120px 1.4fr 380px 220px"
     alignItems: "center",
     padding: "8px 0 10px",
     fontSize: "16px",
@@ -249,7 +249,7 @@ headerSponsorLogo: {
 
   row: {
     display: "grid",
-   gridTemplateColumns: "120px 1fr 420px 220px",
+   gridTemplateColumns: "120px 1.4fr 380px 220px"
     alignItems: "center",
     padding: "10px 0",
     fontSize: "24px",
@@ -271,17 +271,15 @@ headerSponsorLogo: {
   },
 providerCell: {
   display: "flex",
-  justifyContent: "flex-start",
   alignItems: "center",
+  justifyContent: "center",   // 👈 center everything in the column
   gap: "12px",
 },
-
-  providerLogo: {
-    height: "34px",
-    width: "auto",
-    objectFit: "contain",
-  },
-
+providerLogo: {
+  height: "32px",
+  maxWidth: "90px",
+  objectFit: "contain",
+},
   providerName: {
     color: "#ddd",
     fontSize: "20px",
