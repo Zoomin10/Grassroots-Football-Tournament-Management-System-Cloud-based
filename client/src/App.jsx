@@ -5,7 +5,7 @@ import PublicView from "./pages/PublicView";
 import AdminView from "./pages/AdminView";
 import LargeScreenView from "./pages/LargeScreenView";
 import RegisterPage from "./pages/RegisterPage";
-import Entrance from "./pages/Entrance";
+import Entrance from "./pages/entrance";
 
 import "./App.css";
 import "./styles/public.css";
@@ -106,7 +106,7 @@ function App() {
           <Route path="/tv" element={<LargeScreenView />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<PublicView />} />
-            <Route path="/entrance" element={<Entrance />} />
+            <Route path="/entrance" element={<entrance />} />
         </Routes>
       </Layout>
     </BrowserRouter>
