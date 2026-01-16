@@ -615,3 +615,24 @@
     height: 42px;
   }
 }
+.kit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.kit-label {
+  font-weight: 500;
+}
+
+.kit-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.kit-none {
+  opacity: 0.5;
+}

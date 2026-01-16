@@ -180,11 +180,23 @@ const kit2 = item.kit_colour_2 ?? item.kitColour2;
 {isReg ? (
   <div className="kit-row">
     <span className="kit-label">Kit:</span>
-    <span style={{ fontFamily: "monospace" }}>
-      sc1={String(item.kit_colour_1)} sc2={String(item.kit_colour_2)} | cc1={String(item.kitColour1)} cc2={String(item.kitColour2)}
-    </span>
+
+    <KitSwatch
+      colour={item.kit_colour_1}
+      titlePrefix="Primary: "
+    />
+
+    <KitSwatch
+      colour={item.kit_colour_2}
+      titlePrefix="Secondary: "
+    />
+
+    {!item.kit_colour_1 && !item.kit_colour_2 ? (
+      <span className="kit-none">—</span>
+    ) : null}
   </div>
 ) : null}
+
 
                 {isReg && isApproved && item.league_name ? (
                   <div style={{ fontSize: 12, opacity: 0.8 }}>
