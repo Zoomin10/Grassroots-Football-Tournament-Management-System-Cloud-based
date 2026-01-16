@@ -5,7 +5,7 @@ import PublicView from "./pages/PublicView";
 import AdminView from "./pages/AdminView";
 import LargeScreenView from "./pages/LargeScreenView";
 import RegisterPage from "./pages/RegisterPage";
-import entrance from "./pages/entrance";
+import Entrance from "./pages/entrance";
 
 import "./App.css";
 import "./styles/public.css";
@@ -98,26 +98,21 @@ function Layout({ children }) {
 
 function App() {
   return (
-  <BrowserRouter>
-  <Routes>
-    <Route path="/entrance" element={<entrance />} />
+      <BrowserRouter>
+      <Routes>
+        {/* Standalone page - no Layout */}
+        <Route path="/entrance" element={<Entrance />} />
 
-    <Route
-      path="*"
-      element={
-        <Layout>
-          <Routes>
-            <Route path="/" element={<PublicView />} />
-            <Route path="/admin" element={<AdminView />} />
-            <Route path="/tv" element={<LargeScreenView />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="*" element={<PublicView />} />
-          </Routes>
-        </Layout>
-      }
-    />
-  </Routes>
-</BrowserRouter>
+        {/* Everything else uses Layout */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<PublicView />} />
+          <Route path="/admin" element={<AdminView />} />
+          <Route path="/tv" element={<LargeScreenView />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<PublicView />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
