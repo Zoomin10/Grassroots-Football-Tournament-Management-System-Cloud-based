@@ -91,26 +91,27 @@ export default function entrance() {
           <div style={styles.tableHeader}>
             <span>Time</span>
             <span>Activity</span>
+            <span>Provided By</span>
             <span style={styles.headerRight}>Location</span>
-            <span style={styles.headerRight}>Provided By</span>
+           
           </div>
 
           {footballTournaments.map((item, i) => (
             <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
-              <span style={styles.location}>{item.location}</span>
+            <span style={styles.providerCell}>
+  {item.providerLogo ? (
+    <img
+      src={item.providerLogo}
+      alt={item.providerName || "Provider"}
+      style={styles.providerLogo}
+    />
+  ) : null}
+  <span style={styles.providerName}>{item.providerName}</span>
+</span>
 
-              <span style={styles.providerCell}>
-                {item.providerLogo ? (
-                  <img
-                    src={item.providerLogo}
-                    alt={item.providerName || "Provider"}
-                    style={styles.providerLogo}
-                  />
-                ) : null}
-                <span style={styles.providerName}>{item.providerName}</span>
-              </span>
+<span style={styles.location}>{item.location}</span>
             </div>
           ))}
         </section>
@@ -122,6 +123,7 @@ export default function entrance() {
           <div style={styles.tableHeader}>
             <span>Time</span>
             <span>Activity</span>
+            <span>Provided By</span>
             <span style={styles.headerRight}>Location</span>
             <span style={styles.headerRight}>Provided By</span>
           </div>
@@ -130,18 +132,18 @@ export default function entrance() {
             <div key={i} style={styles.row}>
               <span style={styles.time}>{item.time}</span>
               <span style={styles.itemTitle}>{item.title}</span>
-              <span style={styles.location}>{item.location}</span>
+             <span style={styles.providerCell}>
+  {item.providerLogo ? (
+    <img
+      src={item.providerLogo}
+      alt={item.providerName || "Provider"}
+      style={styles.providerLogo}
+    />
+  ) : null}
+  <span style={styles.providerName}>{item.providerName}</span>
+</span>
 
-              <span style={styles.providerCell}>
-                {item.providerLogo ? (
-                  <img
-                    src={item.providerLogo}
-                    alt={item.providerName || "Provider"}
-                    style={styles.providerLogo}
-                  />
-                ) : null}
-                <span style={styles.providerName}>{item.providerName}</span>
-              </span>
+<span style={styles.location}>{item.location}</span>
             </div>
           ))}
         </section>
@@ -170,7 +172,7 @@ const styles = {
 
   header: {
     display: "grid",
-    gridTemplateColumns: "auto 1fr auto",
+    gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
     gap: "32px",
     padding: "22px 40px",
@@ -231,7 +233,7 @@ const styles = {
 
   tableHeader: {
     display: "grid",
-    gridTemplateColumns: "120px 1fr 240px 320px",
+  gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
     padding: "10px 0 14px",
     fontSize: "18px",
@@ -247,7 +249,7 @@ const styles = {
 
   row: {
     display: "grid",
-    gridTemplateColumns: "120px 1fr 240px 320px",
+   gridTemplateColumns: "120px 1fr 420px 220px",
     alignItems: "center",
     padding: "12px 0",
     fontSize: "26px",
@@ -267,13 +269,12 @@ const styles = {
     textAlign: "right",
     color: "#ccc",
   },
-
-  providerCell: {
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    gap: "12px",
-  },
+providerCell: {
+  display: "flex",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  gap: "12px",
+},
 
   providerLogo: {
     height: "34px",
