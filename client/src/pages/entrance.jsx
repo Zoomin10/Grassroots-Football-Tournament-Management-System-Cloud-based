@@ -93,6 +93,8 @@ headerCenter: {
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
+    alignItems: "center",   // 👈 add this
+  textAlign: "center",    // 👈 and this
 },
 headerSponsorLogo: {
   height: "120px",
