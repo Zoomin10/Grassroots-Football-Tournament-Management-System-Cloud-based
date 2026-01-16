@@ -1521,6 +1521,8 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
       team_name: r.team_name,
       club_name: r.club_name,
       team_id_code: r.team_id_code,
+      kit_colour_1: r.kit_colour_1,   // ✅ add
+      kit_colour_2: r.kit_colour_2,   // ✅ add
       manager_name: r.manager_name,
       league_name: r.league_name
     }));
@@ -1549,6 +1551,8 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
         team_name: t.team,
         club_name: null,
         team_id_code: null,
+        kit_colour_1: null,   // optional clarity
+        kit_colour_2: null,   // optional clarity
         manager_name: null,
         league_name: t.league_name
       }));
@@ -1563,66 +1567,6 @@ app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
 
 
 
-
-async function reloadRegisteredTeams() {
-  const res = await fetch(`/api/tournaments/${selectedTournamentId}/registered-teams`);
-  const data = await res.json();
-  setRegisteredTeams(data.teams || []);
-}
-
-
-
-
-app.get("/api/tournaments/:tournamentId/registered-teams", async (req, res) => {
-  try {
-    const tournamentId = parseInt(req.params.tournamentId, 10);
-    if (!Number.isInteger(tournamentId) || tournamentId <= 0) {
-      return res.status(400).json({ error: "ValidationError", field: "tournamentId" });
-    }
-
-  
-    // Web registrations (registrations table)
-    // Join through approved team (team_row_id) to get league_name when approved
-    const regsRes = await pool.query(
-      `SELECT
-         r.id,
-         r.team_row_id,
-         r.club_name,
-         r.team_name,
-         r.manager_name,
-         r.team_id_code,
-          r.kit_colour_1,
-          r.kit_colour_2,
-         r.created_at,
-         l.name AS league_name
-       FROM registrations r
-       LEFT JOIN teams tm ON tm.id = r.team_row_id
-       LEFT JOIN leagues l ON l.id = tm.league_id
-       WHERE r.tournament_id = $1
-       ORDER BY r.created_at DESC`,
-      [tournamentId]
-    );
-
-    const registrationTeams = regsRes.rows.map(r => ({
-      source: "registration",
-      id: `reg-${r.id}`,
-      team_name: r.team_name,
-      club_name: r.club_name,
-      team_id_code: r.team_id_code,
-      kit_colour_1: r.kit_colour_1,
-      kit_colour_2: r.kit_colour_2,
-      manager_name: r.manager_name,
-      registration_id: r.id,
-      team_row_id: r.team_row_id,
-      league_name: r.league_name
-    }));
-
-    res.json({ teams: [...registrationTeams, ...adminTeams] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "ServerError" });
-  }
-});
 
 // Get players for a registration (admin + public can use if you want)
 app.get("/api/registrations/:registrationId/players", async (req, res) => {
