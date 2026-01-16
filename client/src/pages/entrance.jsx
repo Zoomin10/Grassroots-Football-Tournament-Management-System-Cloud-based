@@ -18,7 +18,7 @@ export default function entrance() {
     },
     {
       time: "14:00",
-      title: "Adult 5-a-side Finals",
+      title: "Adult Pan-Disability Finals - Mixed",
       location: "Pitch 3 (3G)",
       providerName: "Wroughton Youth FC",
       providerLogo: "/wroughtonyouthfc.png",
@@ -30,7 +30,7 @@ export default function entrance() {
       time: "12:00",
       title: "Petanque - Weekly Session",
       location: "Petanque Court",
-      providerName: "Petanque Club",
+      providerName: "Petanque England",
       providerLogo: "/petanque.jpeg",
     },
     {
@@ -44,7 +44,7 @@ export default function entrance() {
       time: "14:00",
       title: "Community Fitness Session",
       location: "Grass P1",
-      providerName: "Bootcamp UK",
+      providerName: "Bootcamp Swindon",
       providerLogo: "/bootcamp.jpeg",
     },
     {
@@ -180,8 +180,8 @@ const styles = {
   display: "grid",
   gridTemplateColumns: "auto 1fr auto",
   alignItems: "center",
-  gap: "32px",
-  padding: "16px 16px",   // 👈 smaller left/right padding
+  gap: "28px",
+  padding: "12px 12px",   // 👈 smaller left/right padding
   backgroundColor: "#ffffff",
   borderBottom: "4px solid #ffcc00",
 },
@@ -227,13 +227,13 @@ headerSponsorLogo: {
   },
 
   panel: {
-    padding: "22px 48px",
+    padding: "18px 36px",
     borderBottom: "2px solid #222",
   },
 
   panelTitle: {
     fontSize: "36px",
-    marginBottom: "18px",
+    marginBottom: "12px",
     color: "#00e5ff",
   },
 
@@ -292,7 +292,7 @@ providerLogoBox: {
 },
 
 providerLogo: {
-  height: "52px",
+  height: "50px",
   maxWidth: "90px",
   objectFit: "contain",
 },
@@ -306,7 +306,7 @@ providerLogo: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "26px 32px",
+    padding: "22px 28px",
     backgroundColor: "#ffffff",
     borderTop: "4px solid #ffcc00",
   },
@@ -316,6 +316,4 @@ providerLogo: {
     width: "auto",
     objectFit: "contain",
   },
-
-
 }
