@@ -118,7 +118,7 @@ footerSponsorLogo: {
 },
 
   logo: { height: "120px", width: "auto" },
-  title: { fontSize: "48px", alignItems: "center", margin: 0 },
+  title: { fontSize: "48px", alignItems: "center", paddingLeft: "60px", margin: 0 },
   date: { fontSize: "24px", color: "#e21111ff" },
   main: { flex: 1, display: "grid", gridTemplateRows: "1fr 1fr" },
   panel: { padding: "22px 48px", borderBottom: "2px solid #222" },
