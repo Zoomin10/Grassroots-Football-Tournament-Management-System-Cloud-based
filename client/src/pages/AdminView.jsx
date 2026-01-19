@@ -680,11 +680,7 @@ const activeLeagueName = activeLeague?.name ?? "";
           {leagues.map(l => (
             <button
               key={l.id}
-              className={
-                l.id === activeLeagueId
-                  ? "league-btn.active"
-                  : "league-btn"
-              }
+             className={`league-btn ${l.id === activeLeagueId ? "active" : ""}`}
               onClick={() => setActiveLeagueId(l.id)}
             >
               {l.name}
