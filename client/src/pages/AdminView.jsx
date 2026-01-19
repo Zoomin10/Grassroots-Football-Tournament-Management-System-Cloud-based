@@ -682,7 +682,7 @@ const activeLeagueName = activeLeague?.name ?? "";
               key={l.id}
               className={
                 l.id === activeLeagueId
-                  ? "league-btn active"
+                  ? "league-btn.active"
                   : "league-btn"
               }
               onClick={() => setActiveLeagueId(l.id)}
