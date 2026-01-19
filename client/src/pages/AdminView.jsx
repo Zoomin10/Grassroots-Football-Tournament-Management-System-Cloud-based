@@ -10,6 +10,7 @@ import { formatLeague } from "../utils/formatLeague";
 import RegisteredTeamsList from "../RegisteredTeamsList";
 import ApproveRegistration from "../ApproveRegistration";
 import "../App.css";
+import "../styles/admin.css";
 
 export default function AdminView() {
   /* =========================
