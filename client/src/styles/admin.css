@@ -80,9 +80,11 @@
 
 /* League toggle */
 .admin-card-header {
+  margin: 0; 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.4rem;
 }
 
 .league-toggle {
@@ -96,6 +98,11 @@
   border: 1px solid #ccc;
   background: #f5f5f5;
   cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.league-btn:hover {
+  border-color: #1976d2;
 }
 
 .league-btn.active {
