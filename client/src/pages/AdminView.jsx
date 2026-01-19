@@ -462,8 +462,7 @@ const activeLeagueName = activeLeague?.name ?? "";
 </div>
 
 
-  </div>
-</div>
+
 
         {/* Admin Actions */}
         <div className="admin-actions">
