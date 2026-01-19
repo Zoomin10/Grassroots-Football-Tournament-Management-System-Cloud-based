@@ -406,6 +406,7 @@ const activeLeagueName = activeLeague?.name ?? "";
     <div className="admin-header">
       <h1>🔐 Admin Control Panel</h1>
 
+<div className="admin-page">
 <div className="tournament-actions">
   <div className="admin-tournament-content">
     <div className="admin-tournament-selector">
@@ -461,7 +462,7 @@ const activeLeagueName = activeLeague?.name ?? "";
   </div>
 </div>
 
-
+</div>
 
 
         {/* Admin Actions */}
