@@ -86,6 +86,10 @@
   align-items: center;
   gap: 0.4rem;
 }
+.admin-card-header h3 {
+  margin: 0;
+  line-height: 1;
+}
 
 .league-toggle {
   display: flex;
@@ -109,6 +113,11 @@
   background: #1976d2;
   color: white;
   border-color: #1976d2;
+}
+.league-toggle .league-btn.active {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+  border-color: #1976d2 !important;
 }
 
 /* Teams */
