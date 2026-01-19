@@ -57,7 +57,7 @@ function Layout() {
             className="title-logo"
           />
           <h1>Wroughton Youth FC</h1>
-            <h1>{isRegister ? "Tournament Registration" : "Tournament Management System"}</h1>
+            <h2>{isRegister ? "Tournament Registration" : "Tournament Management System"}</h2>
         </header>
       )}
 
