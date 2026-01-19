@@ -9,14 +9,6 @@
 }
 
 /* Tournament actions */
-.tournament-actions {
-  max-width: 420px;
-  margin: 0 auto 2rem;
-  padding: 1.25rem;
-  background: #373592;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-}
 
 .tournament-actions-buttons {
   display: flex;
@@ -141,14 +133,6 @@
   gap: 2rem;
 }
 
-.admin-tournament-info {
-  width: 100%;
-  margin-top: 0.6rem;
-  padding: 0.5rem 0.75rem;
-  background: #667ac0;
-  border: 1px solid #790d58;
-  border-radius: 10px;
-}
 
 .admin-page .admin-tournament-meta {
   display: flex;
