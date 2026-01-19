@@ -234,3 +234,10 @@
 .league-pill.league-b {
   background: rgba(120,120,120,0.18);
 }
+/* Banner must not inherit extra boxes */
+.admin-page .admin-tournament-content,
+.admin-page .admin-tournament-info {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
