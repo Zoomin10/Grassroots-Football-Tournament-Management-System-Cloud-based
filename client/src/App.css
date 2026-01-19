@@ -53,6 +53,8 @@ margin-bottom: 8px;
   flex-wrap: wrap;
 padding: 10px 6px;
 border-radius: 8px;
+margin-left: 120px;
+margin-right: 120px;
 }
 
 .header img {
