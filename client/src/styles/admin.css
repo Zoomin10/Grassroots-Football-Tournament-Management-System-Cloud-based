@@ -162,24 +162,24 @@
 }
 /* Banner container */
 .admin-page .tournament-actions {
-  max-width: 520px;
+  max-width: 560px;
   margin: 0 auto 2rem;
-  padding: 1.25rem;
-  background: #a9c9f0;              /* lighter, cleaner than red */
+  padding: 18px;
+  background: #a9c9f0;
   border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
-  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  border: none;              /* remove extra border */
 }
 
 /* Selector row */
 .admin-page .admin-tournament-selector {
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: rgba(255,255,255,0.65);
-  padding: 12px 14px;
-  border-radius: 12px;
+  gap: 14px;
+  padding: 10px 12px;
+  background: transparent;   /* was adding another box */
+  border-radius: 0;
 }
 
 .admin-page .admin-tournament-selector label {
@@ -199,11 +199,10 @@
 
 /* Info area */
 .admin-page .admin-tournament-info {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.25);
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.08);
+  margin-top: 14px;
+  padding: 0;               /* remove inner padding box look */
+  background: transparent;
+  border: none;
 }
 
 .admin-page .admin-tournament-meta {
@@ -214,28 +213,29 @@
 }
 
 .admin-page .meta-pill {
-  background: rgba(255,255,255,0.60);
-  border: 1px solid rgba(0,0,0,0.08);
+   background: rgba(255,255,255,0.65);
+  border: none;             /* remove outline */
   border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 0.95rem;
+  padding: 7px 12px;
   color: #0b2a57;
+  font-weight: 600;
 }
 
-/* League pills */
-.admin-tournament-leagues {
+/* Leagues row: no extra panel box */
+.admin-page .admin-tournament-leagues {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
-.league-pill {
+/* League pills: subtle, not boxed */
+.admin-page .league-pill {
+  background: rgba(255,255,255,0.55);
+  border: none;
   border-radius: 10px;
-  padding: 7px 10px;
-  font-weight: 700;
-  border: 1px solid rgba(0,0,0,0.08);
+  padding: 9px 12px;
+  font-weight: 800;
   color: #0b2a57;
 }
 
