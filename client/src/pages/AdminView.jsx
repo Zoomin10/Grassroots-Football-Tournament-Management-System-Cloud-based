@@ -405,45 +405,61 @@ const activeLeagueName = activeLeague?.name ?? "";
     {/* Header */}
     <div className="admin-header">
       <h1>🔐 Admin Control Panel</h1>
+
 <div className="tournament-actions">
   <div className="admin-tournament-content">
-
     <div className="admin-tournament-selector">
       <label htmlFor="admin-tournament-select">Active Tournament</label>
       <select
         id="admin-tournament-select"
         value={selectedTournamentId ?? ""}
-        onChange={e => setSelectedTournamentId(Number(e.target.value))}
+        onChange={(e) => setSelectedTournamentId(Number(e.target.value))}
       >
-        <option value="" disabled>Select tournament</option>
-        {tournaments.map(t => (
+        <option value="" disabled>
+          Select tournament
+        </option>
+        {tournaments.map((t) => (
           <option key={t.id} value={t.id}>
             {t.year} – {t.gender} {t.age_group}
           </option>
         ))}
       </select>
     </div>
-{selectedTournament && (
-  <div className="admin-tournament-info">
-    <div className="admin-tournament-meta">
-      {selectedTournament.date && (
-        <span>📅 {new Date(selectedTournament.date).toLocaleDateString("en-GB")}</span>
-      )}
-      {selectedTournament.kickoff_time && (
-        <span>⏰ Kickoff {selectedTournament.kickoff_time.slice(0, 5)}</span>
-      )}
-      {selectedTournament.venue && (
-        <span>📍 {selectedTournament.venue}</span>
-      )}
-      {selectedTournament.pitch_league_a && (
-        <span>🟦 League A: {selectedTournament.pitch_league_a}</span>
-      )}
-      {selectedTournament.pitch_league_b && (
-        <span>⬜ League B {selectedTournament.pitch_league_b}</span>
-      )}
-    </div>
+
+    {selectedTournament && (
+      <div className="admin-tournament-info">
+        <div className="admin-tournament-meta">
+          {selectedTournament.date && (
+            <span className="meta-pill">
+              📅 {new Date(selectedTournament.date).toLocaleDateString("en-GB")}
+            </span>
+          )}
+          {selectedTournament.kickoff_time && (
+            <span className="meta-pill">
+              ⏰ Kickoff {selectedTournament.kickoff_time.slice(0, 5)}
+            </span>
+          )}
+          {selectedTournament.venue && (
+            <span className="meta-pill">📍 {selectedTournament.venue}</span>
+          )}
+        </div>
+
+        <div className="admin-tournament-leagues">
+          {selectedTournament.pitch_league_a && (
+            <span className="league-pill league-a">
+              🟦 League A: {selectedTournament.pitch_league_a}
+            </span>
+          )}
+          {selectedTournament.pitch_league_b && (
+            <span className="league-pill league-b">
+              ⬜ League B: {selectedTournament.pitch_league_b}
+            </span>
+          )}
+        </div>
+      </div>
+    )}
   </div>
-)}
+</div>
 
 
   </div>
