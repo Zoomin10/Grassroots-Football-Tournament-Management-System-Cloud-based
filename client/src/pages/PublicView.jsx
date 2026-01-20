@@ -20,6 +20,7 @@ export default function PublicView() {
 
 
   const hasPrinted = useRef(false);
+const selectedTournament = tournaments.find((t) => t.id === selectedTournamentId) || null;
 
   const [fixturesA, setFixturesA] = useState([]);
   const [fixturesB, setFixturesB] = useState([]);
@@ -44,10 +45,18 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [isPrintMode]);
 
+useEffect(() => {
+  if (!isPrintMode) return;
+  if (!tournamentIdFromUrl) return;
+
+  setSelectedTournamentId(tournamentIdFromUrl);
+}, [isPrintMode, tournamentIdFromUrl]);
+
+
 // 2) Auto-print ONCE when print mode is enabled
 useEffect(() => {
   if (!isPrintMode) return;
-  if (!selectedTournamentId) return;
+  if (!selectedTournament) return; // <-- wait until data exists
   if (hasPrinted.current) return;
 
   hasPrinted.current = true;
@@ -63,7 +72,8 @@ useEffect(() => {
 
   const timeout = setTimeout(() => window.print(), 800);
   return () => clearTimeout(timeout);
-}, [isPrintMode, selectedTournamentId]);
+}, [isPrintMode, selectedTournament]);
+
 
   /* =========================
      Load tournaments
@@ -77,18 +87,14 @@ useEffect(() => {
       const list = Array.isArray(data) ? data : [];
       setTournaments(list);
 
-      const idFromUrl = tournamentIdFromUrl ? Number(tournamentIdFromUrl) : null;
-
-      if (!selectedTournamentId) {
-        if (idFromUrl) {
-          setSelectedTournamentId(idFromUrl);
-        } else if (list.length) {
-          setSelectedTournamentId(list[0].id);
-        }
+      // Only auto-select first tournament in NON-print mode
+      if (!isPrintMode && !selectedTournamentId && list.length) {
+        setSelectedTournamentId(list[0].id);
       }
     })
     .catch((err) => console.error("❌ Failed to load tournaments", err));
-}, [isPrintMode, tournamentIdFromUrl, selectedTournamentId]);
+}, [isPrintMode, selectedTournamentId]);
+
 
   /* =========================
      Load leagues for tournament
