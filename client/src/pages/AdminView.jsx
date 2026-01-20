@@ -496,6 +496,7 @@ const handleTournamentToggle = async (field, value) => {
             </span>
           )}
         </div>
+   <div className="admin-tournament-flags-wrapper">     
 <div className="admin-tournament-flags">
   <div className="flag-control">
     <span className="flag-label">Registration open</span>
@@ -523,7 +524,8 @@ const handleTournamentToggle = async (field, value) => {
     </button>
   </div>
 </div>
-      </div>
+</div>
+</div>
     )}
   </div>
 </div>
