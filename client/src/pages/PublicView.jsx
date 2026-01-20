@@ -92,35 +92,25 @@ export default function PublicView() {
   // ----------------------------
   // Auto-print ONCE in print mode (after selected tournament is loaded)
   // ----------------------------
-  useEffect(() => {
-     console.log("[PRINT] printMode:", printMode);
+useEffect(() => {
+  console.log("[PRINT] printMode:", printMode);
   console.log("[PRINT] selectedTournamentId:", selectedTournamentId);
   console.log("[PRINT] selectedTournament:", selectedTournament);
-    if (!printMode) return;
-    if (!selectedTournament) return;
-    if (hasPrinted.current) return;
 
-    hasPrinted.current = true;
+  if (!printMode) return;
+  if (!selectedTournament) return;
+  if (hasPrinted.current) return;
 
-   const timeout = setTimeout(() => {
-  window.focus();
-  window.print();
-  cleanupPrintParam();
-}, 800);
+  hasPrinted.current = true;
 
-      // After triggering print, remove print=true so refresh won't re-print
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("print") === "true") {
-        params.delete("print");
-        const newUrl =
-          window.location.pathname +
-          (params.toString() ? `?${params.toString()}` : "");
-        window.history.replaceState({}, "", newUrl);
-      }
-    }, 800);
+  const timeout = setTimeout(() => {
+    window.focus();
+    window.print();
+    cleanupPrintParam();
+  }, 800);
 
-    return () => clearTimeout(timeout);
-  }, [printMode, selectedTournament]);
+  return () => clearTimeout(timeout);
+}, [printMode, selectedTournament]);
 
   /* =========================
      Load leagues for tournament
