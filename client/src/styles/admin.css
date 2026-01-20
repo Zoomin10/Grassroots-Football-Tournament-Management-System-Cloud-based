@@ -242,3 +242,38 @@
   border: none !important;
   box-shadow: none !important;
 }
+.admin-page .admin-tournament-flags{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.admin-page .flag-control{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.admin-page .flag-label{
+  font-size:0.9rem;
+  opacity:0.85;
+}
+
+.admin-page .flag-toggle{
+  border:1px solid rgba(0,0,0,0.18);
+  padding:6px 12px;
+  border-radius:999px;
+  cursor:pointer;
+  background:transparent;
+}
+
+.admin-page .flag-toggle.on{
+  font-weight:600;
+}
+
+.admin-page .flag-toggle:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}

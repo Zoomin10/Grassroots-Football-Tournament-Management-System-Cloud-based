@@ -228,6 +228,89 @@ app.post("/api/tournaments", async (req, res) => {
   }
 });
 
+app.patch("/api/tournaments/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) return res.status(400).json({ error: "Invalid tournament id" });
+
+  const { registration_open, published } = req.body;
+
+  const fields = [];
+  const values = [];
+  let i = 1;
+
+  if (typeof registration_open === "boolean") {
+    fields.push(`registration_open = $${i++}`);
+    values.push(registration_open);
+  }
+
+  if (typeof published === "boolean") {
+    fields.push(`published = $${i++}`);
+    values.push(published);
+  }
+
+  if (fields.length === 0) {
+    return res.status(400).json({ error: "No valid fields to update" });
+  }
+
+  values.push(id);
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE tournaments
+      SET ${fields.join(", ")}
+      WHERE id = $${i}
+      RETURNING *
+      `,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Tournament not found" });
+    }
+
+    res.json({ tournament: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Update tournament error:", err);
+    res.status(500).json({ error: "Failed to update tournament" });
+  }
+});
+
+app.get("/api/tournaments/active", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM tournaments
+      WHERE registration_open = TRUE
+      ORDER BY created_at DESC
+      `
+    );
+    res.json({ tournaments: result.rows });
+  } catch (err) {
+    console.error("❌ Fetch active tournaments error:", err);
+    res.status(500).json({ error: "Failed to fetch tournaments" });
+  }
+});
+
+app.get("/api/tournaments/published", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM tournaments
+      WHERE published = TRUE
+      ORDER BY created_at DESC
+      `
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Fetch published tournaments error:", err);
+    res.status(500).json({ error: "Failed to fetch tournaments" });
+  }
+});
+
+
 // POST add team
 app.post("/api/teams", async (req, res) => {
   try {

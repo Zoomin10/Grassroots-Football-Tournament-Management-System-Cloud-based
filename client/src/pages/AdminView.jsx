@@ -395,6 +395,45 @@ const generateFinal = async (bracket) => {
 const activeLeague = leagues.find(l => l.id === activeLeagueId);
 const activeLeagueName = activeLeague?.name ?? "";
 
+const handleTournamentToggle = async (field, value) => {
+  if (!selectedTournamentId) return;
+
+  // optimistic UI
+  setTournaments((prev) =>
+    prev.map((t) => (t.id === selectedTournamentId ? { ...t, [field]: value } : t))
+  );
+
+  try {
+    const res = await fetch(`/api/tournaments/${selectedTournamentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: value }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Update failed");
+    }
+
+    // sync with DB response (authoritative)
+    if (data?.tournament) {
+      setTournaments((prev) =>
+        prev.map((t) => (t.id === selectedTournamentId ? data.tournament : t))
+      );
+    }
+  } catch (err) {
+    console.error("Failed to update tournament:", err);
+
+    // revert
+    setTournaments((prev) =>
+      prev.map((t) => (t.id === selectedTournamentId ? { ...t, [field]: !value } : t))
+    );
+
+    alert("Could not save change. Please try again.");
+  }
+};
+
   /* =========================
      RENDER
   ========================= */
@@ -457,6 +496,33 @@ const activeLeagueName = activeLeague?.name ?? "";
             </span>
           )}
         </div>
+<div className="admin-tournament-flags">
+  <div className="flag-control">
+    <span className="flag-label">Registration open</span>
+    <button
+      type="button"
+      className={`flag-toggle ${selectedTournament.registration_open ? "on" : "off"}`}
+      onClick={() =>
+        handleTournamentToggle("registration_open", !selectedTournament.registration_open)
+      }
+    >
+      {selectedTournament.registration_open ? "On" : "Off"}
+    </button>
+  </div>
+
+  <div className="flag-control">
+    <span className="flag-label">Publish</span>
+    <button
+      type="button"
+      className={`flag-toggle ${selectedTournament.published ? "on" : "off"}`}
+      onClick={() =>
+        handleTournamentToggle("published", !selectedTournament.published)
+      }
+    >
+      {selectedTournament.published ? "On" : "Off"}
+    </button>
+  </div>
+</div>
       </div>
     )}
   </div>

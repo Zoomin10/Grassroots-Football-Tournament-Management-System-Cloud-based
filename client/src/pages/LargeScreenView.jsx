@@ -195,7 +195,7 @@ export default function LargeScreenView() {
 
   async function fetchTournaments() {
     try {
-      const res = await fetch("/api/tournaments");
+     const res = await fetch("/api/tournaments/published");
       const data = await res.json();
       setTournaments(Array.isArray(data) ? data : []);
       setStatus("ready");

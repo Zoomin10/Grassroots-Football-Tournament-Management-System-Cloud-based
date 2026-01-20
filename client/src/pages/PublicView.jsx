@@ -63,7 +63,7 @@ useEffect(() => {
      Load tournaments
   ========================= */
 useEffect(() => {
-  fetch("/api/tournaments")
+ fetch("/api/tournaments/published")
     .then(res => res.json())
     .then(data => {
       setTournaments(data);
