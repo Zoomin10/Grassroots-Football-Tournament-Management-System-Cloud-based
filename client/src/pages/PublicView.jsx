@@ -36,6 +36,16 @@ export default function PublicView() {
   const selectedTournament =
     tournaments.find((t) => t.id === selectedTournamentId) || null;
 
+    const cleanupPrintParam = () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("print") === "true") {
+    params.delete("print");
+    const newUrl =
+      window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+    window.history.replaceState({}, "", newUrl);
+  }
+};
+
   // ----------------------------
   // Refresh data every minute (normal mode only)
   // ----------------------------
@@ -83,14 +93,20 @@ export default function PublicView() {
   // Auto-print ONCE in print mode (after selected tournament is loaded)
   // ----------------------------
   useEffect(() => {
+     console.log("[PRINT] printMode:", printMode);
+  console.log("[PRINT] selectedTournamentId:", selectedTournamentId);
+  console.log("[PRINT] selectedTournament:", selectedTournament);
     if (!printMode) return;
     if (!selectedTournament) return;
     if (hasPrinted.current) return;
 
     hasPrinted.current = true;
 
-    const timeout = setTimeout(() => {
-      window.print();
+   const timeout = setTimeout(() => {
+  window.focus();
+  window.print();
+  cleanupPrintParam();
+}, 800);
 
       // After triggering print, remove print=true so refresh won't re-print
       const params = new URLSearchParams(window.location.search);
@@ -224,6 +240,22 @@ export default function PublicView() {
      Render
   ========================= */
   return (
+    {printMode && (
+  <div className="print-toolbar">
+    <button
+      type="button"
+      className="print-btn"
+      onClick={() => {
+        window.focus();
+        window.print();
+        cleanupPrintParam();
+      }}
+    >
+      🖨️ Print
+    </button>
+  </div>
+)}
+
     <div className="public-view">
       <div className="public-container">
         <div className="public-dashboard">

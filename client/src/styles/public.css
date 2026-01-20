@@ -283,3 +283,24 @@
 .celebration-banner--public .celebration-card strong {
   color: #007bff;
 }
+
+.print-toolbar {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+}
+
+.print-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media print {
+  .print-toolbar {
+    display: none;
+  }
+}
