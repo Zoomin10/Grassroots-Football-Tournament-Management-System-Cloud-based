@@ -15,6 +15,7 @@ function Layout() {
   const location = useLocation();
   const isTV = location.pathname === "/tv";
   const isRegister = location.pathname.startsWith("/register");
+  const isPublic = location.pathname.startsWith("/public");
 
 
   const [now, setNow] = useState(new Date());
@@ -49,6 +50,16 @@ function Layout() {
             })}
           </div>
         </header>
+        ) : isPublic ? (
+    <header className="app-title public-header">
+      <img
+        src="/logos/wroughtonyouthfc.png"
+        alt="Logo"
+        className="title-logo"
+      />
+      <h1>Wroughton Youth FC</h1>
+      <h2>Live Tournament Tracker</h2>
+    </header>
       ) : (
         <header className="app-title">
           <img

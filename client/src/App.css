@@ -63,6 +63,11 @@ margin-right: 60px;
   margin: 10px;
  
 }
+.public-header h2 {
+  color: #0b3c6d;
+  font-weight: 700;
+}
+
 .title-logo {
   width: auto;
   height: 120px;
