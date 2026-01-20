@@ -68,22 +68,27 @@ useEffect(() => {
   /* =========================
      Load tournaments
   ========================= */
-  useEffect(() => {
-  fetch("/api/tournaments/published")
-      .then(res => res.json())
-      .then(data => {
-        setTournaments(data);
+useEffect(() => {
+  const endpoint = isPrintMode ? "/api/tournaments" : "/api/tournaments/published";
 
-        if (!selectedTournamentId) {
-        if (tournamentIdFromUrl) {
-          setSelectedTournamentId(tournamentIdFromUrl);
-        } else if (data.length) {
-          setSelectedTournamentId(data[0].id);
+  fetch(endpoint)
+    .then((res) => res.json())
+    .then((data) => {
+      const list = Array.isArray(data) ? data : [];
+      setTournaments(list);
+
+      const idFromUrl = tournamentIdFromUrl ? Number(tournamentIdFromUrl) : null;
+
+      if (!selectedTournamentId) {
+        if (idFromUrl) {
+          setSelectedTournamentId(idFromUrl);
+        } else if (list.length) {
+          setSelectedTournamentId(list[0].id);
         }
       }
     })
-    .catch(err => console.error("❌ Failed to load tournaments", err));
-}, []);
+    .catch((err) => console.error("❌ Failed to load tournaments", err));
+}, [isPrintMode, tournamentIdFromUrl, selectedTournamentId]);
 
   /* =========================
      Load leagues for tournament
