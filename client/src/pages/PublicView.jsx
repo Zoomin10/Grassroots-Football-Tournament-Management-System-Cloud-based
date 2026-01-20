@@ -35,13 +35,21 @@ export default function PublicView() {
 
 useEffect(() => {
   if (isPrintMode) return;
+    if (!selectedTournamentId) return;
+
+  const key = `printed:${selectedTournamentId}`;
+  if (sessionStorage.getItem(key) === "1") return;
+  sessionStorage.setItem(key, "1");
+
+  const timeout = setTimeout(() => window.print(), 800);
+  return () => clearTimeout(timeout);
+}, [isPrintMode, selectedTournamentId]);
 
   const interval = setInterval(() => {
     setRefreshTick(t => t + 1);
   }, 60000);
 
-  return () => clearInterval(interval);
-}, [isPrintMode]);
+
 
 useEffect(() => {
   if (!isPrintMode) return;

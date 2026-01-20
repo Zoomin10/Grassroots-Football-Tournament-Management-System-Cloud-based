@@ -449,7 +449,7 @@ const handleTournamentToggle = async (field, value) => {
 <div className="tournament-actions">
   <div className="admin-tournament-content">
     <div className="admin-tournament-selector">
-      <label htmlFor="admin-tournament-select">Active Tournament</label>
+      <label htmlFor="admin-tournament-select">Manage Tournament</label>
       <select
         id="admin-tournament-select"
         value={selectedTournamentId ?? ""}
@@ -511,7 +511,7 @@ const handleTournamentToggle = async (field, value) => {
   </div>
 
   <div className="flag-control">
-    <span className="flag-label">Publish</span>
+    <span className="flag-label">Publish Tournament LiveView</span>
     <button
       type="button"
       className={`flag-toggle ${selectedTournament.published ? "on" : "off"}`}
