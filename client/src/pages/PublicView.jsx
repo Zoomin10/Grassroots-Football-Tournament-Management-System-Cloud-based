@@ -230,23 +230,23 @@ useEffect(() => {
      Render
   ========================= */
   return (
-    {printMode && (
-  <div className="print-toolbar">
-    <button
-      type="button"
-      className="print-btn"
-      onClick={() => {
-        window.focus();
-        window.print();
-        cleanupPrintParam();
-      }}
-    >
-      🖨️ Print
-    </button>
-  </div>
-)}
-
+    
     <div className="public-view">
+       {printMode && (
+      <div className="print-toolbar">
+        <button
+          type="button"
+          className="print-btn"
+          onClick={() => {
+            window.focus();
+            window.print();
+            cleanupPrintParam();
+          }}
+        >
+          🖨️ Print
+        </button>
+      </div>
+    )}
       <div className="public-container">
         <div className="public-dashboard">
           {/* Header / Selector always first */}
@@ -368,4 +368,5 @@ useEffect(() => {
       </div>
     </div>
   );
+
 }
