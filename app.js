@@ -610,7 +610,7 @@ app.post('/api/matches/:id/result', async (req, res) => {
 
 // TV latest results
 app.get("/api/matches/latest", async (req, res) => {
-  const limit = Number(req.query.limit) || 12;
+  const limit = Math.min(Number(req.query.limit) || 12, 50);
 
   try {
     const result = await pool.query(
@@ -634,6 +634,7 @@ app.get("/api/matches/latest", async (req, res) => {
       JOIN teams at ON m.away_team_id = at.id
       JOIN tournaments t ON m.tournament_id = t.id
       WHERE m.played = true
+        AND t.published = true
       ORDER BY m.updated_at DESC
       LIMIT $1
       `,
