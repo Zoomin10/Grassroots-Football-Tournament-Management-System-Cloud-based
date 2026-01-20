@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatLeague } from "../utils/formatLeague";
 import LeagueTable from "../LeagueTable";
 import Fixtures from "../Fixtures";
@@ -7,94 +6,105 @@ import KnockoutBracket from "../KnockoutBracket";
 import "../styles/public.css";
 import "../styles/print.css";
 
-
 export default function PublicView() {
+  // ----------------------------
+  // URL params (latched print mode)
+  // ----------------------------
+  const initialParams = new URLSearchParams(window.location.search);
+  const [printMode] = useState(initialParams.get("print") === "true");
+
+  const tournamentIdFromUrl = initialParams.get("tournamentId")
+    ? Number(initialParams.get("tournamentId"))
+    : null;
+
+  // ----------------------------
+  // State
+  // ----------------------------
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournamentId, setSelectedTournamentId] = useState(null);
 
   const [leagues, setLeagues] = useState([]);
   const [leagueA, setLeagueA] = useState([]);
   const [leagueB, setLeagueB] = useState([]);
-  const params = new URLSearchParams(window.location.search);
-  const isPrintMode = params.get("print") === "true";
-
-
-  const hasPrinted = useRef(false);
-const selectedTournament = tournaments.find((t) => t.id === selectedTournamentId) || null;
-
   const [fixturesA, setFixturesA] = useState([]);
   const [fixturesB, setFixturesB] = useState([]);
   const [knockouts, setKnockouts] = useState([]);
   const [refreshTick, setRefreshTick] = useState(0);
-  const selectedTournament = tournaments.find(
-    t => t.id === selectedTournamentId
-  );
 
-  const tournamentIdFromUrl = params.get("tournamentId")
-  ? Number(params.get("tournamentId"))
-  : null;
+  const hasPrinted = useRef(false);
 
-// 1) Refresh data every minute (normal mode only)
-useEffect(() => {
-  if (isPrintMode) return;
+  const selectedTournament =
+    tournaments.find((t) => t.id === selectedTournamentId) || null;
 
-  const interval = setInterval(() => {
-    setRefreshTick((t) => t + 1);
-  }, 60000);
+  // ----------------------------
+  // Refresh data every minute (normal mode only)
+  // ----------------------------
+  useEffect(() => {
+    if (printMode) return;
 
-  return () => clearInterval(interval);
-}, [isPrintMode]);
+    const interval = setInterval(() => {
+      setRefreshTick((t) => t + 1);
+    }, 60000);
 
-useEffect(() => {
-  if (!isPrintMode) return;
-  if (!tournamentIdFromUrl) return;
+    return () => clearInterval(interval);
+  }, [printMode]);
 
-  setSelectedTournamentId(tournamentIdFromUrl);
-}, [isPrintMode, tournamentIdFromUrl]);
+  // ----------------------------
+  // In print mode, force tournament selection from URL
+  // ----------------------------
+  useEffect(() => {
+    if (!printMode) return;
+    if (!tournamentIdFromUrl) return;
 
+    setSelectedTournamentId(tournamentIdFromUrl);
+  }, [printMode, tournamentIdFromUrl]);
 
-// 2) Auto-print ONCE when print mode is enabled
-useEffect(() => {
-  if (!isPrintMode) return;
-  if (!selectedTournament) return; // <-- wait until data exists
-  if (hasPrinted.current) return;
+  // ----------------------------
+  // Load tournaments (all in print mode; published only otherwise)
+  // ----------------------------
+  useEffect(() => {
+    const endpoint = printMode ? "/api/tournaments" : "/api/tournaments/published";
 
-  hasPrinted.current = true;
+    fetch(endpoint)
+      .then((res) => res.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : [];
+        setTournaments(list);
 
-  // Remove print=true so refresh doesn't print again
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("print") === "true") {
-    params.delete("print");
-    const newUrl =
-      window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
-    window.history.replaceState({}, "", newUrl);
-  }
+        // Only auto-select first tournament in NON-print mode
+        if (!printMode && !selectedTournamentId && list.length) {
+          setSelectedTournamentId(list[0].id);
+        }
+      })
+      .catch((err) => console.error("❌ Failed to load tournaments", err));
+  }, [printMode, selectedTournamentId]);
 
-  const timeout = setTimeout(() => window.print(), 800);
-  return () => clearTimeout(timeout);
-}, [isPrintMode, selectedTournament]);
+  // ----------------------------
+  // Auto-print ONCE in print mode (after selected tournament is loaded)
+  // ----------------------------
+  useEffect(() => {
+    if (!printMode) return;
+    if (!selectedTournament) return;
+    if (hasPrinted.current) return;
 
+    hasPrinted.current = true;
 
-  /* =========================
-     Load tournaments
-  ========================= */
-useEffect(() => {
-  const endpoint = isPrintMode ? "/api/tournaments" : "/api/tournaments/published";
+    const timeout = setTimeout(() => {
+      window.print();
 
-  fetch(endpoint)
-    .then((res) => res.json())
-    .then((data) => {
-      const list = Array.isArray(data) ? data : [];
-      setTournaments(list);
-
-      // Only auto-select first tournament in NON-print mode
-      if (!isPrintMode && !selectedTournamentId && list.length) {
-        setSelectedTournamentId(list[0].id);
+      // After triggering print, remove print=true so refresh won't re-print
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("print") === "true") {
+        params.delete("print");
+        const newUrl =
+          window.location.pathname +
+          (params.toString() ? `?${params.toString()}` : "");
+        window.history.replaceState({}, "", newUrl);
       }
-    })
-    .catch((err) => console.error("❌ Failed to load tournaments", err));
-}, [isPrintMode, selectedTournamentId]);
+    }, 800);
 
+    return () => clearTimeout(timeout);
+  }, [printMode, selectedTournament]);
 
   /* =========================
      Load leagues for tournament
@@ -106,13 +116,13 @@ useEffect(() => {
     }
 
     fetch(`/api/leagues?tournamentId=${selectedTournamentId}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setLeagues)
-      .catch(err => console.error("❌ Fetch leagues error:", err));
+      .catch((err) => console.error("❌ Fetch leagues error:", err));
   }, [selectedTournamentId]);
 
-  const leagueAInfo = leagues.find(l => l.name === "League A");
-  const leagueBInfo = leagues.find(l => l.name === "League B");
+  const leagueAInfo = leagues.find((l) => l.name === "League A");
+  const leagueBInfo = leagues.find((l) => l.name === "League B");
 
   /* =========================
      Load tables, fixtures, knockouts
@@ -128,221 +138,212 @@ useEffect(() => {
     }
 
     // League tables
-    fetch(
-      `/api/league?leagueId=${leagueAInfo.id}&tournamentId=${selectedTournamentId}`
-    )
-      .then(res => res.json())
-      .then(data => setLeagueA(formatLeague(data)))
+    fetch(`/api/league?leagueId=${leagueAInfo.id}&tournamentId=${selectedTournamentId}`)
+      .then((res) => res.json())
+      .then((data) => setLeagueA(formatLeague(data)))
       .catch(console.error);
 
-    fetch(
-      `/api/league?leagueId=${leagueBInfo.id}&tournamentId=${selectedTournamentId}`
-    )
-      .then(res => res.json())
-      .then(data => setLeagueB(formatLeague(data)))
+    fetch(`/api/league?leagueId=${leagueBInfo.id}&tournamentId=${selectedTournamentId}`)
+      .then((res) => res.json())
+      .then((data) => setLeagueB(formatLeague(data)))
       .catch(console.error);
 
     // League fixtures
-    fetch(
-      `/api/matches?round=league&leagueId=${leagueAInfo.id}&tournamentId=${selectedTournamentId}`
-    )
-      .then(res => res.json())
+    fetch(`/api/matches?round=league&leagueId=${leagueAInfo.id}&tournamentId=${selectedTournamentId}`)
+      .then((res) => res.json())
       .then(setFixturesA)
       .catch(console.error);
 
-    fetch(
-      `/api/matches?round=league&leagueId=${leagueBInfo.id}&tournamentId=${selectedTournamentId}`
-    )
-      .then(res => res.json())
+    fetch(`/api/matches?round=league&leagueId=${leagueBInfo.id}&tournamentId=${selectedTournamentId}`)
+      .then((res) => res.json())
       .then(setFixturesB)
       .catch(console.error);
 
     // Knockouts (semis + finals)
     Promise.all([
-      fetch(
-        `/api/matches?round=semi-final&tournamentId=${selectedTournamentId}`
-      ).then(r => r.json()),
-      fetch(
-        `/api/matches?round=final&tournamentId=${selectedTournamentId}`
-      ).then(r => r.json())
+      fetch(`/api/matches?round=semi-final&tournamentId=${selectedTournamentId}`).then((r) => r.json()),
+      fetch(`/api/matches?round=final&tournamentId=${selectedTournamentId}`).then((r) => r.json()),
     ])
-      .then(([semis, finals]) => {
-        setKnockouts([...semis, ...finals]);
-      })
+      .then(([semis, finals]) => setKnockouts([...semis, ...finals]))
       .catch(console.error);
-
   }, [selectedTournamentId, leagueAInfo, leagueBInfo, refreshTick]);
 
   /* =========================
      Derive winners (robust)
   ========================= */
-function getFinalResult(bracket) {
-  const final = knockouts.find(m => m.round === "final" && m.bracket === bracket);
-  if (!final || !final.played) return null;
+  function getFinalResult(bracket) {
+    const final = knockouts.find((m) => m.round === "final" && m.bracket === bracket);
+    if (!final || !final.played) return null;
 
-  const homeName = final.home_team;
-  const awayName = final.away_team;
+    const homeName = final.home_team;
+    const awayName = final.away_team;
 
-  let winner = null;
-  let runnerUp = null;
+    let winner = null;
+    let runnerUp = null;
 
-  if (final.home_score > final.away_score) {
-    winner = homeName;
-    runnerUp = awayName;
-  } else if (final.away_score > final.home_score) {
-    winner = awayName;
-    runnerUp = homeName;
-  } else if (
-    final.decided_by_penalties &&
-    final.penalties_home != null &&
-    final.penalties_away != null
-  ) {
-    const homeWonPens = Number(final.penalties_home) > Number(final.penalties_away);
-    winner = homeWonPens ? homeName : awayName;
-    runnerUp = homeWonPens ? awayName : homeName;
-  } else {
-    return null;
+    if (final.home_score > final.away_score) {
+      winner = homeName;
+      runnerUp = awayName;
+    } else if (final.away_score > final.home_score) {
+      winner = awayName;
+      runnerUp = homeName;
+    } else if (
+      final.decided_by_penalties &&
+      final.penalties_home != null &&
+      final.penalties_away != null
+    ) {
+      const homeWonPens = Number(final.penalties_home) > Number(final.penalties_away);
+      winner = homeWonPens ? homeName : awayName;
+      runnerUp = homeWonPens ? awayName : homeName;
+    } else {
+      return null;
+    }
+
+    return { winner, runnerUp };
   }
 
-  return { winner, runnerUp };
-}
+  const cupResult = getFinalResult("cup");
+  const plateResult = getFinalResult("plate");
 
-const cupResult = getFinalResult("cup");
-const plateResult = getFinalResult("plate");
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-
-const formatTime = (timeStr) => {
-  if (!timeStr) return "";
-  return timeStr.slice(0, 5); // HH:MM
-};
+  const formatTime = (timeStr) => {
+    if (!timeStr) return "";
+    return String(timeStr).slice(0, 5);
+  };
 
   /* =========================
      Render
   ========================= */
   return (
-  <div className="public-view">
-    <div className="public-container">
-      <div className="public-dashboard">
+    <div className="public-view">
+      <div className="public-container">
+        <div className="public-dashboard">
+          {/* Header / Selector always first */}
+          <div className="public-header">
+            {selectedTournament ? (
+              <>
+                <h2 className="tournament-title">
+                  {selectedTournament.year}
+                  {selectedTournament.gender
+                    ? ` – ${selectedTournament.gender.charAt(0).toUpperCase()}${selectedTournament.gender.slice(1)}`
+                    : ""}
+                  {selectedTournament.age_group ? ` ${selectedTournament.age_group}` : ""}
+                </h2>
 
-        {/* 🎉 Celebration Banner */}
-        {(cupResult || plateResult) && (
-          <section className="celebration-banner celebration-banner--public">
-            <h2>🎉 Tournament Results 🎉</h2>
+                {(selectedTournament.date ||
+                  selectedTournament.kickoff_time ||
+                  selectedTournament.venue) && (
+                  <div className="tournament-meta">
+                    {selectedTournament.date && (
+                      <span>📅 {formatDate(selectedTournament.date)}</span>
+                    )}
+                    {selectedTournament.kickoff_time && (
+                      <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
+                    )}
+                    {selectedTournament.venue && (
+                      <span>📍 {selectedTournament.venue}</span>
+                    )}
+                  </div>
+                )}
 
-            {cupResult && (
-              <div className="celebration-card cup">
-                <h3>🏆 Cup Competition</h3>
-                <p><strong>Winners:</strong> {cupResult.winner}</p>
-                <p><strong>Runners-up:</strong> {cupResult.runnerUp}</p>
-              </div>
+                {(selectedTournament.pitch_league_a ||
+                  selectedTournament.pitch_league_b) && (
+                  <div className="tournament-meta">
+                    {selectedTournament.pitch_league_a && (
+                      <span>🟦 League A – {selectedTournament.pitch_league_a}</span>
+                    )}
+                    {selectedTournament.pitch_league_b && (
+                      <span>⬜ League B  – {selectedTournament.pitch_league_b}</span>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <h2 className="tournament-title">Select a tournament</h2>
             )}
 
-            {plateResult && (
-              <div className="celebration-card plate">
-                <h3>🥈 Plate Competition</h3>
-                <p><strong>Winners:</strong> {plateResult.winner}</p>
-                <p><strong>Runners-up:</strong> {plateResult.runnerUp}</p>
-              </div>
-            )}
-          </section>
-        )}
+            <div className="public-tournament-selector">
+              <label htmlFor="tournament-select">Select Tournament</label>
+              <select
+                id="tournament-select"
+                value={selectedTournamentId || ""}
+                onChange={(e) => setSelectedTournamentId(Number(e.target.value))}
+              >
+                {tournaments.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.year} – {t.gender} {t.age_group}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        {/* Header */}
-        <div className="public-header">
-          {selectedTournament ? (
-            <>
-              <h2 className="tournament-title">
-              {selectedTournament.year}
-              {selectedTournament.gender
-                ? ` – ${selectedTournament.gender.charAt(0).toUpperCase()}${selectedTournament.gender.slice(1)}`
-                : ""}
-              {selectedTournament.age_group ? ` ${selectedTournament.age_group}` : ""}
-            </h2>
+          {/* Winners banner moved BELOW the header/selector */}
+          {(cupResult || plateResult) && (
+            <section className="celebration-banner celebration-banner--public">
+              <h2>🎉 Tournament Results 🎉</h2>
 
-              {(selectedTournament.date ||
-                selectedTournament.kickoff_time ||
-                selectedTournament.venue) && (
-                <div className="tournament-meta">
-                  {selectedTournament.date && (
-                    <span>📅 {formatDate(selectedTournament.date)}</span>
-                  )}
-                  {selectedTournament.kickoff_time && (
-                    <span>⏰ Kickoff {formatTime(selectedTournament.kickoff_time)}</span>
-                  )}
-                  {selectedTournament.venue && (
-                    <span>📍 {selectedTournament.venue}</span>
-                  )}
+              {cupResult && (
+                <div className="celebration-card cup">
+                  <h3>🏆 Cup Competition</h3>
+                  <p>
+                    <strong>Winners:</strong> {cupResult.winner}
+                  </p>
+                  <p>
+                    <strong>Runners-up:</strong> {cupResult.runnerUp}
+                  </p>
                 </div>
               )}
 
-              {(selectedTournament.pitch_league_a ||
-                selectedTournament.pitch_league_b) && (
-                <div className="tournament-meta">
-                  {selectedTournament.pitch_league_a && (
-                    <span>🟦 League A – {selectedTournament.pitch_league_a}</span>
-                  )}
-                  {selectedTournament.pitch_league_b && (
-                    <span>⬜ League B  – {selectedTournament.pitch_league_b}</span>
-                  )}
+              {plateResult && (
+                <div className="celebration-card plate">
+                  <h3>🥈 Plate Competition</h3>
+                  <p>
+                    <strong>Winners:</strong> {plateResult.winner}
+                  </p>
+                  <p>
+                    <strong>Runners-up:</strong> {plateResult.runnerUp}
+                  </p>
                 </div>
               )}
-            </>
-          ) : (
-            <h2 className="tournament-title">Select a tournament</h2>
+            </section>
           )}
 
-          <div className="public-tournament-selector">
-            <label htmlFor="tournament-select">Select Tournament</label>
-            <select
-              id="tournament-select"
-              value={selectedTournamentId || ""}
-              onChange={e => setSelectedTournamentId(Number(e.target.value))}
-            >
-              {tournaments.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.year} – {t.gender} {t.age_group}
-                </option>
-              ))}
-            </select>
+          <p style={{ fontSize: "0.85rem", color: "#666", textAlign: "center" }}>
+            🔄 Scores update automatically
+          </p>
+
+          {/* Leagues */}
+          <div className="public-leagues">
+            <section className="league-section">
+              <h2>League A</h2>
+              <LeagueTable league={leagueA} />
+              <Fixtures fixtures={fixturesA} readOnly />
+            </section>
+
+            <section className="league-section">
+              <h2>League B</h2>
+              <LeagueTable league={leagueB} />
+              <Fixtures fixtures={fixturesB} readOnly />
+            </section>
           </div>
-        </div>
 
-        <p style={{ fontSize: "0.85rem", color: "#666", textAlign: "center" }}>
-          🔄 Scores update automatically
-        </p>
-
-        {/* Leagues */}
-        <div className="public-leagues">
-          <section className="league-section">
-            <h2>League A</h2>
-            <LeagueTable league={leagueA} />
-            <Fixtures fixtures={fixturesA} readOnly />
-          </section>
-
-          <section className="league-section">
-            <h2>League B</h2>
-            <LeagueTable league={leagueB} />
-            <Fixtures fixtures={fixturesB} readOnly />
+          {/* Knockouts */}
+          <section className="knockout-stage-wrapper">
+            <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
+            <KnockoutBracket matches={knockouts} readOnly />
           </section>
         </div>
-
-        {/* Knockouts */}
-        <section className="knockout-stage-wrapper">
-          <h2 className="knockout-title">🏆 Knockout Stage 🏆</h2>
-          <KnockoutBracket matches={knockouts} readOnly />
-        </section>
-
       </div>
     </div>
-  </div>
-);
+  );
 }
