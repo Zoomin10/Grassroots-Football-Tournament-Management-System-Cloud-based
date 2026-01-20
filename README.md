@@ -2,7 +2,7 @@
 
 A Multi-view, Cloud hosted, web application for managing youth football tournaments. Tournament creation, fixtures, league tables, knockouts etc. For use on tournament matchdays.
 ---
-Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, and a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators.
+Designed for **simplicity, reliability, and readability on large screens**, this system supports admins on mobile/tablet/PC, public viewers on phones, a dedicated TV mode for displaying on club-house / pavilion smart-TV (via TV web browser) for on-site spectators and a dedicated page for handling registrations.
 
 All club badges, logos, and team names are the property of their respective owners and are used for identification purposes only.
 
@@ -85,6 +85,86 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
         Tournament engine works with teams
         No duplicate rendering in Admin UI
 
+### 🆕 Tournament Visibility Controls (Important)
+
+    Each tournament has two admin-controlled flags:
+
+    registration_open : Controls visibility on which tournaments are visible on the Registration page.
+
+            ON → tournament appears in /register  
+            OFF → tournament hidden from registration
+
+    Tournament published : Controls visibility of which tournaments are visible on - 
+
+            Public View (/public)  
+            TV View (/tv)  
+            Latest Results feeds
+
+    This allows:
+
+         Registration before matchday  
+         Hidden setup & testing  
+         Explicit “go live” control on tournament day
+
+
+### 📝 Public Team Registration System
+    Public Registration (/register)
+
+    A self-service registration flow for teams entering tournaments.
+
+    Required details:
+
+    Club name
+    Team name
+    Manager name
+    Email address
+    Contact phone number
+    
+    On submission:
+    Registration is stored
+    A unique Team ID is generated and shown to the user
+    (Email delivery is stubbed and ready for SMTP integration)
+    Post-registration (using Team ID)
+    
+    Teams can later:
+    Add players (name + DOB)
+    Select kit colours (Colour 1 & Colour 2)
+    Add assistant coaches
+
+    This allows teams to complete details gradually without admin involvement.
+    
+###    🛂 Admin Approval Flow (Design Rationale)
+
+    The tournament engine (fixtures, matches, knockouts) depends on the teams table, which requires league assignment.
+
+    Therefore:
+
+    Web registrations do not immediately become teams
+    
+    Approval Process (Admin) : Admin opens Admin View
+    
+    Sees a unified list of:
+
+        Web registrations
+        Manually added teams
+    
+    For a registration:
+
+        Select league
+        Click Approve
+
+    System action:
+
+        Creates a teams row
+        Links it back to the registration via team_row_id
+        Preserves original registration data
+
+    Result
+
+        Registrations remain intact for audit/history
+        Tournament engine works exclusively with teams
+        No duplication in the Admin UI
+        
 
 ### Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
@@ -94,6 +174,19 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 - Digital clock showing real time
 - Sponsors footer section always on display
 - Designed for **no scrolling** on large screens
+- Only published tournaments appear.
+
+
+### 🌍 Public View (/public)
+
+    Headline: Live Tournament Tracker, audience can follow from any location
+
+    Tournament selector (published tournaments only)
+    League tables + fixtures
+    Knockout bracket
+    Winners banner (shown when finals complete)
+    Auto-refresh (non-print mode)
+ 
 
 ### Knockouts
 - Cup & Plate semi-finals
@@ -207,19 +300,28 @@ Environment Variables
         │ • Reset / dump scripts     │
         └────────────────────────────┘
 
-### TV Mode
+### 🗄️ Database Summary
+    Core Tables
 
-TV mode is designed for 1920×1080 displays and above.
+    tournaments
+    leagues
+    teams
+    matches
+    Registration Tables
+    registrations
+    registration_players
 
-Access:
-      /tv
+    Key Design Addition :
+    registrations.team_row_id → teams.id
+        Nullable  
+        Set only when approved  
+        Prevents duplicate team creation  
+        Preserves registration history  
 
-Characteristics:
-      Dark, high-contrast UI
-      Auto-rotating tournaments and leagues
-      Live score updates
-      Winners banner
-      Sponsors footer
+    Tournament Flags
+
+        registration_open BOOLEAN 
+        published BOOLEAN
 
 ### Database Operations (Critical)
 
@@ -227,25 +329,21 @@ Characteristics:
 
       Scripts live in:  scripts/
 
-      Snapshot Railway (Create Demo Dataset) :   ./scripts/dump-railway.sh
+        dump-railway.sh – snapshot Railway DB (schema + seed) :  Snapshot Railway (Create Demo Dataset) 
+              Produces:
+                      db/schema.sql
+                      db/seed.sql
+                      
+        rebuild-local.sh – rebuild local DB : Rebuilds Local Database
+        
+        railway-reset-schema-only.sh – wipe data, keep schema : Reset Railway – Schema Only 
+        
+        railway-reset-demo.sh – reset Railway with demo dataset : Resets Railway to demo dataset 
 
-      Produces:
+        ⚠️ Never run reset scripts without confirmation
+        
 
-          db/schema.sql
-          db/seed.sql
-
-Rebuild Local Database :   ./scripts/rebuild-local.sh
-
-      Drops and recreates the local DB using schema + seed.
-
-Reset Railway – Schema Only :    ./scripts/railway-reset-schema-only.sh
-
-      Deletes all data but keeps schema.
-
-Reset Railway – Demo Dataset :    ./scripts/railway-reset-demo.sh
-
-      Fully rebuilds Railway with demo data.
-
+  
 ### Safety Rules
 
       Never auto-run Railway reset scripts
@@ -283,12 +381,12 @@ union all select 'matches', count(*) from public.matches;
 
 ## 🧭 Application Routes
 
-| Route | Purpose |
-|------|--------|
-| `/` | Public view (fixtures & results) |
-| `/admin` | Admin view (manage tournaments, teams, fixtures, results) |
-| `/tv` | Large screen / TV live view |
-
+    | Route              | Purpose |
+    |------              |--------|
+    | `/`                | Public view (fixtures & results) |
+    | `/admin`           |  Admin view (manage tournaments, teams, fixtures, results) |
+    | `/tv`              | Large screen / TV live view |
+    | `/register`        | Public team registration|
 ---
 
 ## 🏗️ Architecture Overview
@@ -407,24 +505,8 @@ All data is scoped to a tournament.
     Unique partial index prevents double-linking
     
 
-        🧪 Database Operations (Critical)
-
-        All DB operations are explicit and script-driven.
-        
-        Scripts live in scripts/:
-        dump-railway.sh → snapshot Railway DB
-        rebuild-local.sh → rebuild local DB
-        railway-reset-demo.sh → reset Railway with demo data
-        railway-reset-schema-only.sh → wipe data, keep schema
-
-        ⚠️ Never run reset scripts without confirmation
-        
-    League tables are calculated dynamically from played matches.
-
-    Tie-break rules:
-    1. Points
-    2. Goal Difference (GD)
-    3. Goals For (GF)
+   
+   
 
 
 
@@ -575,8 +657,15 @@ Rules
          │       └─ matches (league)
          └─ matches (semi-finals & finals)
 
+### 🧠 Design principles
+ League tables are calculated dynamically from played matches.
 
-🧠 Design principles
+    Tie-break rules:
+    1. Points
+    2. Goal Difference (GD)
+    3. Goals For (GF)
+
+
 
 Tournament-scoped data
 All leagues, teams, and matches belong to a tournament.
@@ -712,6 +801,8 @@ URL for accessing the app (When hosted on Railway) :
     https://grassroots-football-tournament-management-system-production.up.railway.app/tv
 
     https://grassroots-football-tournament-management-system-production.up.railway.app/public
+    
+    https://grassroots-football-tournament-management-system-production.up.railway.app/register
 
 ---
 
