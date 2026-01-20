@@ -33,24 +33,18 @@ export default function PublicView() {
   ? Number(params.get("tournamentId"))
   : null;
 
+// 1) Refresh data every minute (normal mode only)
 useEffect(() => {
   if (isPrintMode) return;
-    if (!selectedTournamentId) return;
-
-  const key = `printed:${selectedTournamentId}`;
-  if (sessionStorage.getItem(key) === "1") return;
-  sessionStorage.setItem(key, "1");
-
-  const timeout = setTimeout(() => window.print(), 800);
-  return () => clearTimeout(timeout);
-}, [isPrintMode, selectedTournamentId]);
 
   const interval = setInterval(() => {
-    setRefreshTick(t => t + 1);
+    setRefreshTick((t) => t + 1);
   }, 60000);
 
+  return () => clearInterval(interval);
+}, [isPrintMode]);
 
-
+// 2) Auto-print ONCE when print mode is enabled
 useEffect(() => {
   if (!isPrintMode) return;
   if (!selectedTournamentId) return;
@@ -58,25 +52,29 @@ useEffect(() => {
 
   hasPrinted.current = true;
 
-  // Give React + layout time to settle
-  const timeout = setTimeout(() => {
-    window.print();
-  }, 800);
+  // Remove print=true so refresh doesn't print again
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("print") === "true") {
+    params.delete("print");
+    const newUrl =
+      window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+    window.history.replaceState({}, "", newUrl);
+  }
 
+  const timeout = setTimeout(() => window.print(), 800);
   return () => clearTimeout(timeout);
 }, [isPrintMode, selectedTournamentId]);
-
 
   /* =========================
      Load tournaments
   ========================= */
-useEffect(() => {
- fetch("/api/tournaments/published")
-    .then(res => res.json())
-    .then(data => {
-      setTournaments(data);
+  useEffect(() => {
+  fetch("/api/tournaments/published")
+      .then(res => res.json())
+      .then(data => {
+        setTournaments(data);
 
-      if (!selectedTournamentId) {
+        if (!selectedTournamentId) {
         if (tournamentIdFromUrl) {
           setSelectedTournamentId(tournamentIdFromUrl);
         } else if (data.length) {
