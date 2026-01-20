@@ -232,7 +232,9 @@ useEffect(() => {
   return (
     
     <div className="public-view">
-       {printMode && (
+   
+      <div className="public-container">
+            {printMode && (
       <div className="print-toolbar">
         <button
           type="button"
@@ -247,7 +249,6 @@ useEffect(() => {
         </button>
       </div>
     )}
-      <div className="public-container">
         <div className="public-dashboard">
           {/* Header / Selector always first */}
           <div className="public-header">
