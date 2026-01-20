@@ -29,30 +29,29 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 
 📝 NEW: Public Team Registration System
 
-        A full self-service registration flow for teams entering tournaments.
-        Public Registration (/register)
-        Club-branded registration page with sponsor footer
-        
-        Dropdown list of active tournaments
+        A full self-service registration flow for teams entering tournaments.      
+        Club-branded registration page with sponsor footer  Public Registration (/register)        
+        Dropdown list of active tournaments - select which one to register for
         
         Minimum required details:
-        Club name
-        Team name
-        Manager name
-        Email address
-        Contact phone number
+            Club name
+            Team name
+            Manager name
+            Email address
+            Contact phone number
         
         On submission:
 
-        Registration is stored in the database
-        A unique Team ID is generated and returned
-        (Email delivery currently stubbed; ready for SMTP integration)
-        Post-registration (via Team ID)
+            Registration is stored in the database
+            A unique Team ID is generated and returned via email
+            (Email delivery currently stubbed; ready for SMTP integration)
+            Post-registration (via Team ID)
         
         Using their Team ID, teams can later:
-        Add registered players (name + DoB)
-        Select kit colours (Colour 1 & Colour 2 dropdowns)
-        Add assistant coaches
+        
+            Add registered players (name + DoB)
+            Select kit colours (Colour 1 & Colour 2 dropdowns)
+            Add assistant coaches
 
         This allows teams to complete details gradually without admin intervention.
 
@@ -67,23 +66,25 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
         Approval process (Admin)
         
         Admin opens Admin View
-        Sees a unified list of:
-        Web registrations
-        Manually added teams
+            Sees a unified list of:
+            Web registrations
+            Manually added teams
 
         For a web registration:
-        Admin selects a league
-        Clicks Approve
+            Admin selects a league
+            Clicks Approve
 
         System:
-        Creates a teams row
-        Links it back to the registration
-        Preserves the original registration data
+            Creates a teams row
+            Links it back to the registration
+            Preserves the original registration data
 
         Result
-        Registrations remain intact for audit/history
-        Tournament engine works with teams
-        No duplicate rendering in Admin UI
+            Registrations remain intact for audit/history
+            Tournament engine works with teams
+            No duplicate rendering in Admin UI
+
+
 
 ### 🆕 Tournament Visibility Controls (Important)
 
@@ -107,31 +108,9 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
          Explicit “go live” control on tournament day
 
 
-### 📝 Public Team Registration System
-    Public Registration (/register)
 
-    A self-service registration flow for teams entering tournaments.
 
-    Required details:
 
-    Club name
-    Team name
-    Manager name
-    Email address
-    Contact phone number
-    
-    On submission:
-    Registration is stored
-    A unique Team ID is generated and shown to the user
-    (Email delivery is stubbed and ready for SMTP integration)
-    Post-registration (using Team ID)
-    
-    Teams can later:
-    Add players (name + DOB)
-    Select kit colours (Colour 1 & Colour 2)
-    Add assistant coaches
-
-    This allows teams to complete details gradually without admin involvement.
     
 ###    🛂 Admin Approval Flow (Design Rationale)
 
@@ -177,16 +156,17 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 - Only published tournaments appear.
 
 
+
 ### 🌍 Public View (/public)
 
-    Headline: Live Tournament Tracker, audience can follow from any location
 
-    Tournament selector (published tournaments only)
-    League tables + fixtures
-    Knockout bracket
-    Winners banner (shown when finals complete)
-    Auto-refresh (non-print mode)
- 
+- Headline: Live Tournament Tracker
+- Tournament selector (published tournaments only)
+- League tables + fixtures
+- Knockout bracket
+- Winners banner (shown when finals complete)
+- Auto-refresh (non-print mode) 
+
 
 ### Knockouts
 - Cup & Plate semi-finals
@@ -325,9 +305,11 @@ Environment Variables
 
 ### Database Operations (Critical)
 
-      All database operations are script-driven and explicit.
+- All database operations are script-driven and explicit.
 
-      Scripts live in:  scripts/
+- Scripts live in:  scripts/
+
+- ⚠️ Never run reset scripts without confirmation ⚠️
 
         dump-railway.sh – snapshot Railway DB (schema + seed) :  Snapshot Railway (Create Demo Dataset) 
               Produces:
@@ -340,7 +322,7 @@ Environment Variables
         
         railway-reset-demo.sh – reset Railway with demo dataset : Resets Railway to demo dataset 
 
-        ⚠️ Never run reset scripts without confirmation
+     
         
 
   
@@ -351,12 +333,13 @@ Environment Variables
       Treat local DB as disposable
       Prefer separate Railway projects for demo vs production
 
+
 ### Verification Query
 
-select 'tournaments' t, count(*) c from public.tournaments
-union all select 'leagues', count(*) from public.leagues
-union all select 'teams', count(*) from public.teams
-union all select 'matches', count(*) from public.matches;
+- select 'tournaments' t, count(*) c from public.tournaments
+- union all select 'leagues', count(*) from public.leagues
+- union all select 'teams', count(*) from public.teams
+- union all select 'matches', count(*) from public.matches;
 
                     ┌─────────────────────┐
                     │   Railway Database   │
@@ -389,11 +372,12 @@ union all select 'matches', count(*) from public.matches;
     | `/register`        | Public team registration|
 ---
 
+
 ## 🏗️ Architecture Overview
 
 
 
-The frontend is a React SPA that communicates with a REST API. The TV view polls the backend at short intervals to keep displays up to date.
+ The frontend is a React SPA that communicates with a REST API. The TV view polls the backend at short intervals to keep displays up to date.
 
         ┌────────────────────────────┐
         │        Display Devices     │
@@ -457,6 +441,7 @@ The frontend is a React SPA that communicates with a REST API. The TV view polls
 
 ---
 
+
 ## 📁 Project Structure
 
 ```
@@ -476,6 +461,7 @@ server/
 
 ---
 
+
 ## 🗄️ Database (Summary)
 
 📊 Database Schema Overview
@@ -484,7 +470,7 @@ This application uses PostgreSQL to model a youth football tournament system, in
 
 All data is scoped to a tournament.
 
-        Core Tables
+- Core Tables
 
         tournaments
         leagues
@@ -494,27 +480,24 @@ All data is scoped to a tournament.
         registrations
         registration_players
 
- Key Design Addition
+- Key Design Addition
     registrations.team_row_id → teams.id
 
 
-    This links a web registration to the created tournament team after admin approval.
+- This links a web registration to the created tournament team after admin approval.
 
     team_row_id is nullable
     Set only when approved
     Unique partial index prevents double-linking
     
-
+---
    
-   
 
+### 🏆 tournaments
 
+- Represents a single tournament event (e.g. 2026 Boys U11).
 
-    🏆 tournaments
-
-    Represents a single tournament event (e.g. 2026 Boys U11).
-
-    Key fields
+- Key fields
 
     id — primary key
     year — tournament year
@@ -528,134 +511,113 @@ All data is scoped to a tournament.
     created_at
 
 
-    Relationships
+- Relationships
 
     One tournament → many leagues
-
     One tournament → many teams
-
     One tournament → many matches
     
 
-🧩 leagues
+### 🧩 leagues
 
-Represents group stages within a tournament (typically League A and League B).
+- Represents group stages within a tournament (typically League A and League B).
 
     Key fields
 
-    id — primary key
-
-    name — e.g. "League A"
-
-    tournament_id — foreign key → tournaments.id
-
+        id — primary key
+        name — e.g. "League A"
+        tournament_id — foreign key → tournaments.id
+    
     Relationships
 
-    One league → many teams
+        One league → many teams
+        One league → many league-stage matches
 
-    One league → many league-stage matches
+### 👕teams
 
-👕 teams
-
-Represents a team participating in a specific tournament.
+- Represents a team participating in a specific tournament.
 
     Key fields
 
-    id — primary key
+        id — primary key
+        team — team name
+        league_id — foreign key → leagues.id
+        tournament_id — foreign key → tournaments.id
 
-    team — team name
+- Notes
 
-    league_id — foreign key → leagues.id
-
-    tournament_id — foreign key → tournaments.id
-
-Notes
-
-    Teams belong to one league per tournament
-
-    Teams are tournament-scoped (no global team registry)
+        Teams belong to one league per tournament
+        Teams are tournament-scoped (no global team registry)
 
 
 
 
-⚽ matches
+### ⚽ matches
 
-Represents all fixtures in the system:
+- Represents all fixtures in the system:
 
-League matches
+        League matches
+        Semi-finals
+        Finals (Cup & Plate)
+            
+- This is the central and most flexible table.
 
-Semi-finals
+        Match identity
+        id — primary key
+        tournament_id — foreign key → tournaments.id
+        league_id — foreign key → leagues.id
+        (NULL for knockout matches)
+        home_team_id, away_team_id — foreign keys → teams.id
 
-Finals (Cup & Plate)
-
-This is the central and most flexible table.
-
-    Match identity
-
-    id — primary key
-
-    tournament_id — foreign key → tournaments.id
-
-    league_id — foreign key → leagues.id
-    (NULL for knockout matches)
-
-    home_team_id, away_team_id — foreign keys → teams.id
-
-    Match classification
+- Match classification
 
     round
 
-    'league'
-
-    'semi-final'
-
-    'final'
+        'league'
+        'semi-final'
+        'final'
 
     bracket
 
-    'cup'
+        'cup'
+        'plate'
 
-    'plate'
+        NULL for league matches
 
-    NULL for league matches
+- Scores & status
 
-    Scores & status
+        home_score, away_score — normal-time scores
 
-    home_score, away_score — normal-time scores
+        played — set to true once a result is submitted
+        
 
-    played — set to true once a result is submitted
+- 🥅 Penalty shootouts (knockout matches)
 
-    🥅 Penalty shootouts (knockout matches)
+        Knockout matches may be decided by penalties if normal time ends in a draw.
+        Penalty-related fields
+        decided_by_penalties — boolean
+        penalties_home, penalties_away — penalty shootout scores
+        
 
-    Knockout matches may be decided by penalties if normal time ends in a draw.
+- Rules
 
-    Penalty-related fields
+        League matches never use penalties
+        Knockout matches may use penalties only when scores are level
+        Finals may be decided by penalties
+        
+- Timestamps
 
-    decided_by_penalties — boolean
+        created_at
+        updated_at
 
-    penalties_home, penalties_away — penalty shootout scores
-    
+- 🔗 Relationship overview
 
-Rules
-
-    League matches never use penalties
-
-    Knockout matches may use penalties only when scores are level
-
-    Finals may be decided by penalties
-
-    Timestamps
-
-    created_at
-
-    updated_at
-
-        🔗 Relationship overview
         tournaments
          ├─ leagues
          │   └─ teams
          │       └─ matches (league)
          └─ matches (semi-finals & finals)
+
 
 ### 🧠 Design principles
  League tables are calculated dynamically from played matches.
@@ -667,97 +629,86 @@ Rules
 
 
 
-Tournament-scoped data
-All leagues, teams, and matches belong to a tournament.
+- Tournament-scoped data
+        All leagues, teams, and matches belong to a tournament.
 
-Single matches table
-League and knockout fixtures share one schema, differentiated by round and bracket.
+- Single matches table
+        League and knockout fixtures share one schema, differentiated by round and bracket.
 
-Explicit penalty support
-Penalty shootouts are stored explicitly rather than inferred.
+- Explicit penalty support
+        Penalty shootouts are stored explicitly rather than inferred.
 
-Safe resets
-Foreign keys and cascading deletes allow full tournament resets and demo rebuilds.
-
-
-🧪 Example queries
-
-Find finals decided by penalties
-
-    select *
-    from matches
-    where round = 'final'
-      and decided_by_penalties = true;
+- Safe resets
+        Foreign keys and cascading deletes allow full tournament resets and demo rebuilds.
 
 
-Get all Cup knockout matches
+### 🧪 Example queries
 
-    select *
-    from matches
-    where bracket = 'cup'
-      and round in ('semi-final', 'final');
+- Find finals decided by penalties
+
+        select *
+        from matches
+        where round = 'final'
+          and decided_by_penalties = true;
+
+
+- Get all Cup knockout matches
+
+        select *
+        from matches
+        where bracket = 'cup'
+          and round in ('semi-final', 'final');
 
 ---
 
-## 🔌 API Highlights
+### 🔌 API Highlights
 
-Examples:
+- Examples:
 
     Public
 
-    GET /api/tournaments/active
-
-    POST /api/registrations
-
-    GET /api/registrations/:teamIdCode
-
-    PUT /api/registrations/:teamIdCode
-
-    GET /api/kit-colours
-
+        GET /api/tournaments/active
+        POST /api/registrations
+        GET /api/registrations/:teamIdCode
+        PUT /api/registrations/:teamIdCode
+        GET /api/kit-colours
+        
     Admin
 
-    GET /api/tournaments/:tournamentId/registered-teams
-
-    POST /api/registrations/:registrationId/assign-league
-
-    POST /api/league/generate-fixtures
-
-    POST /api/knockout/regenerate
-
-    POST /api/matches/:id/result
-
-    (See full API list in architecture documentation.)
+        GET /api/tournaments/:tournamentId/registered-teams
+        POST /api/registrations/:registrationId/assign-league
+        POST /api/league/generate-fixtures
+        POST /api/knockout/regenerate
+        POST /api/matches/:id/result
+        
+        (See full API list in architecture documentation.)
 
 ---
 
-    👕 Team Logos (Improved)
+### 👕 Team Logos (Improved)
 
-    Logos stored in /public/logos/
+- Logos stored in /public/logos/
 
-    Logo detection is keyword-based, not exact-match
+- Logo detection is keyword-based, not exact-match
 
-    Example:
-    All of the following resolve to the Wroughton Youth FC logo:
+        Example:
+        All of the following resolve to the Wroughton Youth FC logo:
 
-    Wroughton Youth FC
+        Wroughton Youth FC
+        wroughton youth fc
+        Wroughton FC
+        Wroughton
 
-    wroughton youth fc
+        This makes the system tolerant of real-world data entry.
 
-    Wroughton FC
+        Fallback: defaut logo for teams that dont have a logo matched.
 
-    Wroughton
-
-    This makes the system tolerant of real-world data entry.
-
-    Fallback:
-
-    /logos/default.png
+        /logos/default.png
     
     
-## 🚀 Installation
+### 🚀 Installation
 
-### Prerequisites
+## Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
 
@@ -780,7 +731,7 @@ npm run dev
 ## 🖥️ Matchday Deployment 
 
 
-**CLOUD-based deployment**
+### **CLOUD-based deployment**
 
 Required Files & Setup
 
@@ -816,24 +767,13 @@ URL for accessing the app (When hosted on Railway) :
 4. Put TV browser in fullscreen / kiosk mode
 
 
-## 🧩 Team Logos
-
-- Stored in `/public/logos/`
-- Filenames are derived automatically from team names
-- Default fallback: `/logos/default.png`
-
-Example:
-```
-Wroughton Youth FC → /logos/wroughtonyouthfc.png
-```
-
 ---
 
 ## ⚠️ Important Notes
 
 - Admin routes are **not authenticated** (LAN-trusted usage)
 - `/api/admin/reset-matches` deletes **all matches** (use with care)
-- Knockout seeding is currently based on team insertion order
+
 
 ---
 
