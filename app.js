@@ -382,8 +382,6 @@ app.delete("/api/teams/:id", async (req, res) => {
 
 
 
-
-
 // ==================== MATCHES ==========================
 // ======================================================
 // auto generate round robin fixtures
@@ -407,6 +405,15 @@ app.delete("/api/teams/:id", async (req, res) => {
     if (teams.length < 2) {
       return res.status(400).json({ error: "Not enough teams" });
     }
+
+const tRes = await pool.query(
+  `SELECT date, kickoff_time, match_length FROM tournaments WHERE id = $1`,
+  [tournamentId]
+);
+const t = tRes.rows[0];
+if (!t?.date || !t?.kickoff_time || !t?.match_length) {
+  return res.status(400).json({ error: "Tournament date/kickoff_time/match_length must be set" });
+}
 
     // Remove existing fixtures for this league + tournament
     await pool.query(
@@ -434,7 +441,36 @@ app.delete("/api/teams/:id", async (req, res) => {
       }
     }
 
-    res.json({ success: true, fixturesCreated: (teams.length * (teams.length - 1)) / 2 });
+    // ✅ NEW: Auto-assign kickoff times sequentially for this league
+    // Uses tournament date + tournament kickoff_time as the first KO
+    // Each next match starts after (match_length + 5) minutes
+    await pool.query(
+      `
+      WITH ordered AS (
+        SELECT id,
+               ROW_NUMBER() OVER (ORDER BY id) - 1 AS idx
+        FROM matches
+        WHERE tournament_id = $1
+          AND league_id = $2
+          AND round = 'league'
+      )
+      UPDATE matches m
+      SET start_time =
+        (
+          (t.date::date + t.kickoff_time::time)
+          + (ordered.idx * ((t.match_length + 5) || ' minutes')::interval)
+        ) AT TIME ZONE 'Europe/London'
+      FROM ordered, tournaments t
+      WHERE m.id = ordered.id
+        AND t.id = $1
+      `,
+      [tournamentId, leagueId]
+    );
+
+    res.json({
+      success: true,
+      fixturesCreated: (teams.length * (teams.length - 1)) / 2
+    });
   } catch (err) {
     console.error("❌ Generate fixtures error:", err);
     res.status(500).json({ error: "Failed to generate fixtures" });
