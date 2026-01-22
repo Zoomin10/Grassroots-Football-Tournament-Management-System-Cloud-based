@@ -24,10 +24,23 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
 
  const submitResult = async (home, away, ph, pa) => {
   try {
-    const res = await fetch(`/api/matches/${match.id}/result`, { ... });
+    const res = await fetch(`/api/matches/${match.id}/result`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        home_score: Number(home),
+        away_score: Number(away),
+        penalties_home: ph !== undefined && ph !== "" ? Number(ph) : null,
+        penalties_away: pa !== undefined && pa !== "" ? Number(pa) : null
+      })
+    });
 
-    if (!res.ok) throw new Error("Failed to submit result");
+    if (!res.ok) {
+      const msg = await res.text().catch(() => "");
+      throw new Error(msg || "Failed to submit result");
+    }
 
+    // If a semi-final was just completed, attempt to generate the final
     if (match.round === "semi-final") {
       const gf = await fetch("/api/knockout/generate-final", {
         method: "POST",
@@ -40,6 +53,30 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
         console.error("❌ generate-final failed:", gf.status, msg);
       }
     }
+  } catch (err) {
+    console.error("❌ submitResult error:", err);
+    alert(err.message || "Failed to submit result");
+  } finally {
+    onResultsUpdated?.();
+  }
+};
+
+    // If a semi-final was just completed, attempt to generate the final
+    if (match.round === "semi-final") {
+      const gf = await fetch("/api/knockout/generate-final", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId, bracket: match.bracket })
+      });
+
+      if (!gf.ok) {
+        const msg = await gf.text().catch(() => "");
+        console.error("❌ generate-final failed:", gf.status, msg);
+      }
+    }
+  } catch (err) {
+    console.error("❌ submitResult error:", err);
+    alert(err.message || "Failed to submit result");
   } finally {
     onResultsUpdated?.();
   }
