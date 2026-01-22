@@ -21,33 +21,30 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
   const [isDraw, setIsDraw] = useState(false);
   const [editingTime, setEditingTime] = useState(false);
   const [editTimeValue, setEditTimeValue] = useState("");
-  const submitResult = (home, away, ph, pa) => {
-    return fetch(`/api/matches/${match.id}/result`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        home_score: Number(home),
-        away_score: Number(away),
-        penalties_home: ph ? Number(ph) : null,
-        penalties_away: pa ? Number(pa) : null
-      })
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to submit result');
 
-        // If a semi-final was just completed, attempt to generate the final
-        if (match.round === 'semi-final') {
-          return fetch('/api/knockout/generate-final', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tournamentId, bracket: match.bracket })
-          }).catch(() => {});
-        }
-      })
-      .finally(() => {
-        if (typeof onResultsUpdated === 'function') onResultsUpdated();
+ const submitResult = async (home, away, ph, pa) => {
+  try {
+    const res = await fetch(`/api/matches/${match.id}/result`, { ... });
+
+    if (!res.ok) throw new Error("Failed to submit result");
+
+    if (match.round === "semi-final") {
+      const gf = await fetch("/api/knockout/generate-final", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId, bracket: match.bracket })
       });
-  };
+
+      if (!gf.ok) {
+        const msg = await gf.text().catch(() => "");
+        console.error("❌ generate-final failed:", gf.status, msg);
+      }
+    }
+  } finally {
+    onResultsUpdated?.();
+  }
+};
+
  // ✅ kickoff edit handlers
 const startEditKickoff = () => {
   setEditingTime(true);
