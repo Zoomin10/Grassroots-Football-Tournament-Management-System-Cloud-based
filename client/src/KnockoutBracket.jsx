@@ -7,13 +7,11 @@ function formatKickoff(start_time) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function toDatetimeLocalValue(iso) {
+function toTimeValue(iso) {
   if (!iso) return "";
   const d = new Date(iso);
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /* =========================
@@ -51,29 +49,30 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
       });
   };
  // ✅ kickoff edit handlers
-  const startEditKickoff = () => {
-    setEditingTime(true);
-    setEditTimeValue(toDatetimeLocalValue(match.start_time));
-  };
+const startEditKickoff = () => {
+  setEditingTime(true);
+  setEditTimeValue(toTimeValue(match.start_time) || ""); // optional fallback below
+};
+const saveKickoff = async () => {
+  try {
+    const res = await fetch(`/api/matches/${match.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        kickoff_time: editTimeValue || null,
+        tournamentId
+      })
+    });
 
-  const saveKickoff = async () => {
-    try {
-      const res = await fetch(`/api/matches/${match.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ start_time: editTimeValue || null })
-      });
-
-      if (!res.ok) throw new Error("Failed to update kickoff time");
-
-      setEditingTime(false);
-      setEditTimeValue("");
-      if (typeof onResultsUpdated === "function") onResultsUpdated();
-    } catch (err) {
-      console.error("❌ Update kickoff time error:", err);
-      alert("Failed to update kickoff time");
-    }
-  };
+    if (!res.ok) throw new Error("Failed to update kickoff time");
+    setEditingTime(false);
+    setEditTimeValue("");
+    onResultsUpdated?.();
+  } catch (err) {
+    console.error("❌ Update kickoff time error:", err);
+    alert("Failed to update kickoff time");
+  }
+};
 
   return (
     <div className="fixture-card">
@@ -82,7 +81,7 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
         {editingTime ? (
           <>
             <input
-              type="datetime-local"
+               type="time"
               value={editTimeValue}
               onChange={(e) => setEditTimeValue(e.target.value)}
             />
