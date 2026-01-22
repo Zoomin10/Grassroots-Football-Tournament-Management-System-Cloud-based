@@ -101,6 +101,7 @@ const saveKickoff = async () => {
           <>
             <input
                type="time"
+               lang="en-GB"
               value={editTimeValue}
               onChange={(e) => setEditTimeValue(e.target.value)}
             />
