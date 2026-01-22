@@ -221,6 +221,8 @@ useEffect(() => {
   }
 }, [year]);
 
+const selectedTournament = tournaments.find(t => t.id === selectedTournamentId);
+const tournamentStartTime = (selectedTournament?.kickoff_time || "").slice(0, 5);
 
   const createTournament = async () => {
     try {
@@ -808,6 +810,8 @@ const handleTournamentToggle = async (field, value) => {
 
     <Fixtures
       fixtures={fixtures}
+      tournamentId={selectedTournamentId}
+      tournamentStartTime={tournament.kickoff_time?.slice(0,5) ||
       onResultsUpdated={reloadData}
       onDelete={handleDeleteFixture}
     />
