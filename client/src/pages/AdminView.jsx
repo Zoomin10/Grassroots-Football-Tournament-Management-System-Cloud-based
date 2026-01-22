@@ -811,7 +811,7 @@ const handleTournamentToggle = async (field, value) => {
     <Fixtures
       fixtures={fixtures}
       tournamentId={selectedTournamentId}
-      tournamentStartTime={tournament.kickoff_time?.slice(0,5) ||
+       tournamentStartTime={tournamentStartTime}
       onResultsUpdated={reloadData}
       onDelete={handleDeleteFixture}
     />
