@@ -40,9 +40,7 @@ export default function AdminView() {
 const [kickoffHour, setKickoffHour] = useState("09");
 const [kickoffMinute, setKickoffMinute] = useState("00");
 const kickoffTime = `${kickoffHour}:${kickoffMinute}`;
-const selectedTournament = tournaments.find(
-  t => t.id === selectedTournamentId
-);
+
  const PITCHES = ["Pitch 1", "Pitch 2", "Pitch 3", "Pitch 4"];
 
 const [pitchLeagueA, setPitchLeagueA] = useState("");
@@ -50,6 +48,10 @@ const [pitchLeagueB, setPitchLeagueB] = useState("");
 const [registeredTeams, setRegisteredTeams] = useState([]);
 
   const reloadData = () => setReloadKey(k => k + 1);
+
+
+const selectedTournament = tournaments.find(t => t.id === selectedTournamentId);
+const tournamentStartTime = (selectedTournament?.kickoff_time || "").slice(0, 5);
 
   const formattedLeague = Array.isArray(league)
     ? formatLeague(league)
@@ -221,8 +223,6 @@ useEffect(() => {
   }
 }, [year]);
 
-const selectedTournament = tournaments.find(t => t.id === selectedTournamentId);
-const tournamentStartTime = (selectedTournament?.kickoff_time || "").slice(0, 5);
 
   const createTournament = async () => {
     try {
