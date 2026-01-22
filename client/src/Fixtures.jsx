@@ -8,23 +8,21 @@ function formatKickoff(start_time) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-// Convert ISO -> value suitable for <input type="datetime-local">
-function toDatetimeLocalValue(iso) {
+function toTimeValue(iso) {
   if (!iso) return "";
   const d = new Date(iso);
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export default function Fixtures({
   fixtures = [],
   onResultsUpdated,
   onDelete,
-  readOnly = false
+  readOnly = false,
+  tournamentId,
+  tournamentStartTime = "" // "HH:MM"
 }) {
-  // ✅ NEW state for kickoff editing
   const [editingId, setEditingId] = useState(null);
   const [editTimeValue, setEditTimeValue] = useState("");
 
@@ -46,7 +44,7 @@ export default function Fixtures({
           } catch {}
           throw new Error(msg);
         }
-        if (typeof onResultsUpdated === "function") onResultsUpdated();
+        onResultsUpdated?.();
       })
       .catch((err) => {
         console.error("❌ Submit result error:", err);
@@ -54,19 +52,19 @@ export default function Fixtures({
       });
   };
 
-  // ✅ NEW: kickoff edit helpers
   const startEditingTime = (fx) => {
     setEditingId(fx.id);
-    setEditTimeValue(toDatetimeLocalValue(fx.start_time));
+    setEditTimeValue(toTimeValue(fx.start_time) || tournamentStartTime || "");
   };
 
-  const saveTime = async (matchId) => {
+  const saveTime = async (id) => {
     try {
-      const res = await fetch(`/api/matches/${matchId}`, {
+      const res = await fetch(`/api/matches/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          start_time: editTimeValue || null // datetime-local string or null
+          kickoff_time: editTimeValue || null, // "HH:MM"
+          tournamentId
         })
       });
 
@@ -81,9 +79,7 @@ export default function Fixtures({
 
       setEditingId(null);
       setEditTimeValue("");
-
-      // ✅ Refetch so sorting updates + value updates everywhere
-      if (typeof onResultsUpdated === "function") onResultsUpdated();
+      onResultsUpdated?.(); // refetch + re-sort
     } catch (err) {
       console.error("❌ Update kickoff time error:", err);
       alert("Failed to update kickoff time");
@@ -98,13 +94,13 @@ export default function Fixtures({
         {fixtures.map((fx) => (
           <li key={fx.id} className="fixture-card">
             <div className="fixture-content">
-              {/* ✅ Kickoff line */}
+              {/* Kickoff line */}
               <div className="fixture-line fixture-kickoff">
                 <strong>KO:</strong>{" "}
                 {editingId === fx.id ? (
                   <>
                     <input
-                      type="datetime-local"
+                      type="time"
                       value={editTimeValue}
                       onChange={(e) => setEditTimeValue(e.target.value)}
                     />

@@ -1,12 +1,28 @@
 import { useState } from 'react';
 import './KnockoutBracket.css';
 
+function formatKickoff(start_time) {
+  if (!start_time) return "TBC";
+  const d = new Date(start_time);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function toDatetimeLocalValue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
+
 /* =========================
    Reusable Fixture Card
 ========================= */
 function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly }) {
   const [isDraw, setIsDraw] = useState(false);
-
+  const [editingTime, setEditingTime] = useState(false);
+  const [editTimeValue, setEditTimeValue] = useState("");
   const submitResult = (home, away, ph, pa) => {
     return fetch(`/api/matches/${match.id}/result`, {
       method: 'POST',
@@ -34,10 +50,62 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
         if (typeof onResultsUpdated === 'function') onResultsUpdated();
       });
   };
+ // ✅ kickoff edit handlers
+  const startEditKickoff = () => {
+    setEditingTime(true);
+    setEditTimeValue(toDatetimeLocalValue(match.start_time));
+  };
 
+  const saveKickoff = async () => {
+    try {
+      const res = await fetch(`/api/matches/${match.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start_time: editTimeValue || null })
+      });
+
+      if (!res.ok) throw new Error("Failed to update kickoff time");
+
+      setEditingTime(false);
+      setEditTimeValue("");
+      if (typeof onResultsUpdated === "function") onResultsUpdated();
+    } catch (err) {
+      console.error("❌ Update kickoff time error:", err);
+      alert("Failed to update kickoff time");
+    }
+  };
 
   return (
     <div className="fixture-card">
+           <div className="fixture-line fixture-kickoff">
+        <strong>KO:</strong>{" "}
+        {editingTime ? (
+          <>
+            <input
+              type="datetime-local"
+              value={editTimeValue}
+              onChange={(e) => setEditTimeValue(e.target.value)}
+            />
+            <button type="button" onClick={saveKickoff}>Save</button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingTime(false);
+                setEditTimeValue("");
+              }}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <span>{formatKickoff(match.start_time)}</span>
+            {!readOnly && (
+              <button type="button" onClick={startEditKickoff}>Edit</button>
+            )}
+          </>
+        )}
+      </div>
       <div className="fixture-line">
         <strong>{match.home_team}</strong> vs{' '}
         <strong>{match.away_team}</strong>

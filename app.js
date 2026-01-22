@@ -549,42 +549,41 @@ app.post("/api/matches", async (req, res) => {
     res.status(500).json({ error: "Failed to add fixture" });
   }
 });
+
 app.patch("/api/matches/:id", async (req, res) => {
   const matchId = Number(req.params.id);
-  const { start_time } = req.body;
+  const { kickoff_time, tournamentId } = req.body;
 
   if (!matchId) return res.status(400).json({ error: "Invalid match id" });
+  if (!tournamentId) return res.status(400).json({ error: "tournamentId required" });
 
-  // Accept "YYYY-MM-DDTHH:mm" (datetime-local), "" or null
-  if (start_time !== null && start_time !== "" && typeof start_time !== "string") {
-    return res.status(400).json({ error: "start_time must be a string or null" });
+  if (kickoff_time !== null && kickoff_time !== "" && typeof kickoff_time !== "string") {
+    return res.status(400).json({ error: "kickoff_time must be 'HH:MM', '' or null" });
   }
 
   try {
     const result = await pool.query(
       `
-      UPDATE matches
+      UPDATE matches m
       SET start_time = CASE
         WHEN $1::text IS NULL OR $1::text = '' THEN NULL
-        ELSE ($1::timestamp AT TIME ZONE 'Europe/London')
+        ELSE ((t.date::date + $1::time) AT TIME ZONE 'Europe/London')
       END
-      WHERE id = $2
-      RETURNING id, start_time
+      FROM tournaments t
+      WHERE m.id = $2
+        AND t.id = $3
+      RETURNING m.id, m.start_time
       `,
-      [start_time, matchId]
+      [kickoff_time, matchId, tournamentId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Match not found" });
-    }
-
-    res.status(200).json(result.rows[0]);
+    if (!result.rowCount) return res.status(404).json({ error: "Match not found" });
+    res.json(result.rows[0]);
   } catch (err) {
     console.error("❌ Update kickoff time error:", err);
     res.status(500).json({ error: "Failed to update kickoff time" });
   }
 });
-
 
 
 // POST submit result
@@ -948,9 +947,9 @@ app.post('/api/knockout/regenerate', async (req, res) => {
         await pool.query(
           `
           INSERT INTO matches
-            (home_team_id, away_team_id, round, bracket, tournament_id)
+            (home_team_id, away_team_id, round, bracket, tournament_id, start_time)
           VALUES
-            ($1, $2, 'semi-final', $3, $4)
+            ($1, $2, 'semi-final', $3, $4, NULL)
           `,
           [f.home, f.away, f.bracket, tournamentId]
         );
@@ -1004,16 +1003,27 @@ app.post('/api/knockout/regenerate', async (req, res) => {
       }
 
      const winners = semis.rows.map(resolveKnockoutWinner);
+      
+let finalStartTime = null;
+const semiTimes = semis.rows
+  .map(s => s.start_time)
+  .filter(Boolean);
 
+if (semiTimes.length === 2) {
+  // latest semi kickoff + buffer minutes
+  const latest = new Date(Math.max(...semiTimes.map(t => new Date(t).getTime())));
+  latest.setMinutes(latest.getMinutes() + FINAL_BUFFER_MINUTES);
+  finalStartTime = latest.toISOString();
+}
 
       await pool.query(
         `
         INSERT INTO matches
-          (home_team_id, away_team_id, round, bracket, tournament_id)
+          (home_team_id, away_team_id, round, bracket, tournament_id, start_time)
         VALUES
-          ($1, $2, 'final', $3, $4)
+          ($1, $2, 'final', $3, $4, $5)
         `,
-        [winners[0], winners[1], bracket, tournamentId]
+        [winners[0], winners[1], bracket, tournamentId, finalStartTime]
       );
 
       res.json({ message: `${bracket} final created` });
