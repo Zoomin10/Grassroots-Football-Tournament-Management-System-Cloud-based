@@ -55,6 +55,39 @@ function generateTeamIdCode(length = 10) {
   return out;
 }
 
+function generateRoundRobinRounds(teamIds) {
+  const teams = [...teamIds];
+
+  // If odd number of teams, add a BYE
+  if (teams.length % 2 === 1) teams.push(null);
+
+  const n = teams.length;
+  const rounds = [];
+
+  for (let r = 0; r < n - 1; r++) {
+    const round = [];
+
+    for (let i = 0; i < n / 2; i++) {
+      const home = teams[i];
+      const away = teams[n - 1 - i];
+
+      if (home != null && away != null) {
+        round.push({ home, away });
+      }
+    }
+
+    rounds.push(round);
+
+    // rotate all but first
+    const fixed = teams[0];
+    const rest = teams.slice(1);
+    rest.unshift(rest.pop());
+    teams.splice(0, teams.length, fixed, ...rest);
+  }
+
+  return rounds;
+}
+
 async function sendTeamIdEmailStub({ to, tournamentName, teamIdCode }) {
   console.log("📧 TEAM ID EMAIL (stub)");
   console.log("To:", to);
@@ -427,19 +460,23 @@ if (!t?.date || !t?.kickoff_time || !t?.match_length) {
     );
 
     // Generate round-robin fixtures
-    for (let i = 0; i < teams.length; i++) {
-      for (let j = i + 1; j < teams.length; j++) {
-        await pool.query(
-          `
-          INSERT INTO matches
-            (home_team_id, away_team_id, league_id, tournament_id, round)
-          VALUES
-            ($1, $2, $3, $4, 'league')
-          `,
-          [teams[i], teams[j], leagueId, tournamentId]
-        );
-      }
-    }
+   // ✅ NEW: generate balanced round-robin schedule
+const rounds = generateRoundRobinRounds(teams);
+const schedule = rounds.flat(); // play round by round
+
+// Insert fixtures in schedule order
+for (const fx of schedule) {
+  await pool.query(
+    `
+    INSERT INTO matches
+      (home_team_id, away_team_id, league_id, tournament_id, round)
+    VALUES
+      ($1, $2, $3, $4, 'league')
+    `,
+    [fx.home, fx.away, leagueId, tournamentId]
+  );
+}
+
 
     // ✅ NEW: Auto-assign kickoff times sequentially for this league
     // Uses tournament date + tournament kickoff_time as the first KO
