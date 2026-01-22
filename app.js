@@ -75,6 +75,18 @@ function resolveKnockoutWinner(m) {
   throw new Error('Knockout match unresolved');
 }
 
+function parseDatetimeLocalToTimestamptz(dtLocal) {
+  // Accepts "YYYY-MM-DDTHH:mm" or null/empty
+  if (!dtLocal) return null;
+
+  // Basic validation (keep it simple)
+  if (typeof dtLocal !== "string" || !dtLocal.includes("T")) return null;
+
+  // Interpret as Europe/London local time and convert to UTC timestamp via Postgres
+  // We'll pass this string through SQL using AT TIME ZONE.
+  return dtLocal;
+}
+
 // ----------------- DB -----------------
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -460,8 +472,7 @@ app.get("/api/matches", async (req, res) => {
       params.push(round);
       query += ` AND m.round = $${params.length}`;
     }
-
-    query += " ORDER BY m.id";
+ query += ` ORDER BY m.start_time ASC NULLS LAST, m.id ASC`;
 
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -481,7 +492,8 @@ app.post("/api/matches", async (req, res) => {
     home_team_id,
     away_team_id,
     leagueId,
-    tournamentId
+    tournamentId,
+    start_time
   } = req.body;
 
   if (!home_team_id || !away_team_id || !leagueId || !tournamentId) {
@@ -518,11 +530,17 @@ app.post("/api/matches", async (req, res) => {
         away_team_id,
         league_id,
         tournament_id,
-        round
+        round,
+        start_time
       )
-      VALUES ($1, $2, $3, $4, 'league')
+      VALUES ($1, $2, $3, $4, 'league',
+      CASE
+          WHEN $5::text IS NULL OR $5::text = '' THEN NULL
+          ELSE ($5::timestamp AT TIME ZONE 'Europe/London')
+        END
+    )
       `,
-      [home_team_id, away_team_id, leagueId, tournamentId]
+      [home_team_id, away_team_id, leagueId, tournamentId, dtLocal]
     );
 
       res.sendStatus(201);
@@ -531,6 +549,43 @@ app.post("/api/matches", async (req, res) => {
     res.status(500).json({ error: "Failed to add fixture" });
   }
 });
+app.patch("/api/matches/:id", async (req, res) => {
+  const matchId = Number(req.params.id);
+  const { start_time } = req.body;
+
+  if (!matchId) return res.status(400).json({ error: "Invalid match id" });
+
+  // Accept "YYYY-MM-DDTHH:mm" (datetime-local), "" or null
+  if (start_time !== null && start_time !== "" && typeof start_time !== "string") {
+    return res.status(400).json({ error: "start_time must be a string or null" });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE matches
+      SET start_time = CASE
+        WHEN $1::text IS NULL OR $1::text = '' THEN NULL
+        ELSE ($1::timestamp AT TIME ZONE 'Europe/London')
+      END
+      WHERE id = $2
+      RETURNING id, start_time
+      `,
+      [start_time, matchId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Update kickoff time error:", err);
+    res.status(500).json({ error: "Failed to update kickoff time" });
+  }
+});
+
+
 
 // POST submit result
 app.post('/api/matches/:id/result', async (req, res) => {

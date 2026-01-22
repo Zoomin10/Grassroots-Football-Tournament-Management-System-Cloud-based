@@ -99,7 +99,7 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
 
             Public View (/public)  
             TV View (/tv)  
-            Latest Results feeds
+            Latest Results feeds (TV view)
 
     This allows:
 
@@ -145,7 +145,7 @@ https://github.com/Zoomin10/Grassroots-Football-Tournament-Management-System-Clo
         No duplication in the Admin UI
         
 
-### Live TV View (`/tv`)
+### 📺 Live TV View (`/tv`)
 - Two-panel layout (Leagues + Latest Scores)
 - Auto-rotating tournaments (15 seconds rotation)
 - Latest 6 scores (auto-updating) 0 based on most recent time-stamp

@@ -1,75 +1,102 @@
-# context.md — Tournament App (New Thread Starter)
+### context.md
+### Project
 
-## What this project is
-A full-stack tournament management web app:
-- Public view: fixtures/results
-- TV view: live updates
-- Admin panel: create tournaments/leagues/teams, generate fixtures/knockouts, manage results
-- Public registration (`/register`) with Team ID for later edits
+Wroughton Youth FC – Tournament Management System (Cloud-based)
 
-## Stack
-- Backend: Node.js + Express (`app.js`)
-- DB: Postgres (Railway)
-- Frontend: React + Vite (`client/`)
-- Deployment: Railway (server serves Vite build)
+Purpose of This Context
 
-## Key data model
-- `tournaments` → has `leagues`, `teams`, `matches`, `registrations`
-- `teams` rows are used by fixtures/matches and require `league_id`
-- `registrations` store web registration info and produce a unique `team_id_code`
-- `registration_players` stores player details linked to `registrations`
+This document captures the current, correct state of the project so a new ChatGPT thread can be started without historical baggage.
 
-## New registration flow (public)
-1) `/register` shows active tournaments dropdown (`GET /api/tournaments/active`)
-2) User submits minimal details → `POST /api/registrations`
-3) Backend generates `team_id_code` (Team ID) and stores in DB; email is stubbed
-4) User can later re-enter Team ID to add:
-   - players
-   - kit colours (dropdown from `GET /api/kit-colours`)
-   - assistant coaches
+High-level Overview
 
-## Admin approval flow (important)
-Web registrations are NOT automatically inserted into `teams` because `teams.league_id` is required.
-Admin assigns league to a registration:
-- `POST /api/registrations/:registrationId/assign-league` with `{ leagueId }`
-- Creates a `teams` row and links it back via `registrations.team_row_id`
+A React + Node.js + PostgreSQL web application for managing grassroots football tournaments, with distinct views for:
 
-DB change:
-- `registrations.team_row_id INTEGER NULL REFERENCES teams(id) ON DELETE SET NULL`
-- Unique partial index on `team_row_id` to prevent double-linking
+        Admin Control Panel (/admin)
 
-## Admin “Registered Teams” list
-Admin list shows both:
-- manual admin teams (`teams`)
-- web registrations (`registrations`)
-from:
-- `GET /api/tournaments/:tournamentId/registered-teams`
+        Public Registration (/register)
 
-De-duplication:
-- Once a registration is approved (has `team_row_id`), the created `teams` row is filtered out from the combined list to avoid showing twice.
+        Public Matchday View (/public)
 
-Frontend component:
-- `RegisteredTeamsList.jsx` renders the unified list and provides approve controls.
+        TV / Large Screen View (/tv)
 
-## Logo handling
-`getLogoSrc()` now uses keyword-based matching so variants like “Wroughton FC”, “wroughton youth fc”, “Wroughton” all map to the Wroughton Youth FC logo.
+The system is designed for matchday reliability, simple workflows, and spectator-friendly displays.
 
-## Environment variables
-- `DATABASE_URL` (Railway Postgres)
+Core Concepts
+Tournaments
 
-## Where to look in code
-- Backend routes: `app.js`
-- Registration UI: `client/src/pages/Register.jsx` (or similar)
-- Admin UI: `client/src/pages/AdminView.jsx`
-- Registered teams combined list: `client/src/RegisteredTeamsList.jsx`
-- Logo matching: `client/src/utils/getLogoSrc.js` (path may vary)
+Each tournament includes:
 
-## Current status
-- Registration submission works and inserts into DB
-- Player insert works (`registration_players`)
-- Admin can approve registration → creates `teams` row and links via `team_row_id`
-- Admin list shows club + team as “Club – Team” and no longer duplicates after approval
+        Year
+        Gender
+        Age group
+        Date, kickoff time
+        Match length
+        Venue
+        Pitch allocation per league
 
-## Next Steps
- - we have introduced new database schema / new tables. We need to rework the db scripts to reflect the new schema
- 
+Visibility Flags (Important)
+
+Each tournament has two boolean flags:
+
+        registration_open : Controls whether the tournament appears on the Registration page
+
+        published : Controls whether the tournament appears on Public View and TV View
+
+These flags are toggled from the Admin Control Panel.
+
+Registration Model (Key Design)
+
+Public Registrations
+
+        Stored in registrations
+        Do not immediately create a team
+        Generate a unique Team ID for follow-up edits
+
+Admin Approval
+
+        Admin approves a registration
+        System creates a row in teams
+
+registrations.team_row_id links registration → team
+
+This prevents duplicate teams and preserves registration history.
+
+Database (Authoritative Summary)
+Core Tables
+
+        tournaments
+        leagues
+        teams
+        matches
+
+Registration Tables
+
+        registrations
+        registration_players
+
+Important Notes
+
+        teams does not store league stats
+        League tables are computed dynamically from matches
+        teams.league_id and teams.tournament_id are NOT NULL
+
+Print Mode
+
+Admin can open a print-ready public view: /public?tournamentId=<id>&print=true
+
+        Public view auto-triggers browser print once
+        print=true is removed from the URL after triggering
+        Refreshing does not re-print
+
+Deployment
+
+        Hosted on Railway
+        PostgreSQL managed by Railway
+        All destructive DB actions guarded by confirmation flags
+
+Current Status
+
+        Admin toggles implemented for Registration + Publish
+        Public & TV views only show published tournaments
+        Registration page only shows registration_open tournaments
+        Print flow works via Admin → Public View

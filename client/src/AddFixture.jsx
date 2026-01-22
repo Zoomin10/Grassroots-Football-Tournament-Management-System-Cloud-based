@@ -10,6 +10,7 @@ export default function AddFixture({
   const [teams, setTeams] = useState([]);
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
+  const [startTime, setStartTime] = useState(""); 
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
@@ -52,7 +53,8 @@ export default function AddFixture({
         tournamentId,                 // ✅ camelCase
         leagueId,                     // ✅ camelCase
         home_team_id: Number(homeTeam),
-        away_team_id: Number(awayTeam)
+        away_team_id: Number(awayTeam),
+        start_time: startTime || null 
       })
     });
 
@@ -64,6 +66,7 @@ export default function AddFixture({
 
     setHomeTeam("");
     setAwayTeam("");
+    setStartTime(""); 
     setShowForm(false);
     onFixturesUpdated?.();
   } catch (err) {
@@ -118,6 +121,13 @@ export default function AddFixture({
           ))}
         </select>
 
+  {/* ✅ NEW: Start time input */}
+          <input
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+          />
+          
         <button type="submit" className="admin-button primary">
           Save Fixture
         </button>
