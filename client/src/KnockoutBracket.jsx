@@ -61,27 +61,7 @@ function FixtureCard({ match, tournamentId, onDelete, onResultsUpdated, readOnly
   }
 };
 
-    // If a semi-final was just completed, attempt to generate the final
-    if (match.round === "semi-final") {
-      const gf = await fetch("/api/knockout/generate-final", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tournamentId, bracket: match.bracket })
-      });
-
-      if (!gf.ok) {
-        const msg = await gf.text().catch(() => "");
-        console.error("❌ generate-final failed:", gf.status, msg);
-      }
-    }
-  } catch (err) {
-    console.error("❌ submitResult error:", err);
-    alert(err.message || "Failed to submit result");
-  } finally {
-    onResultsUpdated?.();
-  }
-};
-
+ 
  // ✅ kickoff edit handlers
 const startEditKickoff = () => {
   setEditingTime(true);
