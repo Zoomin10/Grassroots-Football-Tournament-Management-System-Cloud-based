@@ -4,8 +4,13 @@ import "./Fixtures.css";
 // Display "TBC" if no kickoff
 function formatKickoff(start_time) {
   if (!start_time) return "TBC";
+
   const d = new Date(start_time);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
 }
 
 function toTimeValue(iso) {

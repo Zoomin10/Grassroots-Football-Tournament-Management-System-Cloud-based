@@ -12,23 +12,18 @@ fi
 
 : "${RAILWAY_DATABASE_URL:?RAILWAY_DATABASE_URL is not set}"
 
-# Guardrails: refuse if URL doesn't look like Railway
+# Guardrails: Railway only
 if ! echo "$RAILWAY_DATABASE_URL" | grep -Eq 'rlwy\.net|railway'; then
   echo "Refusing: RAILWAY_DATABASE_URL does not look like Railway."
   exit 1
 fi
 
 echo "⚠️  THIS IS DESTRUCTIVE AND CANNOT BE UNDONE"
-echo "⚠️  This will DELETE ALL DATA in Railway tables:"
-echo "    public.registration_players"
-echo "    public.registrations"
-echo "    public.matches"
-echo "    public.teams"
-echo "    public.leagues"
-echo "    public.tournaments"
+echo "⚠️  This will DELETE ALL MATCH DATA ONLY:"
+echo "    public.matches (fixtures, kickoff times, results, knockouts)"
 echo
-read -r -p 'Type RESET_RAILWAY_SCHEMA_ONLY to continue: ' CONFIRM
-if [[ "$CONFIRM" != "RESET_RAILWAY_SCHEMA_ONLY" ]]; then
+read -r -p 'Type RESET_MATCHES_ONLY to continue: ' CONFIRM
+if [[ "$CONFIRM" != "RESET_MATCHES_ONLY" ]]; then
   echo "Aborted."
   exit 1
 fi
@@ -39,17 +34,10 @@ psql "$RAILWAY_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 BEGIN;
 SET search_path = public;
 
-TRUNCATE TABLE
-  public.registration_players,
-  public.registrations,
-  public.matches,
-  public.teams,
-  public.leagues,
-  public.tournaments
+TRUNCATE TABLE public.matches
 RESTART IDENTITY CASCADE;
 
 COMMIT;
 SQL
 
-echo "✅ Railway schema preserved; data cleared."
-
+echo "✅ Matches cleared; tournaments, leagues, teams preserved."

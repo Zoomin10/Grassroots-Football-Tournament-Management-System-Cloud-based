@@ -63,7 +63,8 @@ rm -f "${OUT_DIR}/schema.raw.sql"
     --table=public.matches' \
   > "${OUT_DIR}/data.raw.sql"
 
-sed '/transaction_timeout/d;/^\\restrict /d;/^\\unrestrict/d;/DISABLE TRIGGER/d;/ENABLE TRIGGER/d' "${OUT_DIR}/data.raw.sql" \
+sed '/transaction_timeout/d;/^\\restrict /d;/^\\unrestrict/d' ...
+
 | awk '
   /^INSERT INTO / || /^INSERT INTO ONLY / {print; next}
   /^SELECT pg_catalog\.setval/ {print; next}
